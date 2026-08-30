@@ -19,4 +19,4 @@ The posterior is approximated by particles,
 \begin{equation}
 p(\bm{x}_k\mid z_{1:k})\approx\sum_i w_k^{(i)}\delta(\bm{x}_k-\bm{x}_k^{(i)}),
 \end{equation}
-with Gaussian range likelihood and systematic resampling based on effective sample size.
+with Gaussian range likelihood and systematic resampling based on effective sample size. The conventional bootstrap particle filter is used first as a transparent verification baseline before reproducing the AACOPF-specific particle update of Han et al.~\cite{han2020cooperative}.
