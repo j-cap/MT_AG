@@ -1,0 +1,22 @@
+\chapter{Common Mathematical Framework}
+The target state is
+\begin{equation}
+\bm{x}_k = [p_{x,k},p_{y,k},\psi_k]^\top.
+\end{equation}
+Using incremental travelled distance $\Delta L_k$ and heading increment $\Delta\psi_k$, the discrete dead-reckoning model is
+\begin{align}
+p_{x,k+1} &= p_{x,k}+\Delta L_k\cos\psi_k,\\
+p_{y,k+1} &= p_{y,k}+\Delta L_k\sin\psi_k,\\
+\psi_{k+1} &= \operatorname{wrap}(\psi_k+\Delta\psi_k).
+\end{align}
+For an auxiliary node at known position $\bm{a}_k$, the UWB measurement model is
+\begin{equation}
+z_k = \|\bm{p}_k-\bm{a}_k\|_2+v_k.
+\end{equation}
+The first implementation uses $v_k\sim\mathcal{N}(0,\sigma_{\mathrm{UWB}}^2)$. This deliberately simplified model is replaced by experimentally informed LOS/NLOS models in later phases.
+
+The posterior is approximated by particles,
+\begin{equation}
+p(\bm{x}_k\mid z_{1:k})\approx\sum_i w_k^{(i)}\delta(\bm{x}_k-\bm{x}_k^{(i)}),
+\end{equation}
+with Gaussian range likelihood and systematic resampling based on effective sample size. The conventional bootstrap particle filter is used first as a transparent verification baseline before reproducing the AACOPF-specific particle update of Han et al.~\cite{han2020cooperative}.
