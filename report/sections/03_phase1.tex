@@ -1,0 +1,47 @@
+\chapter{Phase 1: Baseline Reimplementation}
+\section{Purpose}
+Phase 1 separates implementation verification from reproduction of the full AACOPF method. The first subphase uses a known approximate initial pose and a conventional bootstrap particle filter. Only after this baseline behaves correctly should unknown-pose initialization and the AACOPF-specific particle transition mechanism be introduced.
+
+\section{Experiment P1.1--P1.4: deterministic DR, drift, UWB and PF}
+A deterministic curved trajectory is generated at \SI{10}{Hz}. Noise-free dead reckoning must reproduce the ground truth to numerical precision. Then distance and heading-increment perturbations are introduced. A moving auxiliary trajectory supplies noisy range observations. The PF uses the same corrupted DR increments and the UWB likelihood.
+
+\section{Current results}
+The current numbers originate from the reviewed Phase-1 bootstrap run with seed 42. They are included here as an implementation-verification result, not as a statistical performance claim.
+
+\begin{table}[ht]
+\centering
+\caption{Initial Phase-1 verification result.}
+\begin{tabular}{lrrrr}
+\toprule
+Method & Position RMSE & Position $p_{95}$ & Final error & Heading RMSE\\
+\midrule
+Ideal DR & \SI{0.000}{m} & \SI{0.000}{m} & \SI{0.000}{m} & \SI{0.000}{deg}\\
+Noisy DR & \SI{1.058}{m} & \SI{2.307}{m} & \SI{2.820}{m} & \SI{7.000}{deg}\\
+PF + UWB & \SI{0.338}{m} & \SI{0.622}{m} & \SI{0.682}{m} & \SI{2.536}{deg}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The conventional PF reduces the position RMSE by approximately $68\%$ relative to noisy dead reckoning for this single verification run. This confirms the intended software invariant: ideal DR is exact, corrupted DR accumulates drift, and UWB range fusion can substantially reduce that drift. Multi-seed evaluation is required before drawing a performance conclusion.
+
+\section{Observability diagnostic}
+For the state $[p_x,p_y,\psi]^\top$, the local transition and range Jacobians are
+\begin{equation}
+F_k=\begin{bmatrix}1&0&-\Delta L_k\sin\psi_k\\0&1&\Delta L_k\cos\psi_k\\0&0&1\end{bmatrix},\quad
+H_k=\begin{bmatrix}(p_x-a_x)/d&(p_y-a_y)/d&0\end{bmatrix}.
+\end{equation}
+A finite-horizon local observability matrix is assembled and its singular values recorded. With the stationary auxiliary trajectory used in the diagnostic, the singular values are approximately
+\begin{equation}
+(176.17,\;10.07,\;4.94\times10^{-15}),
+\end{equation}
+indicating a rank-deficient local linearization. With the selected moving auxiliary trajectory they are approximately
+\begin{equation}
+(110.39,\;11.93,\;6.15),
+\end{equation}
+giving a smallest-to-largest singular-value ratio of $5.57\times10^{-2}$. This is consistent with the geometric symmetry argument and with the role of auxiliary motion discussed by Han et al.~\cite{han2020cooperative}. It is a finite-horizon local diagnostic, not by itself a global nonlinear observability proof.
+
+\section{Interpretation and current status}
+The first run establishes the basic fusion pipeline before attempting the more difficult paper-level reproduction. The current result should therefore be read as a software and modeling verification milestone. The next Phase-1 steps are (i) multi-seed verification, (ii) unknown initial pose with annular position/heading hypotheses, (iii) explicit stationary-versus-moving auxiliary convergence tests, and only then (iv) an audited AACOPF implementation following Han et al.~\cite{han2020cooperative}.
+
+\paragraph{Repository workflow.}
+Research code may be developed on feature or experiment branches. This report remains on the \texttt{main} branch so that it is continuously available through Overleaf. Only reviewed or clearly marked preliminary findings should be transferred into this document.
