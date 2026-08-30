@@ -1,0 +1,18 @@
+\chapter{Research Backlog}
+\section*{Phase 1 completion criteria}
+\begin{enumerate}
+\item Deterministic simulator and ideal-DR invariance test.
+\item Controlled noisy-DR drift experiment.
+\item UWB range model and conventional PF fusion baseline.
+\item Multi-seed robustness check of the baseline.
+\item Unknown-pose annular initialization matching the reference-paper problem.
+\item Stationary versus moving auxiliary-node observability/convergence experiment.
+\item Reproduction audit of every AACOPF equation and underspecified parameter.
+\item AACOPF implementation and PF/AACOPF comparison.
+\end{enumerate}
+
+\section*{Phase 2--4 outlook}
+Phase 2 characterizes update rate, node count, geometry, outages, LOS/NLOS degradation, and DR quality. Phase 3 develops uncertainty/information-aware UWB scheduling and node selection. Phase 4 characterizes DW3000/IMU hardware, measures energy, ports the selected estimator to C/C++, and validates the simulation-to-hardware conclusions.
+
+\section*{Documentation rule}
+The report on \texttt{main} is the persistent scientific record. Experiment branches may contain provisional code and analysis. Results should be transferred to this report when they are reviewed, together with the relevant assumptions, configuration, interpretation, limitations, and next decision. This keeps the Overleaf version accessible while preserving branch-based development for the research code.
