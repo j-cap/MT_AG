@@ -1,31 +1,39 @@
 import numpy as np
+
 from mt_ag.geometry import wrap_angle
-from mt_ag.simulation import generate_curved_trajectory, integrate_dr
-from mt_ag.sensors import generate_uwb_ranges
+from mt_ag.imu import mechanize_planar, simulate_imu_measurements
 from mt_ag.particle_filter import systematic_resample
+from mt_ag.sensors import generate_uwb_ranges
+from mt_ag.simulation import generate_curved_trajectory
 
 
 def test_angle_wrap():
     assert np.isclose(wrap_angle(np.pi), -np.pi)
-    assert np.isclose(wrap_angle(3*np.pi), -np.pi)
+    assert np.isclose(wrap_angle(3 * np.pi), -np.pi)
 
 
-def test_ideal_dr_reconstructs_truth():
-    tr = generate_curved_trajectory(dt=0.1, duration=10.0)
-    rec = integrate_dr(tr.state[0], tr.increments)
-    assert np.max(np.abs(rec - tr.state)) < 1e-12
+def test_ideal_imu_reconstructs_truth():
+    trajectory = generate_curved_trajectory(dt=0.1, duration=10.0)
+    reconstruction = mechanize_planar(trajectory.state[0], trajectory.ideal_imu, trajectory.dt)
+    assert np.max(np.abs(reconstruction - trajectory.state)) < 1e-12
+
+
+def test_noisy_imu_differs_from_ideal_measurement():
+    trajectory = generate_curved_trajectory(dt=0.1, duration=2.0)
+    rng = np.random.default_rng(1)
+    data = simulate_imu_measurements(trajectory.ideal_imu, trajectory.dt, rng)
+    assert not np.allclose(data.measured, trajectory.ideal_imu)
 
 
 def test_ideal_uwb_is_euclidean_range():
-    p = np.array([[0., 0.], [3., 4.]])
-    a = np.array([[0., 0.], [0., 0.]])
-    z = generate_uwb_ranges(p, a)
-    assert np.allclose(z, [0., 5.])
+    p = np.array([[0.0, 0.0], [3.0, 4.0]])
+    a = np.array([[0.0, 0.0], [0.0, 0.0]])
+    assert np.allclose(generate_uwb_ranges(p, a), [0.0, 5.0])
 
 
 def test_systematic_resampling_preserves_particle_count():
     rng = np.random.default_rng(1)
-    w = np.array([0.05, 0.15, 0.8])
-    idx = systematic_resample(w, rng)
-    assert len(idx) == len(w)
-    assert np.all((idx >= 0) & (idx < len(w)))
+    weights = np.array([0.05, 0.15, 0.8])
+    indices = systematic_resample(weights, rng)
+    assert len(indices) == len(weights)
+    assert np.all((indices >= 0) & (indices < len(weights)))

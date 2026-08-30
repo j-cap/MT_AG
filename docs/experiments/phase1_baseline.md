@@ -1,34 +1,37 @@
-# Phase 1 — Baseline implementation
+# Phase 1A — IMU dead-reckoning and UWB/PF baseline
 
 ## Question
-Can a minimal, auditable 2-D simulator reproduce the expected progression from ideal dead reckoning, to drift under noisy increments, to drift correction using UWB range measurements in a conventional particle filter?
+Can we build a minimal, auditable planar inertial-navigation baseline in which raw IMU-like acceleration and yaw-rate measurements generate dead-reckoning drift, and UWB range updates reduce the resulting position error?
 
-## Hypothesis
-1. Noise-free dead reckoning reconstructs the deterministic ground truth to numerical precision.
-2. Perturbed distance/heading increments accumulate position error.
-3. A bootstrap PF using the same DR increments and a moving, globally localized UWB auxiliary node reduces position error.
-4. Relative geometry affects local observability; observability singular values are recorded before attempting global unknown-pose reproduction.
+## Important change from the first bootstrap
+The original bootstrap injected noise directly into displacement and heading increments `(ΔL, Δψ)`. That matches the high-level interface used by Han et al., but it does not match the intended thesis hardware, where dead reckoning is to be built from IMU measurements. Phase 1A therefore now uses body-frame acceleration plus gyroscope yaw rate as the propagation input.
 
-## Scope
-This experiment is deliberately a **debugging baseline**, not yet a numerical reproduction of Han et al.'s AACOPF. The target starts from a known approximate pose. The auxiliary trajectory is known. UWB noise is Gaussian. These restrictions isolate the basic fusion mechanism before global annular initialization, NLOS rejection, and AACOPF are introduced.
+## State and sensor assumptions
+The planar navigation state is `x = [p_x, p_y, v_x, v_y, ψ]^T`. The IMU signal is `u_m = [a_x^b, a_y^b, ω_z]^T`. We assume a level platform and treat the horizontal accelerometer channels as gravity-compensated. This is a deliberate Phase-1 simplification; a real 3-D IMU requires roll/pitch estimation and explicit gravity removal.
 
-## Mathematical model
-State: `x = [p_x, p_y, psi]^T`.
+Accelerometer-only dead reckoning is not sufficient for general 2-D motion because body-frame acceleration must be rotated into the navigation frame. We therefore use both accelerometer and gyroscope channels.
 
-Motion model:
+## Discrete mechanization
+With midpoint yaw `ψ_{k+1/2} = ψ_k + 0.5 ω_{z,k} Δt`, body acceleration is rotated as `a_k^n = R(ψ_{k+1/2}) a_k^b`. We then propagate
 
-`p_x(k+1) = p_x(k) + ΔL(k) cos psi(k)`  
-`p_y(k+1) = p_y(k) + ΔL(k) sin psi(k)`  
-`psi(k+1) = wrap(psi(k) + Δpsi(k))`.
+`p_{k+1} = p_k + v_k Δt + 0.5 a_k^n Δt²`,
 
-Range measurement to auxiliary node `a_k`:
+`v_{k+1} = v_k + a_k^n Δt`,
 
-`z_k = ||p_k-a_k||_2 + v_k`, with `v_k ~ N(0, sigma_UWB^2)`.
+`ψ_{k+1} = wrap(ψ_k + ω_{z,k} Δt)`.
 
-The bootstrap PF samples the DR process model, weights particles with the Gaussian range likelihood, and uses systematic resampling when the effective sample size falls below a threshold.
+The simulated IMU contains white accelerometer/gyro noise and random-walk bias. Exact values are stored in `configs/phase1.yaml`.
 
-## Reproduction rule
-All stochastic runs use an explicit seed. Configuration is stored in `configs/phase1.yaml`; result metrics and trajectories are written to `results/phase1/`.
+## UWB and particle filter
+A moving auxiliary node has known position `a_k`. Its range is `z_k = ||p_k-a_k|| + v_k`, with Gaussian range noise. The bootstrap PF propagates each particle with the measured IMU plus process perturbations and weights it with the UWB range likelihood. The known-pose initialization remains a debugging baseline; global unknown-pose initialization is a later Phase-1 task.
 
-## Interpretation policy
-Do not interpret one seed as a final performance claim. The purpose of this first run is verification of implementation behavior. Multi-seed studies, update-rate sweeps, NLOS models, and energy claims belong to later experiments.
+## Verification run (seed 42)
+Local validation after the IMU reformulation: 5 tests passed. Ideal IMU mechanization reconstructs the generated trajectory exactly by construction. Noisy IMU DR yields position RMSE 1.378 m and final error 2.680 m. PF+UWB yields position RMSE 0.231 m and final error 0.324 m. This corresponds to an 83.3% reduction in position RMSE for this single verification realization.
+
+Heading RMSE is 0.110 deg for noisy DR and 0.354 deg for PF+UWB. This is intentionally not hidden: a scalar range does not directly measure heading, and the current PF is not tuned or augmented with explicit bias states. Phase 1A therefore supports a position-correction claim only.
+
+## Observability diagnostic
+For the full local state `[p_x,p_y,v_x,v_y,ψ]`, a finite-horizon linearized observability matrix gives singular values approximately `(931.97,232.84,49.46,7.05,4.12e-14)` for the selected stationary auxiliary and `(916.48,320.81,45.58,8.05,0.602)` for the selected moving auxiliary. The stationary case is numerically rank deficient; the moving case is full rank but not especially well conditioned. This is a local diagnostic, not a complete nonlinear proof.
+
+## Interpretation
+The reformulated baseline now matches the intended sensing chain: IMU -> inertial mechanization -> drifting DR, with UWB used as an external range correction. The next tasks are multi-seed verification, explicit bias/initial-state sensitivity, unknown-pose initialization, and only then the audited AACOPF reproduction.

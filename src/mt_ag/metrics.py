@@ -6,9 +6,11 @@ def position_error(estimate, truth):
     return np.linalg.norm(np.asarray(estimate)[:, :2] - np.asarray(truth)[:, :2], axis=1)
 
 
-def summary_metrics(estimate, truth):
+def summary_metrics(estimate, truth, heading_index=4):
+    estimate = np.asarray(estimate)
+    truth = np.asarray(truth)
     e = position_error(estimate, truth)
-    psi_e = wrap_angle(np.asarray(estimate)[:, 2] - np.asarray(truth)[:, 2])
+    psi_e = wrap_angle(estimate[:, heading_index] - truth[:, heading_index])
     return {
         "position_rmse_m": float(np.sqrt(np.mean(e**2))),
         "position_mae_m": float(np.mean(e)),

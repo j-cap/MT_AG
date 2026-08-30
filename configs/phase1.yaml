@@ -2,15 +2,18 @@ seed: 42
 simulation:
   dt: 0.1
   duration: 60.0
-dead_reckoning:
-  sigma_distance_m: 0.004
-  sigma_heading_rad: 0.0015
-  heading_bias_rw_rad: 0.00004
+imu:
+  sigma_accel_mps2: 0.02
+  sigma_gyro_rps: 0.001
+  accel_bias_initial_mps2: [0.0, 0.0]
+  gyro_bias_initial_rps: 0.0
+  sigma_accel_bias_rw_mps2_sqrt_s: 0.00005
+  sigma_gyro_bias_rw_rps_sqrt_s: 0.000005
 uwb:
   sigma_range_m: 0.12
 particle_filter:
-  n_particles: 3000
-  initial_std: [0.5, 0.5, 0.0872664626]
-  sigma_process_distance_m: 0.006
-  sigma_process_heading_rad: 0.002
+  n_particles: 5000
+  initial_std: [0.5, 0.5, 0.12, 0.12, 0.01745329252]
+  sigma_process_accel_mps2: 0.025
+  sigma_process_gyro_rps: 0.0015
   resample_fraction: 0.5
