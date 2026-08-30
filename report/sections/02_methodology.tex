@@ -1,22 +1,128 @@
-\chapter{Common Mathematical Framework}
-The target state is
+\chapter{Common Mathematical and Simulation Framework}
+\section{Coordinate frames and planar assumption}
+Two frames are used. The navigation frame $n$ is the two-dimensional world frame in which positions are evaluated. The body frame $b$ is fixed to the mobile node/IMU. The yaw angle $\psi$ rotates body-frame horizontal vectors into the navigation frame. The corresponding rotation matrix is
 \begin{equation}
-\bm{x}_k = [p_{x,k},p_{y,k},\psi_k]^\top.
+R_b^n(\psi)=
+\begin{bmatrix}
+\cos\psi & -\sin\psi\\
+\sin\psi & \cos\psi
+\end{bmatrix}.
 \end{equation}
-Using incremental travelled distance $\Delta L_k$ and heading increment $\Delta\psi_k$, the discrete dead-reckoning model is
-\begin{align}
-p_{x,k+1} &= p_{x,k}+\Delta L_k\cos\psi_k,\\
-p_{y,k+1} &= p_{y,k}+\Delta L_k\sin\psi_k,\\
-\psi_{k+1} &= \operatorname{wrap}(\psi_k+\Delta\psi_k).
-\end{align}
-For an auxiliary node at known position $\bm{a}_k$, the UWB measurement model is
-\begin{equation}
-z_k = \|\bm{p}_k-\bm{a}_k\|_2+v_k.
-\end{equation}
-The first implementation uses $v_k\sim\mathcal{N}(0,\sigma_{\mathrm{UWB}}^2)$. This deliberately simplified model is replaced by experimentally informed LOS/NLOS models in later phases.
 
-The posterior is approximated by particles,
+Phase 1 deliberately uses a level planar model. Roll and pitch are assumed sufficiently small or already compensated, and the two horizontal acceleration channels are treated as gravity-compensated. This is an important modeling assumption. A real three-axis accelerometer measures \emph{specific force}, not directly the horizontal translational acceleration. In a full three-dimensional strapdown inertial navigation system one must estimate attitude and remove gravity before double-integrating acceleration; see, e.g., Groves~\cite{groves2013principles}. The planar model is therefore a controlled first step, not the final hardware model.
+
+\section{Why accelerometer measurements require gyroscope information}
+Acceleration is measured in the body frame. To integrate it in a fixed navigation frame we need the body orientation. Consequently, ``acceleration-based DR'' should be understood as \emph{IMU-based DR}: accelerometer channels provide translational specific force and the gyroscope provides angular rate. Accelerometer-only integration is not a general solution for planar localization because the direction in which the measured acceleration acts in the global frame would be unknown.
+
+\section{Navigation state}
+The Phase-1 inertial state is
 \begin{equation}
-p(\bm{x}_k\mid z_{1:k})\approx\sum_i w_k^{(i)}\delta(\bm{x}_k-\bm{x}_k^{(i)}),
+\bm{x}_k=
+\begin{bmatrix}
+p_{x,k} & p_{y,k} & v_{x,k} & v_{y,k} & \psi_k
+\end{bmatrix}^{\top},
 \end{equation}
-with Gaussian range likelihood and systematic resampling based on effective sample size. The conventional bootstrap particle filter is used first as a transparent verification baseline before reproducing the AACOPF-specific particle update of Han et al.~\cite{han2020cooperative}.
+with planar position $\bm{p}_k=[p_{x,k},p_{y,k}]^\top$, navigation-frame velocity $\bm{v}_k=[v_{x,k},v_{y,k}]^\top$, and yaw $\psi_k$.
+
+The ideal planar IMU signal is
+\begin{equation}
+\bm{u}_k=
+\begin{bmatrix}
+a_{x,k}^{b} & a_{y,k}^{b} & \omega_{z,k}
+\end{bmatrix}^{\top}.
+\end{equation}
+
+\section{IMU measurement model}
+The simulated accelerometer and gyro measurements are modeled as
+\begin{align}
+\bm{a}_{m,k}^{b} &= \bm{a}_{k}^{b}+\bm{b}_{a,k}+\bm{n}_{a,k},\\
+\omega_{m,k} &= \omega_{z,k}+b_{g,k}+n_{g,k},
+\end{align}
+where $\bm{n}_{a,k}$ and $n_{g,k}$ are zero-mean white sensor noise. The biases follow random walks,
+\begin{align}
+\bm{b}_{a,k+1} &= \bm{b}_{a,k}+\bm{w}_{ba,k},\\
+b_{g,k+1} &= b_{g,k}+w_{bg,k}.
+\end{align}
+This is intentionally simpler than a complete IMU error model. Scale factor, axis misalignment, temperature effects, nonlinearity, vibration effects, and explicit 3-D gravity compensation are postponed until hardware characterization provides evidence that they are needed.
+
+\section{Planar inertial mechanization}
+For sample time $\Delta t$, the implementation uses a midpoint yaw
+\begin{equation}
+\psi_{k+\frac12}=\psi_k+\frac{1}{2}\omega_{m,k}\Delta t.
+\end{equation}
+The measured body acceleration is rotated into the navigation frame,
+\begin{equation}
+\bm{a}_{k}^{n}=R_b^n\!\left(\psi_{k+\frac12}\right)\bm{a}_{m,k}^{b}.
+\end{equation}
+The DR update is then
+\begin{align}
+\bm{p}_{k+1} &= \bm{p}_k+\bm{v}_k\Delta t+\frac12\bm{a}_{k}^{n}\Delta t^2,\\
+\bm{v}_{k+1} &= \bm{v}_k+\bm{a}_{k}^{n}\Delta t,\\
+\psi_{k+1} &= \operatorname{wrap}\!\left(\psi_k+\omega_{m,k}\Delta t\right).
+\end{align}
+The same equations with ideal, noise-free IMU signals are used to construct the deterministic Phase-1 reference trajectory. Therefore the statement ``ideal IMU reconstructs the ground truth exactly'' is a software invariant that verifies consistent indexing and coordinate conventions; it is not an empirical performance result.
+
+\section{Why inertial dead reckoning drifts}
+Accelerometer noise is integrated once to velocity and twice to position. Even a constant acceleration bias $b_a$ produces approximately
+\begin{equation}
+\delta p(t)\approx\frac12 b_a t^2
+\end{equation}
+in the direction of the bias, before accounting for attitude error. A gyro error changes the estimated rotation $R_b^n(\psi)$, which projects the measured acceleration into the wrong global direction. In a full 3-D implementation, small attitude errors also cause imperfect gravity removal, which is often a dominant source of drift. The role of UWB is therefore to inject external geometric information before these inertial errors grow without bound.
+
+\section{UWB measurement model}
+For a target position $\bm{p}_k$ and an auxiliary node at known position $\bm{a}_k$, the ideal range is
+\begin{equation}
+d_k=\lVert\bm{p}_k-\bm{a}_k\rVert_2.
+\end{equation}
+The Phase-1 measurement is
+\begin{equation}
+z_k=d_k+v_k,\qquad v_k\sim\mathcal{N}(0,\sigma_{\mathrm{UWB}}^2).
+\end{equation}
+Packet loss, NLOS bias, outliers, and time-varying measurement quality are intentionally excluded from the initial debugging experiment and introduced in Phase 2.
+
+\section{Bootstrap particle filter}
+The particle filter approximates the posterior by
+\begin{equation}
+p(\bm{x}_k\mid z_{1:k},\bm{u}_{1:k})\approx
+\sum_{i=1}^{N_p}w_k^{(i)}\delta(\bm{x}_k-\bm{x}_k^{(i)}).
+\end{equation}
+Each particle is propagated with the same IMU measurement plus sampled process perturbations in acceleration and yaw rate. For particle $i$, the predicted range is
+\begin{equation}
+\hat d_k^{(i)}=\lVert\bm{p}_k^{(i)}-\bm{a}_k\rVert_2,
+\end{equation}
+and the range residual is $r_k^{(i)}=z_k-\hat d_k^{(i)}$. Under the Gaussian range model,
+\begin{equation}
+p(z_k\mid\bm{x}_k^{(i)})\propto
+\exp\!\left[-\frac{(r_k^{(i)})^2}{2\sigma_{\mathrm{UWB}}^2}\right].
+\end{equation}
+The weights are updated in log space for numerical robustness and normalized to sum to one. The effective sample size
+\begin{equation}
+N_{\mathrm{eff},k}=\frac{1}{\sum_i (w_k^{(i)})^2}
+\end{equation}
+is monitored. Systematic resampling is applied if $N_{\mathrm{eff},k}<\gamma N_p$. The position and velocity estimate use the weighted particle mean; yaw uses a circular mean.
+
+\section{Local observability diagnostic}
+For the ideal bias-free state $[p_x,p_y,v_x,v_y,\psi]^\top$, define $\bm{a}_k^n=R_b^n(\psi_{k+1/2})\bm{a}_k^b$. Its derivative with respect to yaw is
+\begin{equation}
+\bm{a}_{\psi,k}=\frac{\partial\bm{a}_k^n}{\partial\psi}.
+\end{equation}
+The local transition Jacobian used in the current diagnostic is
+\begin{equation}
+F_k=
+\begin{bmatrix}
+I_2 & \Delta t I_2 & \frac12\Delta t^2\bm{a}_{\psi,k}\\
+0_{2\times2} & I_2 & \Delta t\bm{a}_{\psi,k}\\
+0_{1\times2} & 0_{1\times2} & 1
+\end{bmatrix}.
+\end{equation}
+For the scalar range measurement,
+\begin{equation}
+H_k=
+\begin{bmatrix}
+\dfrac{(\bm{p}_k-\bm{a}_k)^\top}{d_k} & 0 & 0 & 0
+\end{bmatrix}.
+\end{equation}
+A finite-horizon matrix is assembled from the propagated Jacobians and its singular values are inspected. A zero smallest singular value indicates a locally unobservable direction. The ratio $\sigma_{\min}/\sigma_{\max}$ is used only as a conditioning diagnostic. This linearized finite-horizon test is not presented as a complete nonlinear observability proof.
+
+\section{Relation to the $\Delta L$, $\Delta\psi$ model in Han et al.}
+Han et al.~\cite{han2020cooperative} formulate the cooperative layer with a compact state $[p_x,p_y,\psi]^\top$ and require a displacement increment $\Delta L$ and azimuth increment $\Delta\psi$ from an underlying DR system. Our initial bootstrap used that interface directly. The revised implementation moves one level closer to the physical sensor by explicitly generating and integrating acceleration and yaw-rate measurements. Consequently, velocity is now part of the state. The later AACOPF reproduction must document clearly whether it uses (i) the original high-level increment interface for a faithful paper baseline, (ii) the IMU-driven state model for the thesis implementation, or both as separate comparisons.

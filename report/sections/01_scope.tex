@@ -1,4 +1,28 @@
 \chapter{Scope and Research Objective}
-The project investigates collaborative localization using inertial/dead-reckoning information and inter-node ultra-wideband (UWB) ranging. The long-term objective is to determine how UWB communication can be scheduled and selected to reduce communication and energy cost while retaining acceptable localization accuracy.
+\section{Overall objective}
+The thesis investigates collaborative localization of mobile nodes using inertial dead reckoning (DR) and inter-node ultra-wideband (UWB) ranging. The long-term goal is not only to demonstrate that UWB can correct inertial drift, but to determine how UWB communication can be reduced while maintaining useful localization accuracy. The central research question is therefore:
+\begin{quote}
+How much UWB communication and collaboration is necessary to bound the localization error of an IMU-based dead-reckoning system, and how should UWB measurements be scheduled or selected to obtain a favorable accuracy--energy trade-off?
+\end{quote}
 
-The initial scientific baseline follows the cooperative IMU/UWB formulation of Han et al.~\cite{han2020cooperative}. Their method combines dead reckoning with UWB ranging and investigates localization with as few as one moving auxiliary node. The present project treats reproduction of the baseline as a prerequisite rather than as the thesis contribution.
+\section{Relation to the reference work}
+The initial cooperative-localization baseline is motivated by Han et al.~\cite{han2020cooperative}. Their algorithm combines a DR system with UWB ranges and studies localization with as few as one auxiliary node. The cooperative filter receives displacement and azimuth increments from an underlying DR/INS subsystem. In their vehicle experiment, the displacement increment is obtained using odometry and INS; the paper therefore does \emph{not} directly propagate the cooperative particle filter from raw accelerometer samples.
+
+The present thesis uses Han et al. as a conceptual and algorithmic reference, but the intended embedded hardware provides an IMU. For that reason, the project explicitly implements the inertial mechanization that precedes the cooperative localization layer. This creates two related but distinct goals:
+\begin{enumerate}
+    \item reproduce the qualitative cooperative-localization and observability behavior of Han et al.;
+    \item develop an IMU-driven implementation that is physically consistent with the intended ESP32/DW3000 hardware platform.
+\end{enumerate}
+Exact numerical reproduction is not required where the paper does not specify all implementation details.
+
+\section{Research phases}
+The work is organized into four phases.
+\begin{description}
+    \item[Phase 1:] establish and understand the baseline: planar IMU mechanization, inertial drift, UWB ranging, conventional PF fusion, observability, unknown-pose initialization, and finally the audited AACOPF reproduction.
+    \item[Phase 2:] characterize the dominant factors: UWB update rate, number and geometry of auxiliary nodes, IMU quality, outages, LOS/NLOS degradation, and relative motion.
+    \item[Phase 3:] develop an adaptive collaboration strategy that decides when a UWB update is needed and, if several neighbors are available, which node is most informative and reliable.
+    \item[Phase 4:] characterize the real IMU/DW3000 hardware, measure communication energy, port the selected estimator to the embedded platform, and validate the simulation conclusions experimentally.
+\end{description}
+
+\section{Absolute versus relative localization}
+Whenever an auxiliary node position is described as ``known'', it is known in the navigation frame used for evaluation. This is the setting assumed in the current Phase-1 baseline and is also consistent with the accurately localized auxiliary nodes in Han et al. Without any absolute position or orientation reference, pairwise ranges cannot determine the absolute translation and rotation of the entire node network. A fully infrastructure-free formulation must therefore either work in a relative frame or introduce additional information that fixes the global gauge freedom. This distinction will be kept explicit throughout the thesis.
