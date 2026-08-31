@@ -1,7 +1,7 @@
 \chapter*{Abbreviations and Notation}
 \addcontentsline{toc}{chapter}{Abbreviations and Notation}
 
-This chapter defines the abbreviations and mathematical notation used throughout the report. The notation table is intended to be exhaustive for the current version. When new symbols are introduced in later experiments, they should be added here and also explained at their first use in the corresponding chapter.
+This chapter defines the abbreviations and mathematical notation used throughout the report. The notation tables are intended to be exhaustive for the current version. When a later experiment introduces a new abbreviation or symbol, it should be added here and also explained at its first use in the corresponding chapter.
 
 \section*{Abbreviations}
 \begin{longtable}{>{\bfseries}p{0.20\textwidth}p{0.72\textwidth}}
@@ -43,8 +43,13 @@ Symbol / convention & Meaning\\
 \endhead
 $k$ & Discrete-time sample index.\\
 $i$ & Particle index in the particle filter.\\
+$j$ & Generic secondary index, e.g. a summation index or an index used in the observability horizon.\\
+$K$ & Final discrete-time index of a finite analysis/observability horizon.\\
 $t$ & Continuous time in seconds.\\
+$t_k=k\Delta t$ & Continuous time associated with discrete sample $k$ for the fixed-rate simulations.\\
+$T$ & Total duration of a simulation experiment.\\
 $\Delta t$ & Sampling interval between discrete states.\\
+$A$ & Label used for the auxiliary UWB node in the current single-auxiliary-node formulation.\\
 $n$ & Navigation frame: fixed two-dimensional world frame in which global position is expressed.\\
 $b$ & Body frame: coordinate frame rigidly attached to the mobile node and IMU.\\
 $(\cdot)^n$ & Quantity expressed in the navigation frame.\\
@@ -55,8 +60,12 @@ $\bm{(\cdot)}$ & Vector or matrix quantity.\\
 $(\cdot)^\top$ & Matrix/vector transpose.\\
 $\lVert\cdot\rVert_2$ & Euclidean norm.\\
 $\mathcal{N}(\mu,\sigma^2)$ & Gaussian distribution with mean $\mu$ and variance $\sigma^2$. For vector quantities, a covariance matrix is given explicitly when needed.\\
+$p(\cdot)$ & Probability density or conditional probability density; context distinguishes it from the position vector $\bm p$.\\
 $\delta(\cdot)$ & Dirac delta distribution used in the particle representation of a probability density.\\
-$\operatorname{wrap}(\theta)$ & Mapping of angle $\theta$ to the interval $[-\pi,\pi)$.\\
+$\operatorname{wrap}(\theta)$ & Mapping of a generic angle $\theta$ to the interval $[-\pi,\pi)$.\\
+$\operatorname{atan2}(y,x)$ & Four-quadrant inverse tangent used for the circular mean of yaw.\\
+$I_q$ & $q\times q$ identity matrix; $q$ denotes the matrix dimension.\\
+$0_{r\times c}$ & $r\times c$ zero matrix; $r$ and $c$ denote row and column dimensions.\\
 \bottomrule
 \end{longtable}
 
@@ -111,6 +120,8 @@ Symbol & Meaning\\
 \midrule
 \endhead
 $\bm{p}_{A,k}$ & Known navigation-frame position of auxiliary UWB node $A$ at sample $k$.\\
+$p_{A,x,k}$ & Navigation-frame $x$-coordinate of auxiliary node $A$.\\
+$p_{A,y,k}$ & Navigation-frame $y$-coordinate of auxiliary node $A$.\\
 $\bm{p}_{A}(t)$ & Continuous-time trajectory used to specify auxiliary-node motion in a simulation scenario.\\
 $d_k$ & Ideal geometric range between target and auxiliary node at sample $k$.\\
 $z_k$ & Measured UWB range at sample $k$.\\
@@ -132,7 +143,12 @@ Symbol & Meaning\\
 $N_p$ & Number of particles.\\
 $\bm{x}_k^{(i)}$ & State of particle $i$ at sample $k$.\\
 $\bm{p}_k^{(i)}$ & Position component of particle $i$.\\
+$\bm{v}_k^{(i)}$ & Velocity component of particle $i$.\\
+$\psi_k^{(i)}$ & Yaw component of particle $i$.\\
 $w_k^{(i)}$ & Normalized importance weight of particle $i$.\\
+$\tilde w_k^{(i)}$ & Unnormalized importance weight of particle $i$ before normalization.\\
+$\bm{a}_{k}^{b,(i)}$ & Body-frame acceleration used to propagate particle $i$.\\
+$\omega_k^{(i)}$ & Yaw rate used to propagate particle $i$.\\
 $\bm{\epsilon}_{a,k}^{(i)}$ & Additional sampled acceleration perturbation used to propagate particle $i$.\\
 $\epsilon_{\omega,k}^{(i)}$ & Additional sampled yaw-rate perturbation used to propagate particle $i$.\\
 $\sigma_{a,\mathrm{PF}}$ & Standard deviation of each component of the particle acceleration perturbation.\\
@@ -144,6 +160,7 @@ $\gamma$ & Resampling fraction; resampling is triggered when $N_{\mathrm{eff},k}
 $\bm{\sigma}_0$ & Vector of standard deviations used for the Gaussian initial particle cloud in the known-pose baseline.\\
 $\hat{\bm{x}}_k$ & Particle-filter state estimate.\\
 $\hat{\bm{p}}_k$ & Estimated position component of $\hat{\bm{x}}_k$.\\
+$\hat{\bm{v}}_k$ & Estimated velocity component of $\hat{\bm{x}}_k$.\\
 $\hat{\psi}_k$ & Estimated yaw angle, computed using a weighted circular mean.\\
 \bottomrule
 \end{longtable}
@@ -160,14 +177,13 @@ Symbol & Meaning\\
 \endhead
 $F_k$ & Local state-transition Jacobian from sample $k$ to $k+1$.\\
 $H_k$ & Local Jacobian of the scalar UWB range measurement with respect to the state.\\
-$I_q$ & $q\times q$ identity matrix.\\
-$0_{r\times c}$ & $r\times c$ zero matrix.\\
 $\bm{a}_{\psi,k}$ & Derivative of navigation-frame acceleration with respect to yaw.\\
 $\Phi_{j,0}$ & State-transition sensitivity from sample $0$ to sample $j$, equal to $F_{j-1}\cdots F_0$ for $j>0$.\\
 $\mathcal{O}_{0:K}$ & Finite-horizon local observability matrix from sample $0$ through $K$.\\
 $\sigma_{\min}(\mathcal{O})$ & Smallest singular value of the observability matrix.\\
 $\sigma_{\max}(\mathcal{O})$ & Largest singular value of the observability matrix.\\
 $e_{p,k}$ & Euclidean position error $\lVert\hat{\bm{p}}_k-\bm{p}_k\rVert_2$.\\
+$e_{p,95}$ & Empirical 95th-percentile position error.\\
 $e_{\psi,k}$ & Wrapped yaw error $\operatorname{wrap}(\hat\psi_k-\psi_k)$.\\
 $N_s$ & Number of samples included in an evaluation metric.\\
 $\mathrm{RMSE}_p$ & Root-mean-square position error.\\
