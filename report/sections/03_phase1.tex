@@ -1,78 +1,130 @@
 \chapter{Phase 1: Baseline Reimplementation and Understanding}
+
 \section{Purpose}
-Phase 1 is intended to create a trustworthy baseline before investigating communication efficiency. The first milestone is deliberately easier than the full problem in Han et al.: the target starts from an approximately known state, UWB noise is Gaussian, and the auxiliary-node trajectory is known. This isolates the inertial propagation and range-fusion logic. The unknown-initial-pose problem and AACOPF are introduced only after this baseline is verified.
+Phase 1 creates a trustworthy localization baseline before communication efficiency is studied. The first milestone, denoted P1A, is deliberately easier than the full unknown-pose problem studied by Han et al.~\cite{han2020cooperative}: the target starts from an approximately known state, UWB noise is Gaussian, and the auxiliary-node trajectory is known. This isolates the inertial propagation and range-fusion logic. Unknown initial pose and the Adaptive Ant Colony Optimization Particle Filter (AACOPF) are introduced only after this baseline has been verified.
 
 \section{Experiment P1A: IMU-based DR and UWB correction}
-\subsection{Hypotheses}
+\subsection{Research question and hypotheses}
+The research question for P1A is whether the implemented inertial-measurement-unit (IMU) dead-reckoning (DR) pipeline and conventional particle-filter (PF) range fusion behave in the physically expected manner before more difficult cooperative-localization cases are considered.
+
 The current verification experiment tests four qualitative statements:
 \begin{enumerate}
     \item ideal IMU mechanization reproduces the deterministic reference trajectory exactly under the shared discrete model;
-    \item noisy accelerometer and gyro measurements produce accumulated DR error;
-    \item a conventional bootstrap PF using UWB ranges can substantially reduce position drift;
-    \item auxiliary-node motion changes the information content/observability of the range sequence.
+    \item noisy accelerometer and gyroscope measurements produce accumulated DR error;
+    \item a conventional bootstrap PF using ultra-wideband (UWB) ranges can substantially reduce position drift;
+    \item auxiliary-node motion changes the information content and local observability of the range sequence.
 \end{enumerate}
 No claim of statistical superiority is made from a single random seed.
 
-\subsection{Deterministic motion}
-The simulation lasts \SI{60}{s} with sample time \SI{0.1}{s}. The initial state is
+\subsection{Deterministic target trajectory}
+The simulation duration is $T=\SI{60}{s}$ and the sample time is $\Delta t=\SI{0.1}{s}$. The initial state is
 \begin{equation}
-\bm{x}_0=[0,0,0.75,0,0]^\top.
+\bm{x}_0=
+\begin{bmatrix}
+0 & 0 & 0.75 & 0 & 0
+\end{bmatrix}^{\top}.
 \end{equation}
-A smooth body longitudinal acceleration and yaw-rate profile are prescribed,
-\begin{align}
-a_x^b(t) &= 0.018\sin(0.14t)+0.006\cos(0.05t),\\
-\omega_z(t) &= 0.055+0.025\sin(0.07t).
-\end{align}
-For the nominal forward-motion trajectory the lateral body acceleration is selected as
-\begin{equation}
-a_y^b(t)=v(t)\omega_z(t),
-\end{equation}
-which provides the centripetal acceleration associated with the turning motion. The trajectory is propagated with the inertial mechanization defined in the previous chapter.
+Using the state definition in Eq.~\eqref{eq:state}, this means
+\begin{align*}
+p_{x,0} &= \SI{0}{m}, & p_{y,0} &= \SI{0}{m},\\
+v_{x,0} &= \SI{0.75}{m/s}, & v_{y,0} &= \SI{0}{m/s},\\
+\psi_0 &= \SI{0}{rad}.
+\end{align*}
+Thus the target initially starts at the navigation-frame origin, moves along the positive navigation-frame $x$-axis with speed \SI{0.75}{m/s}, and has zero initial yaw.
 
-\subsection{Sensor configuration}
-The current configuration is summarized in Table~\ref{tab:p1config}. These values are engineering choices for the verification experiment and have not yet been calibrated against the final hardware.
+The deterministic body-frame longitudinal acceleration $a_x^b(t)$ and yaw rate $\omega_z(t)$ are prescribed as
+\begin{align}
+a_x^b(t) &= 0.018\sin(0.14t)+0.006\cos(0.05t)\quad [\mathrm{m/s^2}],\\
+\omega_z(t) &= 0.055+0.025\sin(0.07t)\quad [\mathrm{rad/s}].
+\end{align}
+Let
+\begin{equation}
+s(t)=\lVert\bm{v}(t)\rVert_2
+\end{equation}
+denote the target speed, i.e. the magnitude of the navigation-frame velocity. The deterministic body-frame lateral acceleration is selected as
+\begin{equation}
+a_y^b(t)=s(t)\omega_z(t),
+\end{equation}
+which supplies the centripetal acceleration associated with the turning motion. At each simulation step, the ideal IMU vector
+\begin{equation}
+\bm{u}_k=
+\begin{bmatrix}
+a_{x,k}^b & a_{y,k}^b & \omega_{z,k}\end{bmatrix}^{\top}
+\end{equation}
+is passed through the same planar inertial mechanization used by the estimator. This construction intentionally guarantees internal consistency between the ideal IMU data and the ground-truth trajectory.
+
+\subsection{Sensor and PF configuration}
+Table~\ref{tab:p1config} lists the complete committed P1A configuration. These values are engineering choices for software verification and have not yet been calibrated against the final physical hardware.
+
 \begin{table}[ht]
 \centering
 \caption{Phase-1A verification configuration.}
 \label{tab:p1config}
-\begin{tabular}{lll}
+\begin{tabular}{p{0.34\textwidth}p{0.23\textwidth}p{0.31\textwidth}}
 \toprule
-Quantity & Value & Role\\
+Quantity & Value & Meaning\\
 \midrule
-Sample time $\Delta t$ & \SI{0.1}{s} & IMU/simulation step\\
-Duration & \SI{60}{s} & trajectory length\\
-Accelerometer white-noise std. & \SI{0.02}{m/s^2} & simulated IMU noise\\
-Gyro white-noise std. & \SI{0.001}{rad/s} & simulated yaw-rate noise\\
-Accel. bias RW scale & $5\times10^{-5}$ & verification drift source\\
-Gyro bias RW scale & $5\times10^{-6}$ & verification drift source\\
-UWB range-noise std. & \SI{0.12}{m} & Gaussian range model\\
-Particles & 5000 & bootstrap PF\\
-Resampling fraction $\gamma$ & 0.5 & $N_{\mathrm{eff}}$ threshold\\
-Random seed & 42 & reproducibility\\
+Sample time $\Delta t$ & \SI{0.1}{s} & IMU and simulation integration interval\\
+Duration $T$ & \SI{60}{s} & total simulated trajectory duration\\
+Accelerometer white-noise standard deviation $\sigma_a$ & \SI{0.02}{m/s^2} & per-sample standard deviation of each horizontal accelerometer channel\\
+Gyroscope white-noise standard deviation $\sigma_{\omega}$ & \SI{0.001}{rad/s} & per-sample yaw-rate noise standard deviation\\
+Initial accelerometer bias $\bm{b}_{a,0}$ & $[0,0]^\top\,\mathrm{m/s^2}$ & initial simulated accelerometer bias\\
+Initial gyroscope bias $b_{g,0}$ & \SI{0}{rad/s} & initial simulated yaw-rate bias\\
+Accelerometer-bias random-walk intensity $\sigma_{ba}$ & $5\times10^{-5}\,\mathrm{(m/s^2)/\sqrt{s}}$ & one-step bias increment standard deviation is $\sigma_{ba}\sqrt{\Delta t}$\\
+Gyroscope-bias random-walk intensity $\sigma_{bg}$ & $5\times10^{-6}\,\mathrm{(rad/s)/\sqrt{s}}$ & one-step bias increment standard deviation is $\sigma_{bg}\sqrt{\Delta t}$\\
+UWB range-noise standard deviation $\sigma_{\mathrm{UWB}}$ & \SI{0.12}{m} & Gaussian range-measurement model\\
+Number of particles $N_p$ & 5000 & bootstrap PF population\\
+Initial particle standard deviations $\bm{\sigma}_0$ & $[0.5,0.5,0.12,0.12,1^\circ]^\top$ & standard deviations for $[p_x,p_y,v_x,v_y,\psi]^\top$\\
+PF acceleration perturbation $\sigma_{a,\mathrm{PF}}$ & \SI{0.025}{m/s^2} & process spread per particle and acceleration component\\
+PF yaw-rate perturbation $\sigma_{\omega,\mathrm{PF}}$ & \SI{0.0015}{rad/s} & process spread per particle in yaw rate\\
+Resampling fraction $\gamma$ & 0.5 & trigger $N_{\mathrm{eff},k}<\gamma N_p$\\
+Random seed & 42 & reproducible stochastic realization\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Auxiliary-node trajectories}
-The stationary diagnostic uses an auxiliary at $(8,-4)$ m. The moving auxiliary follows
+The initial particle cloud therefore uses
 \begin{equation}
-\bm{a}(t)=
+\bm{\sigma}_0=
+\begin{bmatrix}
+\SI{0.5}{m} & \SI{0.5}{m} & \SI{0.12}{m/s} & \SI{0.12}{m/s} & 1^\circ
+\end{bmatrix}^{\top}.
+\end{equation}
+This initialization is intentionally narrow enough to represent an approximately known pose and velocity. It is not the unknown-pose initialization required for the later reproduction of Han et al.
+
+\subsection{Auxiliary-node trajectories}
+The auxiliary node is denoted by $A$, and its known navigation-frame position is $\bm{p}_{A}(t)$. Two trajectories are used for the present observability diagnostic.
+
+For the stationary case,
+\begin{equation}
+\bm{p}_{A}(t)=
+\begin{bmatrix}
+8\\-4
+\end{bmatrix}\ \mathrm{m}.
+\end{equation}
+For the moving case,
+\begin{equation}
+\bm{p}_{A}(t)=
 \begin{bmatrix}
 8-0.10t\\
 -4+0.22t+1.2\sin(0.08t)
-\end{bmatrix}.
+\end{bmatrix}\ \mathrm{m}.
 \end{equation}
-The specific curves are not intended to represent a final application scenario. They provide controlled geometries for debugging and for checking the expected stationary-versus-moving observability distinction.
+The discrete auxiliary position used in the filter is $\bm{p}_{A,k}=\bm{p}_{A}(t_k)$. The specific trajectories are not intended to model a final application scenario. They provide controlled geometries for debugging and for checking the expected difference between stationary and informative moving range references.
+
+\subsection{Measurement schedule}
+In P1A, one UWB range measurement $z_k$ is available at every simulation sample. Since $\Delta t=\SI{0.1}{s}$, the effective UWB update rate is \SI{10}{Hz}. This intentionally removes communication scheduling as a confounding factor. Reduced UWB rates are studied only after the baseline estimator is validated.
 
 \section{Current verification results}
-The revised IMU implementation was executed locally with the committed configuration and passed five unit/integration tests. The resulting metrics are shown in Table~\ref{tab:p1results}.
+The revised IMU implementation was executed locally with the committed configuration and passed five unit/integration tests. The resulting metrics are shown in Table~\ref{tab:p1results}. The metric definitions are given in the preceding methodology chapter.
+
 \begin{table}[ht]
 \centering
 \caption{Single-seed Phase-1A verification result. Values are not yet statistical claims.}
 \label{tab:p1results}
 \begin{tabular}{lrrrr}
 \toprule
-Method & Position RMSE [m] & p95 [m] & Final [m] & Heading RMSE [deg]\\
+Method & Position RMSE [m] & p95 [m] & Final error [m] & Heading RMSE [deg]\\
 \midrule
 Ideal IMU DR & 0.000 & 0.000 & 0.000 & 0.000\\
 Noisy IMU DR & 1.378 & 2.550 & 2.680 & 0.110\\
@@ -80,42 +132,62 @@ PF + UWB & 0.231 & 0.401 & 0.324 & 0.354\\
 \bottomrule
 \end{tabular}
 \end{table}
-The position RMSE reduction relative to noisy DR is approximately
+
+The position-RMSE reduction of PF+UWB relative to noisy IMU DR in this single run is
 \begin{equation}
-1-\frac{0.231}{1.378}\approx 83.2\%.
+1-\frac{0.231}{1.378}\approx 0.832,
 \end{equation}
-This number demonstrates that the implemented UWB likelihood is able to pull the position estimate back toward the correct trajectory in this controlled realization. It is not yet evidence for a general expected improvement because only one trajectory, noise realization, update rate, and particle configuration have been evaluated.
+or approximately $83.2\%$. This number demonstrates that the implemented UWB likelihood can pull the position estimate back toward the true trajectory in this controlled realization. It is not yet evidence of a general expected improvement because only one target trajectory, one noise realization, one UWB rate, and one particle configuration have been evaluated.
 
 \section{Interpretation of the heading result}
-The PF heading RMSE is larger than the heading RMSE of the direct noisy-IMU DR in this particular run. This result is intentionally retained. A scalar range does not directly observe heading. Heading can only be inferred indirectly through the time evolution of the range under motion. The PF also introduces initial heading spread and process perturbations. Therefore Phase 1A currently supports the statement that UWB corrects \emph{position drift}; it does not yet support a claim that the chosen PF improves yaw estimation. Unknown-pose localization and heading convergence must be assessed explicitly in the later observability/convergence experiments rather than inferred from this debugging case.
+The PF heading RMSE, $0.354^\circ$, is larger than the $0.110^\circ$ heading RMSE of direct noisy-IMU DR in this particular run. This result is intentionally retained rather than hidden. A scalar UWB range $z_k$ directly depends on target position but not directly on yaw. Yaw can only become informative through the time evolution of the target and auxiliary geometry. In addition, the PF introduces initial yaw spread and particle-specific yaw-rate perturbations. P1A therefore currently supports the statement that UWB corrects \emph{position drift}; it does not yet support a claim that the selected PF improves yaw estimation. Unknown-pose localization and heading convergence must be tested explicitly in later observability and convergence experiments.
 
 \section{Observability diagnostic}
-For the five-state IMU-driven model, the stationary auxiliary yields singular values approximately
+For the five-state IMU-driven model, the stationary auxiliary produces the singular values
 \begin{equation}
-(931.97,\;232.84,\;49.46,\;7.05,\;4.12\times10^{-14}),
+(931.97,\;232.84,\;49.46,\;7.05,\;4.12\times10^{-14})
 \end{equation}
-which is numerically rank deficient. For the selected moving auxiliary the singular values are approximately
+of the finite-horizon local observability matrix $\mathcal{O}_{0:K}$. The smallest singular value is therefore numerically zero at machine precision, indicating a rank-deficient local linearization for this selected geometry.
+
+For the moving auxiliary, the corresponding singular values are
 \begin{equation}
 (916.48,\;320.81,\;45.58,\;8.05,\;0.602).
 \end{equation}
-Thus the moving case is full rank for this local finite-horizon linearization, although its smallest-to-largest singular-value ratio is only about $6.57\times10^{-4}$. The result is consistent with the geometric argument that a moving, globally known auxiliary trajectory can break the rotational symmetry of a single stationary range reference. It does not by itself prove global nonlinear observability.
+The smallest-to-largest singular-value ratio is
+\begin{equation}
+\frac{\sigma_{\min}}{\sigma_{\max}}
+=\frac{0.602}{916.48}
+\approx 6.57\times10^{-4}.
+\end{equation}
+Thus the selected moving case is full rank for this local finite-horizon linearization, although it remains relatively poorly conditioned. This result is consistent with the geometric argument that a moving, globally known auxiliary trajectory can break the rotational symmetry present with one stationary range reference. The result is only a local linearized diagnostic and does not by itself prove global nonlinear observability.
 
 \section{What changed relative to the first repository bootstrap}
-The original code corrupted $\Delta L$ and $\Delta\psi$ directly. That was useful as a rapid check of the Han et al. high-level model, but it bypassed the central source of inertial drift. The revised implementation now follows
+The first repository bootstrap corrupted the higher-level travelled-distance increment $\Delta L$ and yaw increment $\Delta\psi$ directly. This was useful for rapidly checking the high-level formulation used by Han et al., but it bypassed the actual acceleration integration that creates much of the inertial drift in the intended hardware system.
+
+The revised thesis baseline now follows
 \begin{equation}
-\boxed{\text{accel. + gyro measurements} \rightarrow \text{inertial mechanization} \rightarrow \text{DR state} \rightarrow \text{UWB/PF correction}}.
+\boxed{
+\text{accelerometer + gyroscope measurements}
+\rightarrow
+\text{inertial mechanization}
+\rightarrow
+\text{DR state}
+\rightarrow
+\text{UWB/PF correction}
+}.
 \end{equation}
-This is the preferred baseline for the thesis hardware direction. The earlier increment-level numerical result should therefore be treated as superseded by the IMU-based verification result above.
+This IMU-driven formulation is the preferred baseline for the hardware-oriented thesis development. The earlier increment-level numerical result should therefore be treated as superseded for the thesis baseline, while the $\Delta L,\Delta\psi$ formulation remains relevant for the separate faithful reproduction of Han et al.
 
 \section{Known limitations of P1A}
 The following limitations are deliberate and must be removed or investigated before Phase 1 is complete:
 \begin{itemize}
-    \item level 2-D motion and gravity-compensated horizontal accelerations;
-    \item approximately known initial position, velocity, and yaw;
-    \item no explicit accelerometer/gyro bias state in the PF;
-    \item UWB at every simulation step with Gaussian noise only;
-    \item one deterministic target trajectory and one random seed;
-    \item no packet loss, NLOS bias, or clock/timing effects;
-    \item no AACOPF particle-transition mechanism yet;
-    \item no measured ESP32/IMU/DW3000 sensor parameters yet.
+    \item the motion is restricted to a level two-dimensional plane and horizontal accelerations are assumed gravity-compensated;
+    \item initial position, velocity, and yaw are approximately known;
+    \item accelerometer and gyroscope biases are simulated but are not explicit states estimated by the PF;
+    \item one UWB range is available at every \SI{0.1}{s} simulation step;
+    \item the UWB model contains Gaussian range noise only;
+    \item only one deterministic target trajectory and one stochastic seed have been evaluated;
+    \item packet loss, NLOS range bias, timing/clock effects, and asynchronous communication are not modeled;
+    \item the AACOPF particle-transition mechanism has not yet been implemented;
+    \item no sensor-noise or energy parameters have yet been measured on the final ESP32/IMU/DW3000 hardware.
 \end{itemize}
