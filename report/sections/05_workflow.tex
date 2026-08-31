@@ -20,5 +20,13 @@ Numerical parameters belong in version-controlled YAML configuration files rathe
 \section{Result provenance}
 Every result used in the thesis should be traceable to the code revision and configuration that produced it. Generated bulk data need not all be committed to Git, but the repository must contain enough metadata to reproduce the experiment. Hardware logs will later require a data manifest including acquisition date, device identifiers, experimental geometry, firmware/software revision, and checksums or stable storage references.
 
+\section{Notation and abbreviation policy}
+The report follows two explicit documentation rules.
+\begin{enumerate}
+    \item Every abbreviation used in the report must appear in the Abbreviations and Notation chapter. At first substantive use in the main text, the full term should be written before the abbreviation unless the abbreviation is a hardware product identifier such as ESP32 or DW3000.
+    \item Every mathematical symbol must be defined both in the notation tables and locally when it first enters the derivation or experiment description. Symbols should not be reused for unrelated physical quantities. In particular, the report uses $\bm{p}_{A,k}$ for auxiliary-node position and $\bm{a}_k$ for acceleration, and uses $\nu_k$ for UWB measurement noise to avoid confusion with the velocity vector $\bm{v}_k$.
+\end{enumerate}
+When an experiment introduces new notation, updating the notation table is part of the definition of completing that experiment.
+
 \section{Writing policy}
 Markdown under \texttt{docs/experiments/} acts as the detailed laboratory notebook and may contain provisional interpretations or failed experiments. This LaTeX report is the curated persistent record: it should contain all definitions, assumptions, equations, configurations, and mature findings needed to understand what was done without reconstructing the reasoning from source code alone. Sections of this report can later be shortened or reorganized into the final thesis.
