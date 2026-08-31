@@ -1,18 +1,22 @@
 \chapter{Research Backlog}
-\section*{Phase 1 completion criteria}
+\section{Phase 1 completion criteria}
+Phase 1 is complete only after the following sequence is documented and reproducible.
 \begin{enumerate}
-\item Deterministic simulator and ideal-DR invariance test.
-\item Controlled noisy-DR drift experiment.
-\item UWB range model and conventional PF fusion baseline.
-\item Multi-seed robustness check of the baseline.
-\item Unknown-pose annular initialization matching the reference-paper problem.
-\item Stationary versus moving auxiliary-node observability/convergence experiment.
-\item Reproduction audit of every AACOPF equation and underspecified parameter.
-\item AACOPF implementation and PF/AACOPF comparison.
+    \item \textbf{P1A -- IMU baseline:} deterministic planar IMU mechanization, noisy inertial drift, Gaussian UWB measurement, and conventional PF correction. Current status: implemented and single-seed verification completed.
+    \item \textbf{P1B -- robustness of the known-pose baseline:} multi-seed study; sensitivity to initial position/velocity/yaw uncertainty; particle count; IMU noise and bias levels. The purpose is validation, not a large hyperparameter study.
+    \item \textbf{P1C -- unknown initial pose:} introduce the global-localization problem. The initial position must satisfy the first UWB range approximately, while initial yaw is unknown. Because the IMU-driven model also contains velocity, the initialization assumptions for speed/velocity must be made explicit.
+    \item \textbf{P1D -- geometry/observability:} compare stationary, degenerate, and informative moving auxiliary trajectories; report convergence time, error, particle-cloud evolution, and observability singular values.
+    \item \textbf{P1E -- paper reproduction audit:} document each equation and algorithmic step of Han et al.; list every underspecified AACOPF parameter and the chosen interpretation. Distinguish the paper's $\Delta L,\Delta\psi$ DR interface from the thesis IMU-driven mechanization.
+    \item \textbf{P1F -- AACOPF implementation:} implement the audited transition/resampling mechanism and compare conventional PF and AACOPF on matched trajectories/noise realizations.
 \end{enumerate}
 
-\section*{Phase 2--4 outlook}
-Phase 2 characterizes update rate, node count, geometry, outages, LOS/NLOS degradation, and DR quality. Phase 3 develops uncertainty/information-aware UWB scheduling and node selection. Phase 4 characterizes DW3000/IMU hardware, measures energy, ports the selected estimator to C/C++, and validates the simulation-to-hardware conclusions.
+\section{Decision required before unknown-pose implementation}
+The next important modeling decision is how closely the paper reproduction and the IMU-driven thesis implementation should be coupled. Two clean options are available:
+\begin{description}
+    \item[Option A -- two baselines:] reproduce Han et al. with the original $[p_x,p_y,\psi]$ state and $\Delta L,\Delta\psi$ interface, while maintaining the IMU-driven $[p_x,p_y,v_x,v_y,\psi]$ estimator as the hardware-oriented thesis baseline. This is scientifically cleanest for separating reproduction from adaptation.
+    \item[Option B -- adapted reproduction:] implement AACOPF directly around the IMU-driven state model. This is closer to the final hardware but makes direct comparison with Han et al. less faithful.
+\end{description}
+The current recommendation is Option A, followed by a documented transition from the paper baseline to the IMU-driven implementation.
 
-\section*{Documentation rule}
-The report on \texttt{main} is the persistent scientific record. Experiment branches may contain provisional code and analysis. Results should be transferred to this report when they are reviewed, together with the relevant assumptions, configuration, interpretation, limitations, and next decision. This keeps the Overleaf version accessible while preserving branch-based development for the research code.
+\section{Phase 2--4 outlook}
+Phase 2 will vary UWB update rate, node count, geometry, outages, LOS/NLOS degradation, and IMU quality. Phase 3 will develop uncertainty/information-aware UWB scheduling and node selection. Phase 4 will characterize the actual hardware, replace simulated sensor parameters with measured ones, measure energy per UWB transaction, port the selected estimator to C/C++, and compare simulation and hardware.
