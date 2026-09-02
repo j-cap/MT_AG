@@ -1,6 +1,6 @@
-from pathlib import Path
 import json
 import sys
+from pathlib import Path
 
 import numpy as np
 import yaml
@@ -8,12 +8,12 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from mt_ag.imu import mechanize_planar, simulate_imu_measurements  # noqa: E402
-from mt_ag.metrics import summary_metrics  # noqa: E402
-from mt_ag.observability import singular_values_planar_imu  # noqa: E402
-from mt_ag.particle_filter import run_imu_bootstrap_pf  # noqa: E402
-from mt_ag.sensors import generate_uwb_ranges  # noqa: E402
-from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory  # noqa: E402
+from mt_ag.imu import mechanize_planar, simulate_imu_measurements
+from mt_ag.metrics import summary_metrics
+from mt_ag.observability import singular_values_planar_imu
+from mt_ag.particle_filter import run_imu_bootstrap_pf
+from mt_ag.sensors import generate_uwb_ranges
+from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory
 
 
 def main():
