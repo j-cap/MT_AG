@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 import numpy as np
 
 from .imu import mechanize_planar
@@ -34,5 +35,7 @@ def auxiliary_trajectory(t, mode="moving"):
     if mode == "stationary":
         return np.column_stack((np.full_like(t, 8.0), np.full_like(t, -4.0)))
     if mode == "moving":
-        return np.column_stack((8.0 - 0.10 * t, -4.0 + 0.22 * t + 1.2 * np.sin(0.08 * t)))
+        return np.column_stack(
+            (8.0 - 0.10 * t, -4.0 + 0.22 * t + 1.2 * np.sin(0.08 * t))
+        )
     raise ValueError(f"Unknown auxiliary mode: {mode}")
