@@ -1,0 +1,158 @@
+\section{Experiment P1B: Robustness of the known-pose baseline}
+\subsection{Purpose and research question}
+P1A established that the implemented IMU--UWB particle-filter pipeline behaves correctly for one controlled stochastic realization. P1B asks whether this behavior is robust or whether the P1A result depends strongly on one random seed, one initial-state assumption, or a narrowly tuned PF configuration. The P1B research question is therefore:
+\begin{quote}
+Does the conventional PF consistently reduce position drift in the known-pose problem across stochastic realizations and reasonable variations of initialization, IMU quality, particle count, and PF process uncertainty?
+\end{quote}
+
+P1B deliberately does \emph{not} vary the UWB update rate, communication timing, auxiliary-node geometry, or UWB error model. The same deterministic target trajectory, moving auxiliary trajectory, Gaussian range model with $\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$, and one UWB measurement every $\Delta t=\SI{0.1}{s}$ are retained from P1A. This keeps the experiment focused on validation of the known-pose estimator rather than mixing in the communication questions reserved for Phase~2.
+
+\subsection{Experimental protocol}
+Sensor and PF randomness are generated independently. For matched comparisons, the same seed is used to generate the same normalized sensor-noise realization while the parameter under study is changed. Initial-state-error experiments use an additional independent random-number generator. Unless a parameter is explicitly varied, the P1A configuration in Table~\ref{tab:p1config} is used.
+
+The P1B campaign contains six experiment groups:
+\begin{enumerate}
+    \item a 20-seed replication of the unchanged P1A configuration;
+    \item sensitivity to finite initial position, velocity, and yaw error;
+    \item sensitivity to IMU white-noise and bias-random-walk magnitude;
+    \item a synthetic persistent accelerometer/gyroscope bias stress test;
+    \item a particle-count/runtime sweep;
+    \item sensitivity to the PF acceleration and yaw-rate process perturbations.
+\end{enumerate}
+The complete numerical configuration is stored in \texttt{configs/phase1b.yaml}; the experiment runner is \texttt{experiments/run\_phase1b.py}.
+
+\subsection{Multi-seed baseline result}
+Table~\ref{tab:p1b_multiseed} summarizes the unchanged P1A configuration over 20 independent stochastic seeds.
+\begin{table}[ht]
+\centering
+\caption{P1B multi-seed result for the known-pose baseline.}
+\label{tab:p1b_multiseed}
+\begin{tabular}{lcc}
+\toprule
+Metric & Noisy IMU DR & PF + UWB\\
+\midrule
+Mean position RMSE & $1.491\pm0.635$ m & $\mathbf{0.375\pm0.196}$ m\\
+Mean heading RMSE & $\mathbf{0.102^\circ}$ & $0.387^\circ$\\
+PF position-RMSE 95th percentile across seeds & -- & $0.636$ m\\
+Worst PF position RMSE & -- & $1.066$ m\\
+\bottomrule
+\end{tabular}
+\end{table}
+The PF has lower position RMSE than DR in all 20 seeds. Comparing the aggregate mean RMSE values gives
+\begin{equation}
+1-\frac{0.375}{1.491}\approx0.749,
+\end{equation}
+i.e. an approximately $74.9\%$ reduction in mean position RMSE for this controlled known-pose scenario. This result upgrades the P1A observation from a single-seed software verification to a statistically repeated simulation result for the selected trajectory and measurement model. It does not generalize yet to different trajectories, UWB rates, or NLOS conditions.
+
+The heading result remains qualitatively unchanged: direct gyro integration has lower heading RMSE than the PF. P1B therefore strengthens only the position-drift-correction claim, not a yaw-estimation claim.
+
+\subsection{Initial-state sensitivity}
+To test the boundary of the known-pose assumption, a random initial-estimate error is drawn in $[p_x,p_y,v_x,v_y,\psi]^\top$. The PF prior is centered on this erroneous estimate with the same uncertainty scale. Table~\ref{tab:p1b_init} reports ten seeds per level.
+\begin{table}[ht]
+\centering
+\caption{Sensitivity to finite initial-state error.}
+\label{tab:p1b_init}
+\begin{tabular}{p{0.38\textwidth}rrr}
+\toprule
+Initial-error standard deviations & PF RMSE mean & PF RMSE p95 & PF better than DR\\
+\midrule
+$[0.25\,\mathrm{m},0.25\,\mathrm{m},0.06\,\mathrm{m/s},0.06\,\mathrm{m/s},1^\circ]$ & 0.409 m & 0.627 m & 10/10\\
+$[0.5\,\mathrm{m},0.5\,\mathrm{m},0.12\,\mathrm{m/s},0.12\,\mathrm{m/s},2^\circ]$ & 0.668 m & 1.244 m & 10/10\\
+$[1\,\mathrm{m},1\,\mathrm{m},0.25\,\mathrm{m/s},0.25\,\mathrm{m/s},5^\circ]$ & 8.790 m & 35.963 m & 8/10\\
+$[2\,\mathrm{m},2\,\mathrm{m},0.5\,\mathrm{m/s},0.5\,\mathrm{m/s},10^\circ]$ & 14.215 m & 36.615 m & 8/10\\
+\bottomrule
+\end{tabular}
+\end{table}
+The key result is the sharp transition between moderate and large initial errors. The local PF reliably corrects moderate initialization errors, but some large-error realizations converge to an incorrect mode and produce very large RMSE. This is not treated as a parameter-tuning problem in P1B. It identifies the boundary between the local known-pose problem and the global unknown-pose problem that P1C is intended to solve through a principled initialization strategy.
+
+\subsection{Sensitivity to IMU quality}
+Accelerometer and gyroscope white-noise standard deviations and their bias-random-walk intensities are jointly multiplied by a common scale factor. The results in Table~\ref{tab:p1b_imu} use ten matched seeds per condition.
+\begin{table}[ht]
+\centering
+\caption{Sensitivity to IMU noise and bias-random-walk scale.}
+\label{tab:p1b_imu}
+\begin{tabular}{rrrr}
+\toprule
+IMU scale & DR RMSE mean & PF RMSE mean & PF RMSE p95\\
+\midrule
+$0.5\times$ & 0.736 m & 0.292 m & 0.479 m\\
+$1\times$ & 1.473 m & 0.415 m & 0.832 m\\
+$2\times$ & 2.946 m & 0.837 m & 2.090 m\\
+$4\times$ & 5.890 m & 3.741 m & 8.723 m\\
+\bottomrule
+\end{tabular}
+\end{table}
+The UWB correction remains useful as inertial quality degrades, but the range measurement cannot fully compensate arbitrarily poor propagation. In particular, the $4\times$ case is highly variable. This is expected because UWB constrains only scalar range while the PF must still propagate position, velocity, and yaw between updates.
+
+\subsection{Persistent-bias stress test}
+The current PF does not contain accelerometer or gyroscope bias states. To determine whether this omission can become important, constant initial biases are added to the simulated IMU. The selected values are synthetic stress levels and are \emph{not} claims about the final hardware. Table~\ref{tab:p1b_bias} summarizes ten seeds per level.
+\begin{table}[ht]
+\centering
+\caption{Synthetic persistent-bias sensitivity.}
+\label{tab:p1b_bias}
+\begin{tabular}{lcccc}
+\toprule
+Case & Accelerometer bias [m/s$^2$] & Gyro bias [rad/s] & DR RMSE & PF RMSE\\
+\midrule
+zero & $[0,0]$ & 0 & 1.473 m & 0.415 m\\
+small & $[0.002,-0.002]$ & 0.0002 & 1.862 m & 0.782 m\\
+moderate & $[0.01,-0.01]$ & 0.001 & 7.361 m & 4.551 m\\
+large & $[0.03,-0.03]$ & 0.003 & 21.937 m & 9.873 m\\
+\bottomrule
+\end{tabular}
+\end{table}
+The PF reduces position error in all tested bias realizations, but substantial residual drift remains because the estimator has no mechanism to identify and remove a persistent inertial bias. This result justifies keeping bias handling as an explicit design question. It does \emph{not} yet justify augmenting the state: the decision should be based on measured bias characteristics of the actual IMU in Phase~4 or an earlier lightweight hardware characterization.
+
+\subsection{Particle-count and runtime trade-off}
+Table~\ref{tab:p1b_particles} compares particle counts over the same 20 sensor realizations. Runtime is measured on the current Python execution platform and is only a relative computational-cost indicator; embedded runtime must be measured separately on the ESP32 platform.
+\begin{table}[ht]
+\centering
+\caption{Particle-count versus localization and runtime.}
+\label{tab:p1b_particles}
+\begin{tabular}{rrrr}
+\toprule
+$N_p$ & PF RMSE mean & PF RMSE p95 & Mean runtime/run\\
+\midrule
+500 & 0.618 m & 1.913 m & 0.078 s\\
+1000 & 0.485 m & 0.821 m & 0.130 s\\
+2500 & 0.411 m & 0.799 m & 0.276 s\\
+5000 & 0.375 m & 0.636 m & 0.524 s\\
+10000 & 0.365 m & 0.680 m & 0.963 s\\
+\bottomrule
+\end{tabular}
+\end{table}
+The accuracy improvement shows clear diminishing returns. Increasing the particle count from 5000 to 10000 approximately doubles runtime while changing mean RMSE only from 0.375 m to 0.365 m. The conservative Phase-1 decision is therefore to retain $N_p=5000$ until the more difficult P1C unknown-pose problem is evaluated. A 2500-particle configuration is acceptable for exploratory parameter sweeps when runtime matters.
+
+\subsection{PF process-noise sensitivity}
+The per-particle acceleration and yaw-rate perturbations are jointly scaled relative to their P1A values. Table~\ref{tab:p1b_process} reports ten seeds per condition.
+\begin{table}[ht]
+\centering
+\caption{Sensitivity to PF process-noise scaling.}
+\label{tab:p1b_process}
+\begin{tabular}{rrrr}
+\toprule
+Process-noise scale & PF RMSE mean & PF RMSE p95 & PF better than DR\\
+\midrule
+$0.25\times$ & 1.009 m & 2.269 m & 7/10\\
+$0.5\times$ & 0.656 m & 2.038 m & 9/10\\
+$1\times$ & 0.415 m & 0.832 m & 10/10\\
+$2\times$ & 0.420 m & 0.791 m & 10/10\\
+$4\times$ & 0.512 m & 0.814 m & 10/10\\
+\bottomrule
+\end{tabular}
+\end{table}
+The filter is most vulnerable when process noise is too small. An under-dispersed particle population cannot adequately represent the uncertainty induced by noisy inertial propagation, causing occasional failures. The original P1A values and a $2\times$ scaling perform similarly, indicating that P1A is not dependent on a narrowly tuned process-noise value.
+
+\subsection{P1B conclusions and decisions}
+P1B supports the following conclusions for the current controlled known-pose problem:
+\begin{enumerate}
+    \item PF+UWB consistently reduces position RMSE relative to open-loop IMU DR across the 20 baseline seeds;
+    \item the result remains a position-correction result and does not establish improved yaw estimation;
+    \item moderate initial-state error is recoverable, while sufficiently large initial uncertainty produces multimodal/global-localization failures and motivates P1C;
+    \item the current PF process-noise configuration lies in a reasonably broad useful region;
+    \item 5000 particles remain a conservative Phase-1 default, with little benefit observed at 10000 particles;
+    \item persistent unmodeled IMU bias can dominate the remaining error and must be revisited once real hardware statistics are known.
+\end{enumerate}
+
+\subsection{Treatment of the P1A limitations}
+The limitations listed at the end of P1A are not all prerequisites that must be removed before Phase~1 is complete. They are controlled assumptions whose treatment is intentionally distributed across the research plan. P1B addresses the single-seed limitation and investigates sensitivity to initial state, IMU quality, bias, particle count, and process noise. P1C removes the approximately-known-initial-pose assumption. P1E--P1F address the AACOPF reproduction. Reduced UWB update rate, packet loss, NLOS effects, and communication timing belong primarily to Phase~2 or Phase~3, while three-dimensional/gravity-compensation validity, real sensor statistics, embedded timing, and energy characterization belong primarily to Phase~4. This staged treatment prevents several sources of uncertainty from being changed simultaneously.
