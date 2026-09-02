@@ -39,7 +39,7 @@ randomness:
 # problem before yaw is also made global.
 known_yaw_control:
   n_seeds: 10
-  n_bearing: 500
+  n_bearing: 1000
   n_yaw: 1
   yaw_mode: known
   velocity_mode: aligned_fixed_speed
@@ -85,3 +85,11 @@ velocity_prior:
 grid_resolution:
   n_seeds: 10
   values: [50, 75, 100, 150]
+
+# P1C-E: diagnose whether premature resampling destroys globally competing
+# pose modes before the moving geometry becomes informative.
+resampling_sensitivity:
+  n_seeds: 10
+  n_bearing: 100
+  n_yaw: 100
+  fractions: [0.0, 0.05, 0.10, 0.25, 0.50]
