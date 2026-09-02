@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 import numpy as np
 
 from .geometry import wrap_angle
@@ -42,7 +43,11 @@ def run_imu_bootstrap_pf(
     z = np.asarray(ranges_meas, dtype=float)
     aux = np.asarray(auxiliary_positions, dtype=float)
     n_steps = len(imu_measurements) + 1
-    particles = rng.normal(np.asarray(initial_mean, dtype=float), np.asarray(initial_std, dtype=float), size=(n_particles, 5))
+    particles = rng.normal(
+        np.asarray(initial_mean, dtype=float),
+        np.asarray(initial_std, dtype=float),
+        size=(n_particles, 5),
+    )
     particles[:, 4] = wrap_angle(particles[:, 4])
     weights = np.full(n_particles, 1.0 / n_particles)
     estimate = np.zeros((n_steps, 5), dtype=float)
