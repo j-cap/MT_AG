@@ -1,0 +1,28 @@
+\section*{P1C global-initialization quantities}
+The following symbols are introduced by Experiment P1C and complement the general notation tables above.
+\begin{longtable}{p{0.30\textwidth}p{0.62\textwidth}}
+\toprule
+Symbol & Meaning\\
+\midrule
+\endfirsthead
+\toprule
+Symbol & Meaning\\
+\midrule
+\endhead
+$N_{\theta}$ & Number of initial target-position bearing hypotheses distributed around the first-UWB-range ring.\\
+$N_{\psi}$ & Number of initial yaw hypotheses distributed over $[-\pi,\pi)$ in the unknown-yaw initialization.\\
+$\theta_n$ & Bearing angle of initial position hypothesis $n$ around the known auxiliary position $\bm p_{A,0}$.\\
+$\psi_m$ & Initial yaw hypothesis indexed by $m$ in the structured global-pose grid.\\
+$n$ & P1C position-bearing hypothesis index when used in $\theta_n$; context distinguishes it from the navigation-frame superscript $(\cdot)^n$.\\
+$m$ & P1C yaw-hypothesis index.\\
+$r_0^{(n,m)}$ & Initial radial distance from auxiliary node $A$ to the target-position hypothesis associated with bearing $n$ and yaw $m$.\\
+$\epsilon_r^{(n,m)}$ & Sampled radial perturbation applied to the first measured range when constructing initial particle $(n,m)$.\\
+$\sigma_r$ & Standard deviation of the radial initialization perturbation; set equal to $\sigma_{\mathrm{UWB}}$ in the realistic P1C experiments.\\
+$s_0$ & Assumed or sampled initial target speed magnitude used to initialize the velocity states.\\
+$e_{p,\mathrm{thr}}$ & Diagnostic position-error threshold used to define terminal convergence in P1C; currently \SI{1}{m}.\\
+$e_{\psi,\mathrm{thr}}$ & Diagnostic absolute yaw-error threshold used to define terminal pose convergence; currently $10^{\circ}$.\\
+$t_{\mathrm{conv}}$ & Earliest time after the final threshold violation such that the relevant convergence conditions remain satisfied until the end of the experiment.\\
+$T_{\mathrm{hold}}$ & Minimum remaining duration required after $t_{\mathrm{conv}}$ for a run to count as converged; currently \SI{5}{s}.\\
+$T_{\mathrm{late}}$ & Length of the terminal evaluation window used for late-window RMSE; currently \SI{20}{s}.\\
+\bottomrule
+\end{longtable}
