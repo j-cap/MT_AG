@@ -2,22 +2,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import time
 from pathlib import Path
 
 import numpy as np
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from mt_ag.geometry import wrap_angle
+from mt_ag.imu import simulate_imu_measurements
+from mt_ag.initialization import initialize_range_conditioned_particles
+from mt_ag.particle_filter import run_imu_bootstrap_pf_from_particles
+from mt_ag.sensors import generate_uwb_ranges
+from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory
 
-from mt_ag.geometry import wrap_angle  # noqa: E402
-from mt_ag.imu import simulate_imu_measurements  # noqa: E402
-from mt_ag.initialization import initialize_range_conditioned_particles  # noqa: E402
-from mt_ag.particle_filter import run_imu_bootstrap_pf_from_particles  # noqa: E402
-from mt_ag.sensors import generate_uwb_ranges  # noqa: E402
-from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def distribution(values):
@@ -170,6 +168,9 @@ def main():
         init_kwargs = dict(init_cfg)
         yaw_mode = init_kwargs.pop("yaw_mode")
         velocity_mode = init_kwargs.pop("velocity_mode")
+        init_kwargs.pop("n_seeds", None)
+        init_kwargs.pop("n_bearing", None)
+        init_kwargs.pop("n_yaw", None)
         if yaw_mode == "known":
             init_kwargs["known_yaw_rad"] = float(trajectory.state[0, 4])
         particles = initialize_range_conditioned_particles(
@@ -203,13 +204,17 @@ def main():
         pos_error = np.linalg.norm(
             result.estimate[:, :2] - trajectory.state[:, :2], axis=1
         )
-        yaw_error = np.abs(wrap_angle(result.estimate[:, 4] - trajectory.state[:, 4]))
+        yaw_error = np.abs(
+            wrap_angle(result.estimate[:, 4] - trajectory.state[:, 4])
+        )
         position_mask = pos_error < float(conv_cfg["position_threshold_m"])
         pose_mask = position_mask & (yaw_error < yaw_threshold)
         position_convergence = sustained_convergence_time(
             position_mask, trajectory.dt, hold_steps
         )
-        pose_convergence = sustained_convergence_time(pose_mask, trajectory.dt, hold_steps)
+        pose_convergence = sustained_convergence_time(
+            pose_mask, trajectory.dt, hold_steps
+        )
         late = slice(max(0, len(pos_error) - late_steps), len(pos_error))
         return {
             "seed": int(seed),
@@ -217,9 +222,13 @@ def main():
             "position_convergence_s": position_convergence,
             "pose_convergence_s": pose_convergence,
             "position_rmse_m": float(np.sqrt(np.mean(pos_error**2))),
-            "late_position_rmse_m": float(np.sqrt(np.mean(pos_error[late] ** 2))),
+            "late_position_rmse_m": float(
+                np.sqrt(np.mean(pos_error[late] ** 2))
+            ),
             "final_position_error_m": float(pos_error[-1]),
-            "heading_rmse_deg": float(np.rad2deg(np.sqrt(np.mean(yaw_error**2)))),
+            "heading_rmse_deg": float(
+                np.rad2deg(np.sqrt(np.mean(yaw_error**2)))
+            ),
             "late_heading_rmse_deg": float(
                 np.rad2deg(np.sqrt(np.mean(yaw_error[late] ** 2)))
             ),
@@ -274,14 +283,14 @@ def main():
         )
         for seed in range(n_seeds("core_unknown_pose"))
     ]
-    raw["core_unknown_pose"] = {"aggregate": aggregate(core_runs), "runs": core_runs}
+    raw["core_unknown_pose"] = {
+        "aggregate": aggregate(core_runs),
+        "runs": core_runs,
+    }
 
     velocity_cfg = cfg["velocity_prior"]
     for name, case in velocity_cfg["cases"].items():
-        init_cfg = {
-            "yaw_mode": "uniform",
-            **case,
-        }
+        init_cfg = {"yaw_mode": "uniform", **case}
         runs = [
             run_case(
                 seed,
