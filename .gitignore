@@ -6,8 +6,10 @@ __pycache__/
 results/**/*.png
 results/**/*.pdf
 results/**/*.csv
+results/**/raw_results.json
 !results/**/trajectory_report.csv
 !results/**/summary.md
+!results/**/summary.json
 report/main.aux
 report/main.bbl
 report/main.blg
