@@ -30,13 +30,14 @@ def distribution(values):
     }
 
 
-def convergence_time(mask, dt, hold_steps):
-    run = 0
-    for k, ok in enumerate(mask):
-        run = run + 1 if ok else 0
-        if run >= hold_steps:
-            return float((k - hold_steps + 1) * dt)
-    return None
+def terminal_convergence_time(mask, dt, hold_steps):
+    """Earliest sample after the last threshold violation, if stable to the end."""
+    mask = np.asarray(mask, dtype=bool)
+    false_indices = np.flatnonzero(~mask)
+    start = 0 if len(false_indices) == 0 else int(false_indices[-1] + 1)
+    if len(mask) - start < hold_steps:
+        return None
+    return float(start * dt)
 
 
 def aggregate(runs):
@@ -114,7 +115,7 @@ def main():
             sensor_cache[seed] = imu, ranges
         return sensor_cache[seed]
 
-    def run_case(seed, initializer, n_bearing, n_yaw):
+    def run_case(seed, initializer, n_bearing, n_yaw, resample_fraction=None):
         imu, ranges = measurements(seed)
         init = dict(initializer)
         init.pop("n_seeds", None)
@@ -149,7 +150,9 @@ def main():
             sigma_process_accel_mps2=pf_cfg["sigma_process_accel_mps2"],
             sigma_process_gyro_rps=pf_cfg["sigma_process_gyro_rps"],
             sigma_uwb_m=uwb_cfg["sigma_range_m"],
-            resample_fraction=pf_cfg["resample_fraction"],
+            resample_fraction=(
+                pf_cfg["resample_fraction"] if resample_fraction is None else resample_fraction
+            ),
             initial_particles_conditioned_on_z0=True,
         )
         runtime = time.perf_counter() - start
@@ -162,8 +165,8 @@ def main():
         return {
             "seed": seed,
             "n_particles": len(particles),
-            "position_convergence_s": convergence_time(pos_ok, trajectory.dt, hold_steps),
-            "pose_convergence_s": convergence_time(pose_ok, trajectory.dt, hold_steps),
+            "position_convergence_s": terminal_convergence_time(pos_ok, trajectory.dt, hold_steps),
+            "pose_convergence_s": terminal_convergence_time(pose_ok, trajectory.dt, hold_steps),
             "position_rmse_m": float(np.sqrt(np.mean(pos_error**2))),
             "late_position_rmse_m": float(np.sqrt(np.mean(pos_error[late] ** 2))),
             "final_position_error_m": float(pos_error[-1]),
@@ -180,6 +183,7 @@ def main():
             "auxiliary": "moving and globally known",
             "uwb": "Gaussian sigma 0.12 m, synchronous 10 Hz",
             "first_range_handling": "initial ring conditioned on z0; filter likelihood starts at z1",
+            "convergence_definition": "within thresholds continuously from t_conv to experiment end, with at least 5 s remaining",
             "position_threshold_m": conv_cfg["position_threshold_m"],
             "yaw_threshold_deg": conv_cfg["yaw_threshold_deg"],
             "hold_time_s": conv_cfg["hold_time_s"],
@@ -189,11 +193,12 @@ def main():
         "core_unknown_pose": {},
         "velocity_prior": {},
         "grid_resolution": {},
+        "resampling_sensitivity": {},
     }
 
     control = cfg["known_yaw_control"]
     control_runs = [
-        run_case(seed, control, 100 if args.quick else control["n_bearing"], control["n_yaw"])
+        run_case(seed, control, 200 if args.quick else control["n_bearing"], control["n_yaw"])
         for seed in range(seed_count("known_yaw_control"))
     ]
     raw["known_yaw_control"] = {"aggregate": aggregate(control_runs), "runs": control_runs}
@@ -221,19 +226,39 @@ def main():
         }
 
     grids = [25, 40] if args.quick else cfg["grid_resolution"]["values"]
-    grid_initializer = {
+    global_initializer = {
         "yaw_mode": "uniform",
         "velocity_mode": "aligned_fixed_speed",
         "speed_mean_mps": 0.75,
     }
     for grid in grids:
         runs = [
-            run_case(seed, grid_initializer, grid, grid)
+            run_case(seed, global_initializer, grid, grid)
             for seed in range(seed_count("grid_resolution"))
         ]
         raw["grid_resolution"][str(grid)] = {
             "n_bearing": grid,
             "n_yaw": grid,
+            "aggregate": aggregate(runs),
+            "runs": runs,
+        }
+
+    resampling = cfg["resampling_sensitivity"]
+    resampling_grid = 40 if args.quick else resampling["n_bearing"]
+    fractions = [0.0, 0.1, 0.5] if args.quick else resampling["fractions"]
+    for fraction in fractions:
+        runs = [
+            run_case(
+                seed,
+                global_initializer,
+                resampling_grid,
+                resampling_grid,
+                resample_fraction=fraction,
+            )
+            for seed in range(seed_count("resampling_sensitivity"))
+        ]
+        raw["resampling_sensitivity"][str(fraction)] = {
+            "resample_fraction": fraction,
             "aggregate": aggregate(runs),
             "runs": runs,
         }
@@ -246,6 +271,10 @@ def main():
         },
         "grid_resolution": {
             name: compact(value["aggregate"]) for name, value in raw["grid_resolution"].items()
+        },
+        "resampling_sensitivity": {
+            name: compact(value["aggregate"])
+            for name, value in raw["resampling_sensitivity"].items()
         },
     }
     out = ROOT / "results/phase1/p1c"
