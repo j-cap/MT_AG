@@ -1,0 +1,47 @@
+{
+  "baseline": {
+    "n": 20,
+    "dr_rmse_mean_m": 1.491193,
+    "dr_rmse_std_m": 0.635119,
+    "pf_rmse_mean_m": 0.374881,
+    "pf_rmse_std_m": 0.195515,
+    "pf_rmse_q95_m": 0.636088,
+    "pf_rmse_max_m": 1.066303,
+    "dr_heading_rmse_mean_deg": 0.102078,
+    "pf_heading_rmse_mean_deg": 0.387364,
+    "pf_better_fraction": 1.0,
+    "runtime_mean_s": 0.502098
+  },
+  "initial_state": {
+    "small_offset": {"error_std": [0.25, 0.25, 0.06, 0.06, 0.01745329252], "n": 10, "dr_rmse_mean_m": 3.138468, "pf_rmse_mean_m": 0.408761, "pf_rmse_std_m": 0.146154, "pf_rmse_q95_m": 0.627268, "pf_better_fraction": 1.0},
+    "moderate_offset": {"error_std": [0.5, 0.5, 0.12, 0.12, 0.03490658504], "n": 10, "dr_rmse_mean_m": 5.688469, "pf_rmse_mean_m": 0.667717, "pf_rmse_std_m": 0.359270, "pf_rmse_q95_m": 1.244314, "pf_better_fraction": 1.0},
+    "large_offset": {"error_std": [1.0, 1.0, 0.25, 0.25, 0.08726646260], "n": 10, "dr_rmse_mean_m": 11.673989, "pf_rmse_mean_m": 8.790128, "pf_rmse_std_m": 14.293975, "pf_rmse_q95_m": 35.963478, "pf_better_fraction": 0.8},
+    "boundary_offset": {"error_std": [2.0, 2.0, 0.5, 0.5, 0.17453292520], "n": 10, "dr_rmse_mean_m": 23.327130, "pf_rmse_mean_m": 14.215188, "pf_rmse_std_m": 14.568990, "pf_rmse_q95_m": 36.614574, "pf_better_fraction": 0.8}
+  },
+  "imu_quality": {
+    "0.5": {"n": 10, "dr_rmse_mean_m": 0.736483, "pf_rmse_mean_m": 0.292082, "pf_rmse_std_m": 0.135766, "pf_rmse_q95_m": 0.478597, "pf_better_fraction": 0.9},
+    "1.0": {"n": 10, "dr_rmse_mean_m": 1.472903, "pf_rmse_mean_m": 0.415219, "pf_rmse_std_m": 0.250279, "pf_rmse_q95_m": 0.832221, "pf_better_fraction": 1.0},
+    "2.0": {"n": 10, "dr_rmse_mean_m": 2.945552, "pf_rmse_mean_m": 0.837015, "pf_rmse_std_m": 0.688236, "pf_rmse_q95_m": 2.089803, "pf_better_fraction": 1.0},
+    "4.0": {"n": 10, "dr_rmse_mean_m": 5.890081, "pf_rmse_mean_m": 3.740535, "pf_rmse_std_m": 3.086840, "pf_rmse_q95_m": 8.722615, "pf_better_fraction": 0.9}
+  },
+  "initial_bias": {
+    "zero": {"accel_bias_mps2": [0.0, 0.0], "gyro_bias_rps": 0.0, "n": 10, "dr_rmse_mean_m": 1.472903, "pf_rmse_mean_m": 0.415219, "pf_rmse_q95_m": 0.832221},
+    "small": {"accel_bias_mps2": [0.002, -0.002], "gyro_bias_rps": 0.0002, "n": 10, "dr_rmse_mean_m": 1.861907, "pf_rmse_mean_m": 0.781632, "pf_rmse_q95_m": 1.364377},
+    "moderate": {"accel_bias_mps2": [0.01, -0.01], "gyro_bias_rps": 0.001, "n": 10, "dr_rmse_mean_m": 7.361184, "pf_rmse_mean_m": 4.551066, "pf_rmse_q95_m": 5.094290},
+    "large": {"accel_bias_mps2": [0.03, -0.03], "gyro_bias_rps": 0.003, "n": 10, "dr_rmse_mean_m": 21.937161, "pf_rmse_mean_m": 9.873411, "pf_rmse_q95_m": 10.881834}
+  },
+  "particle_count": {
+    "500": {"n": 20, "pf_rmse_mean_m": 0.618132, "pf_rmse_std_m": 0.514506, "pf_rmse_q95_m": 1.912654, "pf_better_fraction": 0.95, "runtime_mean_s": 0.077976},
+    "1000": {"n": 20, "pf_rmse_mean_m": 0.485459, "pf_rmse_std_m": 0.241443, "pf_rmse_q95_m": 0.820955, "pf_better_fraction": 1.0, "runtime_mean_s": 0.130127},
+    "2500": {"n": 20, "pf_rmse_mean_m": 0.411479, "pf_rmse_std_m": 0.227828, "pf_rmse_q95_m": 0.799488, "pf_better_fraction": 1.0, "runtime_mean_s": 0.276235},
+    "5000": {"n": 20, "pf_rmse_mean_m": 0.374881, "pf_rmse_std_m": 0.195515, "pf_rmse_q95_m": 0.636088, "pf_better_fraction": 1.0, "runtime_mean_s": 0.524485},
+    "10000": {"n": 20, "pf_rmse_mean_m": 0.364870, "pf_rmse_std_m": 0.199879, "pf_rmse_q95_m": 0.679745, "pf_better_fraction": 1.0, "runtime_mean_s": 0.963302}
+  },
+  "process_noise": {
+    "0.25": {"n": 10, "pf_rmse_mean_m": 1.009265, "pf_rmse_std_m": 0.804816, "pf_rmse_q95_m": 2.269461, "pf_better_fraction": 0.7},
+    "0.5": {"n": 10, "pf_rmse_mean_m": 0.655543, "pf_rmse_std_m": 0.796065, "pf_rmse_q95_m": 2.037843, "pf_better_fraction": 0.9},
+    "1.0": {"n": 10, "pf_rmse_mean_m": 0.415219, "pf_rmse_std_m": 0.250279, "pf_rmse_q95_m": 0.832221, "pf_better_fraction": 1.0},
+    "2.0": {"n": 10, "pf_rmse_mean_m": 0.420423, "pf_rmse_std_m": 0.209433, "pf_rmse_q95_m": 0.790738, "pf_better_fraction": 1.0},
+    "4.0": {"n": 10, "pf_rmse_mean_m": 0.511755, "pf_rmse_std_m": 0.179982, "pf_rmse_q95_m": 0.813683, "pf_better_fraction": 1.0}
+  }
+}

@@ -1,0 +1,74 @@
+# Phase P1B: robustness of the known-pose IMU/UWB particle-filter baseline.
+# UWB/trajectory assumptions deliberately remain identical to P1A.
+
+simulation:
+  dt: 0.1
+  duration: 60.0
+
+uwb:
+  sigma_range_m: 0.12
+
+baseline_imu:
+  sigma_accel_mps2: 0.02
+  sigma_gyro_rps: 0.001
+  accel_bias_initial_mps2: [0.0, 0.0]
+  gyro_bias_initial_rps: 0.0
+  sigma_accel_bias_rw_mps2_sqrt_s: 0.00005
+  sigma_gyro_bias_rw_rps_sqrt_s: 0.000005
+
+baseline_pf:
+  n_particles: 5000
+  initial_std: [0.5, 0.5, 0.12, 0.12, 0.01745329252]
+  sigma_process_accel_mps2: 0.025
+  sigma_process_gyro_rps: 0.0015
+  resample_fraction: 0.5
+
+randomness:
+  sensor_seed_offset: 1000
+  pf_seed_offset: 100000
+  initial_state_seed_offset: 200000
+
+multi_seed:
+  n_seeds: 20
+
+initial_state_uncertainty:
+  n_seeds: 10
+  # Each vector is [p_x, p_y, v_x, v_y, psi] standard deviation.
+  # A random initial-estimate error is drawn with this std and the PF prior
+  # is centered on that erroneous estimate with the same uncertainty scale.
+  levels:
+    small_offset: [0.25, 0.25, 0.06, 0.06, 0.01745329252]
+    moderate_offset: [0.5, 0.5, 0.12, 0.12, 0.03490658504]
+    large_offset: [1.0, 1.0, 0.25, 0.25, 0.08726646260]
+    boundary_offset: [2.0, 2.0, 0.5, 0.5, 0.17453292520]
+
+imu_quality:
+  n_seeds: 10
+  # White-noise std and bias-random-walk intensities are scaled together.
+  scales: [0.5, 1.0, 2.0, 4.0]
+
+initial_bias:
+  n_seeds: 10
+  # Synthetic stress levels; not hardware-calibrated yet.
+  levels:
+    zero:
+      accel_bias_mps2: [0.0, 0.0]
+      gyro_bias_rps: 0.0
+    small:
+      accel_bias_mps2: [0.002, -0.002]
+      gyro_bias_rps: 0.0002
+    moderate:
+      accel_bias_mps2: [0.01, -0.01]
+      gyro_bias_rps: 0.001
+    large:
+      accel_bias_mps2: [0.03, -0.03]
+      gyro_bias_rps: 0.003
+
+particle_count:
+  n_seeds: 20
+  values: [500, 1000, 2500, 5000, 10000]
+
+process_noise:
+  n_seeds: 10
+  # PF acceleration and yaw-rate process perturbations are scaled together.
+  scales: [0.25, 0.5, 1.0, 2.0, 4.0]
