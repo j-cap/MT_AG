@@ -1,0 +1,211 @@
+\section{Experiment P1C: Unknown initial pose}
+\subsection{Purpose and research question}
+P1A and P1B considered a local localization problem in which the initial position, velocity, and yaw were approximately known. P1C removes the approximately-known-position/yaw assumption and asks whether the same IMU--UWB bootstrap PF can solve a global initialization problem when the first UWB range is the only direct information about the initial position. The research question is:
+\begin{quote}
+Can the moving-auxiliary IMU--UWB system recover the target's global position and yaw from a range-conditioned but globally ambiguous initial particle distribution, and which part of the initialization problem limits the conventional PF?
+\end{quote}
+
+The deterministic target trajectory, moving auxiliary trajectory, IMU error model, Gaussian UWB range model, and \SI{10}{Hz} UWB schedule are kept unchanged from P1A/P1B. P1C changes the initialization problem rather than the sensor or communication model.
+
+\subsection{Range-conditioned global initialization}
+At sample $k=0$, the auxiliary node has known navigation-frame position $\bm p_{A,0}$ and the first UWB observation is $z_0$. A single scalar range does not define a unique two-dimensional target position. In the noise-free case it constrains the target to the circle
+\begin{equation}
+\left\lVert \bm p_0-\bm p_{A,0}\right\rVert_2=z_0.
+\end{equation}
+With noisy UWB data, P1C represents this constraint by a range-conditioned annular particle distribution.
+
+Let $N_{\theta}$ denote the number of bearing hypotheses around the first-range ring and let $N_{\psi}$ denote the number of yaw hypotheses. The nominal bearing grid is
+\begin{equation}
+\theta_n=-\pi+\frac{2\pi n}{N_{\theta}},
+\qquad n=0,\ldots,N_{\theta}-1,
+\end{equation}
+and, for unknown yaw,
+\begin{equation}
+\psi_m=-\pi+\frac{2\pi m}{N_{\psi}},
+\qquad m=0,\ldots,N_{\psi}-1.
+\end{equation}
+The implementation applies a small common random angular offset within one grid cell to both grids so that the discretization is not tied to a privileged angular origin while preserving uniform global coverage.
+
+For each position/yaw combination, the initial radius is sampled as
+\begin{equation}
+r_0^{(n,m)}=z_0+\epsilon_r^{(n,m)},
+\qquad
+\epsilon_r^{(n,m)}\sim\mathcal N(0,\sigma_r^2),
+\end{equation}
+where $\sigma_r=\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$ in the realistic P1C experiments. The resulting initial position is
+\begin{equation}
+\bm p_0^{(n,m)}=
+\bm p_{A,0}+r_0^{(n,m)}
+\begin{bmatrix}
+\cos\theta_n\\
+\sin\theta_n
+\end{bmatrix}.
+\end{equation}
+The total number of particles is therefore
+\begin{equation}
+N_p=N_{\theta}N_{\psi}.
+\end{equation}
+This structured construction ensures that all initial position bearings and yaw angles are represented deliberately rather than depending on a favorable random draw.
+
+\paragraph{First-measurement convention.}
+The initial particle distribution is already conditioned on $z_0$. Therefore the PF does not evaluate the $z_0$ likelihood a second time. The first subsequent range likelihood is applied at $k=1$. This avoids double-counting the first UWB measurement and artificially narrowing the radial posterior.
+
+\subsection{Initial velocity prior}
+The IMU-driven state contains the navigation-frame velocity components $v_x$ and $v_y$. Consequently, unlike the three-state $[p_x,p_y,\psi]^\top$ formulation of Han et al.\ \cite{han2020cooperative}, P1C must explicitly specify the initial velocity distribution. Three priors are investigated.
+
+For the \emph{aligned fixed-speed} prior, the initial speed $s_0$ is assumed known and the velocity direction equals the yaw hypothesis,
+\begin{equation}
+\bm v_0^{(n,m)}=s_0
+\begin{bmatrix}
+\cos\psi_m\\
+\sin\psi_m
+\end{bmatrix},
+\qquad s_0=\SI{0.75}{m/s}.
+\end{equation}
+For the \emph{aligned uncertain-speed} prior, the direction remains aligned with yaw but
+\begin{equation}
+s_0^{(i)}\sim\mathcal N(\SI{0.75}{m/s},\,(\SI{0.20}{m/s})^2),
+\end{equation}
+with the sampled speed clipped to $[0,\SI{1.5}{m/s}]$. For the deliberately weak \emph{free-velocity} prior, the speed is sampled uniformly from $[0,\SI{1.5}{m/s}]$ and the velocity direction is sampled independently of yaw from $[-\pi,\pi)$.
+
+This distinction is physically important. The planar IMU measures acceleration and yaw rate but does not directly determine the initial global velocity. P1C therefore treats the velocity prior as part of the estimation problem rather than hiding it in the implementation.
+
+\subsection{Convergence and diagnostic quantities}
+A global-localization experiment can exhibit a large initial transient even when the final mode is correct, so whole-trajectory RMSE is not sufficient. Let $e_{p,k}$ denote the Euclidean position error and $|e_{\psi,k}|$ the absolute wrapped yaw error. P1C defines diagnostic position convergence at time $t_{\mathrm{conv}}$ if
+\begin{equation}
+e_{p,k}<e_{p,\mathrm{thr}}=\SI{1}{m}
+\end{equation}
+for every remaining sample from $t_{\mathrm{conv}}$ to the end of the experiment, with at least $T_{\mathrm{hold}}=\SI{5}{s}$ remaining. Pose convergence additionally requires
+\begin{equation}
+|e_{\psi,k}|<e_{\psi,\mathrm{thr}}=10^{\circ}
+\end{equation}
+over the same terminal interval. These thresholds are research diagnostics rather than final application specifications.
+
+To distinguish initial global-search transients from steady terminal behavior, P1C also reports RMSE over the final $T_{\mathrm{late}}=\SI{20}{s}$. The final particle-cloud position spread and yaw resultant length are additionally recorded. A yaw resultant close to one indicates strong angular concentration; it does not by itself imply that the concentrated yaw mode is correct.
+
+\subsection{Experiment design}
+P1C consists of six related diagnostic experiments:
+\begin{enumerate}
+    \item \textbf{P1C-A -- known-yaw control:} unknown position on the first-range ring, known yaw, and known aligned speed;
+    \item \textbf{P1C-B -- core unknown pose:} unknown position bearing and unknown yaw, with known aligned initial speed;
+    \item \textbf{P1C-C -- velocity prior:} aligned fixed-speed, aligned uncertain-speed, and free-velocity initialization;
+    \item \textbf{P1C-D -- grid resolution:} vary $N_{\theta}=N_{\psi}$ and therefore the total particle count;
+    \item \textbf{P1C-E -- resampling sensitivity:} vary the effective-sample-size resampling fraction $\gamma$, including $\gamma=0$ (no resampling);
+    \item \textbf{P1C-F -- idealized identifiability sanity check:} remove measurement/process uncertainty and substantially increase global hypothesis coverage.
+\end{enumerate}
+The realistic experiments retain $\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$, the P1A/P1B IMU model, and \SI{10}{Hz} ranging. Unless stated otherwise, the core global initialization uses $N_{\theta}=N_{\psi}=100$, corresponding to $N_p=10{,}000$ particles.
+
+\subsection{Known-yaw control}
+The first experiment isolates the range-ring position ambiguity by keeping the true initial yaw and the aligned initial speed. With $N_{\theta}=1000$ and $N_{\psi}=1$, terminal position and pose convergence is obtained in 8 of 10 runs. Table~\ref{tab:p1c_control_core} compares this control with the full unknown-pose problem.
+\begin{table}[ht]
+\centering
+\caption{P1C control and core unknown-pose results.}
+\label{tab:p1c_control_core}
+\begin{tabular}{lrrrr}
+\toprule
+Case & $N_p$ & Pose success & Late pos. RMSE & Late yaw RMSE\\
+\midrule
+Known yaw, unknown position & 1000 & 8/10 & 0.733 m & $0.132^{\circ}$\\
+Unknown position and yaw & 10000 & 2/20 & 12.616 m & $29.810^{\circ}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+The known-yaw result demonstrates that the first-range ring itself is not the dominant difficulty. Once the initial yaw is also global, the conventional PF becomes unreliable.
+
+\subsection{Core unknown-pose result}
+For the core configuration, only 2 of 20 runs achieve terminal position and pose convergence. Mean whole-trajectory position RMSE is \SI{10.728}{m}, mean late-window position RMSE is \SI{12.616}{m}, and mean final position error is \SI{8.784}{m}. The mean late yaw RMSE is $29.810^{\circ}$.
+
+A particularly important diagnostic is that the mean final yaw resultant is approximately $0.997$, close to perfect angular concentration. Thus many failed runs do not remain broadly uncertain; rather, they collapse to a highly concentrated but incorrect global mode. This behavior motivates later particle-diversity analysis but also cautions against interpreting small particle spread as evidence of estimator correctness.
+
+\subsection{Sensitivity to the initial velocity prior}
+Table~\ref{tab:p1c_velocity} uses ten matched sensor realizations to assess the additional initialization assumption introduced by the IMU-driven state.
+\begin{table}[ht]
+\centering
+\caption{P1C sensitivity to the initial velocity prior.}
+\label{tab:p1c_velocity}
+\begin{tabular}{lrrr}
+\toprule
+Velocity prior & Pose success & Late pos. RMSE & Late yaw RMSE\\
+\midrule
+Aligned fixed speed & 1/10 & 16.237 m & $41.302^{\circ}$\\
+Aligned uncertain speed & 0/10 & 16.393 m & $37.924^{\circ}$\\
+Free velocity & 0/10 & 35.449 m & $81.236^{\circ}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+The free-velocity prior is substantially harder than the aligned cases. P1C therefore confirms that raw planar IMU measurements do not supply the missing initial velocity. Subsequent experiments must state whether initial speed is known, estimated by another subsystem, or constrained by a motion model.
+
+\subsection{Particle-count and grid-resolution sensitivity}
+A natural hypothesis is that the realistic failure is caused simply by too few particles. Table~\ref{tab:p1c_grid} tests this by increasing the structured global grid.
+\begin{table}[ht]
+\centering
+\caption{P1C global angular-grid resolution.}
+\label{tab:p1c_grid}
+\begin{tabular}{rrrrr}
+\toprule
+$N_{\theta}=N_{\psi}$ & $N_p$ & Pose success & Late pos. RMSE & Runtime\\
+\midrule
+50 & 2500 & 0/10 & 18.272 m & 0.439 s\\
+75 & 5625 & 0/10 & 14.230 m & 0.906 s\\
+100 & 10000 & 1/10 & 16.237 m & 1.558 s\\
+150 & 22500 & 0/10 & 12.120 m & 3.409 s\\
+\bottomrule
+\end{tabular}
+\end{table}
+Higher resolution improves some error measures but does not make convergence reliable. The failure therefore cannot be explained by particle count alone. The computational cost also rises approximately with the number of particles, as expected for the direct vectorized PF implementation.
+
+\subsection{Resampling sensitivity}
+P1C next tests whether conventional resampling removes competing global modes before the moving geometry becomes sufficiently informative. The resampling threshold $N_{\mathrm{eff}}<\gamma N_p$ is varied from $\gamma=0$ (no resampling) to $\gamma=0.5$ (the P1A/P1B setting). Table~\ref{tab:p1c_resampling} summarizes ten matched runs per value.
+\begin{table}[ht]
+\centering
+\caption{P1C resampling-threshold sensitivity.}
+\label{tab:p1c_resampling}
+\begin{tabular}{rrrr}
+\toprule
+$\gamma$ & Pose success & Late pos. RMSE & Final position spread\\
+\midrule
+0.00 & 0/10 & 13.896 m & 0.0045 m\\
+0.05 & 2/10 & 17.032 m & 1.716 m\\
+0.10 & 1/10 & 16.203 m & 1.982 m\\
+0.25 & 2/10 & 17.961 m & 2.461 m\\
+0.50 & 1/10 & 16.237 m & 1.563 m\\
+\bottomrule
+\end{tabular}
+\end{table}
+Disabling resampling does not solve the global-localization problem. Indeed, the no-resampling case can become extremely concentrated in position while remaining incorrect. Consequently, premature conventional resampling is not sufficient to explain wrong-mode collapse; the accumulated likelihood itself can drive the approximation toward an incorrect hypothesis under realistic uncertainty.
+
+\subsection{Idealized identifiability sanity check}
+The final diagnostic determines whether the poor realistic result is compatible with a fundamentally unresolved geometry/model ambiguity or instead reflects practical filtering difficulty. The idealized experiment uses exact IMU data, exact UWB ranges, zero initial radial uncertainty, zero PF process perturbation, no resampling, and a $200\times200$ structured grid, giving $N_p=40{,}000$ initial pose hypotheses. A small likelihood width of \SI{0.02}{m} is retained for numerical evaluation of exact-range consistency. The aligned fixed speed $s_0=\SI{0.75}{m/s}$ is retained.
+
+All three idealized runs reach the correct terminal pose. The pose-convergence times are \SI{11.7}{s}, \SI{5.8}{s}, and \SI{13.2}{s}. Table~\ref{tab:p1c_ideal} summarizes the aggregate result.
+\begin{table}[ht]
+\centering
+\caption{Idealized P1C sanity check.}
+\label{tab:p1c_ideal}
+\begin{tabular}{lr}
+\toprule
+Metric & Result\\
+\midrule
+Position convergence & 3/3\\
+Pose convergence & 3/3\\
+Mean whole-trajectory position RMSE & 1.815 m\\
+Mean late-window position RMSE & 0.147 m\\
+Mean final position error & 0.146 m\\
+Mean late yaw RMSE & $0.266^{\circ}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+The relatively large whole-trajectory position RMSE is compatible with the intended global-search transient: the filter begins from a globally distributed pose set and requires several seconds to identify the correct mode. The late-window and final errors are therefore the more relevant quantities for this sanity check.
+
+The idealized experiment is not a practical performance result: it contains only three runs, uses exact measurements, removes process uncertainty and resampling, and assumes a known aligned initial speed. Its purpose is diagnostic. Under these ideal conditions and sufficiently dense global hypothesis coverage, the selected moving-auxiliary scenario resolves the initial position/yaw ambiguity.
+
+\subsection{P1C interpretation and decisions}
+The combined P1C evidence supports the following interpretation:
+\begin{quote}
+The selected moving-auxiliary scenario is capable of resolving the initial global pose under ideal information, but the conventional bootstrap PF is not robust enough to preserve and discriminate the competing global pose hypotheses under the realistic P1C sensor uncertainty.
+\end{quote}
+This result rules out two overly simple explanations. First, the experiment does not support a claim of fundamental non-identifiability for the selected moving scenario because the idealized global search converges. Second, the experiment does not support the claim that the realistic failures can be repaired merely by increasing $N_p$ or disabling conventional resampling.
+
+The sharp degradation between the known-yaw control and the unknown-yaw case identifies global yaw ambiguity as the dominant difficulty in the current setup. The velocity-prior study additionally shows that the IMU-driven formulation introduces an initialization requirement that is absent from the higher-level $\Delta L,\Delta\psi$ interface used in the reference paper.
+
+P1C is therefore considered complete as a \emph{diagnostic phase}. Its outcome is not a robust global-localization baseline; rather, it defines the failure mode that the subsequent work must explain. The next experiment, P1D, keeps the aligned fixed-speed prior and explicitly varies auxiliary/target geometry to relate global convergence behavior to observability and particle-cloud evolution. P1C is also retained as motivation for the later AACOPF audit and matched PF--AACOPF comparison.
