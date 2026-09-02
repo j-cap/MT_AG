@@ -2,21 +2,26 @@
 \section{Phase 1 completion criteria}
 Phase 1 is complete only after the following sequence is documented and reproducible.
 \begin{enumerate}
-    \item \textbf{P1A -- IMU baseline:} deterministic planar IMU mechanization, noisy inertial drift, Gaussian UWB measurement, and conventional PF correction. Current status: implemented and single-seed verification completed.
-    \item \textbf{P1B -- robustness of the known-pose baseline:} multi-seed study; sensitivity to initial position/velocity/yaw uncertainty; particle count; IMU noise and bias levels. The purpose is validation, not a large hyperparameter study.
-    \item \textbf{P1C -- unknown initial pose:} introduce the global-localization problem. The initial position must satisfy the first UWB range approximately, while initial yaw is unknown. Because the IMU-driven model also contains velocity, the initialization assumptions for speed/velocity must be made explicit.
+    \item \textbf{P1A -- IMU baseline:} deterministic planar IMU mechanization, noisy inertial drift, Gaussian UWB measurement, and conventional PF correction. Current status: \textbf{completed}. The implementation is verified and the result is now supported by the P1B multi-seed study.
+    \item \textbf{P1B -- robustness of the known-pose baseline:} multi-seed study; sensitivity to initial position/velocity/yaw uncertainty; particle count; IMU noise and bias levels; PF process-noise sensitivity. Current status: \textbf{completed and documented}. The known-pose PF improves position RMSE in all 20 baseline seeds, while large initialization errors and persistent IMU bias have been identified as explicit boundaries for later work.
+    \item \textbf{P1C -- unknown initial pose:} introduce the global-localization problem. The initial position must satisfy the first UWB range approximately, while initial yaw is unknown. Because the IMU-driven model also contains velocity, the initialization assumptions for speed/velocity must be made explicit. Current status: \textbf{next task}.
     \item \textbf{P1D -- geometry/observability:} compare stationary, degenerate, and informative moving auxiliary trajectories; report convergence time, error, particle-cloud evolution, and observability singular values.
     \item \textbf{P1E -- paper reproduction audit:} document each equation and algorithmic step of Han et al.; list every underspecified AACOPF parameter and the chosen interpretation. Distinguish the paper's $\Delta L,\Delta\psi$ DR interface from the thesis IMU-driven mechanization.
     \item \textbf{P1F -- AACOPF implementation:} implement the audited transition/resampling mechanism and compare conventional PF and AACOPF on matched trajectories/noise realizations.
 \end{enumerate}
 
-\section{Decision required before unknown-pose implementation}
-The next important modeling decision is how closely the paper reproduction and the IMU-driven thesis implementation should be coupled. Two clean options are available:
+\section{Current Phase-1 parameter decisions after P1B}
+For the remaining Phase-1 experiments, the conservative default remains $N_p=5000$ particles. The P1A PF process-noise values are retained because P1B shows similar performance for the baseline and a $2\times$ scaling, whereas substantially smaller process noise causes under-dispersion and occasional failures. A 2500-particle configuration may be used for exploratory sweeps, but final matched comparisons should use the conservative default unless a later experiment provides a reason to change it.
+
+Persistent accelerometer/gyroscope bias is recorded as an open estimator-design question rather than immediately adding bias states. The P1B stress test shows that unestimated bias can dominate the remaining error, but the selected stress levels are synthetic. The decision to augment the state with bias variables should therefore be made after real IMU bias/noise characteristics are available.
+
+\section{Decision required before paper reproduction}
+The important modeling distinction is how closely the paper reproduction and the IMU-driven thesis implementation should be coupled. Two clean options are available:
 \begin{description}
     \item[Option A -- two baselines:] reproduce Han et al. with the original $[p_x,p_y,\psi]$ state and $\Delta L,\Delta\psi$ interface, while maintaining the IMU-driven $[p_x,p_y,v_x,v_y,\psi]$ estimator as the hardware-oriented thesis baseline. This is scientifically cleanest for separating reproduction from adaptation.
     \item[Option B -- adapted reproduction:] implement AACOPF directly around the IMU-driven state model. This is closer to the final hardware but makes direct comparison with Han et al. less faithful.
 \end{description}
-The current recommendation is Option A, followed by a documented transition from the paper baseline to the IMU-driven implementation.
+The current recommendation remains Option A, followed by a documented transition from the paper baseline to the IMU-driven implementation.
 
 \section{Phase 2--4 outlook}
 Phase 2 will vary UWB update rate, node count, geometry, outages, LOS/NLOS degradation, and IMU quality. Phase 3 will develop uncertainty/information-aware UWB scheduling and node selection. Phase 4 will characterize the actual hardware, replace simulated sensor parameters with measured ones, measure energy per UWB transaction, port the selected estimator to C/C++, and compare simulation and hardware.
