@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
 import yaml
@@ -12,11 +12,11 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from mt_ag.imu import mechanize_planar, simulate_imu_measurements  # noqa: E402
-from mt_ag.metrics import summary_metrics  # noqa: E402
-from mt_ag.particle_filter import run_imu_bootstrap_pf  # noqa: E402
-from mt_ag.sensors import generate_uwb_ranges  # noqa: E402
-from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory  # noqa: E402
+from mt_ag.imu import mechanize_planar, simulate_imu_measurements
+from mt_ag.metrics import summary_metrics
+from mt_ag.particle_filter import run_imu_bootstrap_pf
+from mt_ag.sensors import generate_uwb_ranges
+from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory
 
 
 def distribution(values):
@@ -276,7 +276,7 @@ def main():
         "particle_count": {},
         "process_noise": {},
     }
-    for group in compact:
+    for group, group_output in compact.items():
         if group == "multi_seed":
             continue
         for name, result in raw[group].items():
@@ -285,7 +285,7 @@ def main():
                 for key, value in result.items()
                 if key not in {"aggregate", "runs"}
             }
-            compact[group][name] = {
+            group_output[name] = {
                 **metadata,
                 "metrics": compact_aggregate(result["aggregate"]),
             }
