@@ -1,0 +1,87 @@
+# Phase P1C: unknown initial position/yaw with first-range conditioning.
+# The target trajectory, IMU/UWB noise, 10 Hz ranging, and moving auxiliary
+# remain identical to P1A/P1B. P1C changes only the initial-state problem.
+
+simulation:
+  dt: 0.1
+  duration: 60.0
+
+uwb:
+  sigma_range_m: 0.12
+  initial_radial_std_m: 0.12
+
+imu:
+  sigma_accel_mps2: 0.02
+  sigma_gyro_rps: 0.001
+  accel_bias_initial_mps2: [0.0, 0.0]
+  gyro_bias_initial_rps: 0.0
+  sigma_accel_bias_rw_mps2_sqrt_s: 0.00005
+  sigma_gyro_bias_rw_rps_sqrt_s: 0.000005
+
+particle_filter:
+  sigma_process_accel_mps2: 0.025
+  sigma_process_gyro_rps: 0.0015
+  resample_fraction: 0.5
+
+convergence:
+  position_threshold_m: 1.0
+  yaw_threshold_deg: 10.0
+  hold_time_s: 5.0
+  late_window_s: 20.0
+
+randomness:
+  sensor_seed_offset: 3000
+  initializer_seed_offset: 300000
+  pf_seed_offset: 400000
+
+# P1C-A: controlled sanity check. Position is unknown on the first UWB ring,
+# but yaw and initial speed are known. This isolates the range-ring position
+# problem before yaw is also made global.
+known_yaw_control:
+  n_seeds: 10
+  n_bearing: 500
+  n_yaw: 1
+  yaw_mode: known
+  velocity_mode: aligned_fixed_speed
+  speed_mean_mps: 0.75
+
+# P1C-B: core global-pose case. Position bearing and yaw are both unknown.
+# Initial speed magnitude is known and velocity is assumed aligned with yaw.
+core_unknown_pose:
+  n_seeds: 20
+  n_bearing: 100
+  n_yaw: 100
+  yaw_mode: uniform
+  velocity_mode: aligned_fixed_speed
+  speed_mean_mps: 0.75
+
+# P1C-C: determine whether the speed/velocity assumption is essential.
+velocity_prior:
+  n_seeds: 10
+  n_bearing: 100
+  n_yaw: 100
+  cases:
+    aligned_fixed:
+      velocity_mode: aligned_fixed_speed
+      speed_mean_mps: 0.75
+      speed_std_mps: 0.0
+      speed_min_mps: 0.0
+      speed_max_mps: 1.5
+    aligned_uncertain:
+      velocity_mode: aligned_gaussian_speed
+      speed_mean_mps: 0.75
+      speed_std_mps: 0.20
+      speed_min_mps: 0.0
+      speed_max_mps: 1.5
+    free_velocity:
+      velocity_mode: free_velocity
+      speed_mean_mps: 0.75
+      speed_std_mps: 0.0
+      speed_min_mps: 0.0
+      speed_max_mps: 1.5
+
+# P1C-D: global angular-grid resolution / particle-count sensitivity.
+# n_particles = n_bearing * n_yaw.
+grid_resolution:
+  n_seeds: 10
+  values: [50, 75, 100, 150]
