@@ -93,3 +93,13 @@ resampling_sensitivity:
   n_bearing: 100
   n_yaw: 100
   fractions: [0.0, 0.05, 0.10, 0.25, 0.50]
+
+# P1C-F: idealized identifiability sanity check. Exact IMU and exact UWB are
+# used, the first range has zero radial uncertainty, PF process noise is zero,
+# and resampling is disabled. This checks the global geometry/hypothesis logic
+# independently of sensor noise and particle impoverishment.
+ideal_sanity:
+  n_seeds: 3
+  n_bearing: 200
+  n_yaw: 200
+  uwb_likelihood_sigma_m: 0.02
