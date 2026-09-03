@@ -16,7 +16,7 @@ with normalized transition probability over the candidate set. A move is accepte
 
 `max_j P_ij > c_lambda / K_i`,
 
-where `K_i` is the number of higher-weight candidates. Thus `c_lambda` controls selectivity relative to the uniform candidate probability. Values at or below one are expected to be aggressive; larger values require increasingly concentrated destination evidence.
+where `K_i` is the number of higher-weight candidates. Thus `c_lambda` controls selectivity relative to the uniform candidate probability. Values at or below one are aggressive in the tested regime; larger values require increasingly concentrated destination evidence.
 
 The full development sweep is:
 
@@ -68,16 +68,81 @@ A setting is development-eligible if its correct-mode concentration fraction is 
 
 If no setting reaches the development success floor, the best available setting is reported but is not described as an acceptable frozen configuration.
 
+## Development results
+
+The safety-aware ranking selects
+
+`alpha = 0.5`, `beta = 0`, `c_lambda = 2`.
+
+Across the 16 development runs this tuple gives:
+
+| Metric | Result |
+|---|---:|
+| Correct-mode terminal lock | 15/16 = 93.75% |
+| Wrong-mode terminal lock | 0/16 = 0% |
+| Catastrophic ancestry collapse | 1/16 = 6.25% |
+| Dominant-clone event | 10/16 = 62.5% |
+| Mean final correct-mode fraction | 0.993125 |
+| Mean minimum unique-parent fraction | 0.402344 |
+| Mean moved-particle fraction | 0.039879 |
+
+The next two safety-ranked settings are `(alpha,beta,c_lambda)=(1,0,4)` and `(2,0,8)`. Both also have `beta=0`. In contrast, the P1F-B mechanism-check point `(1,1,0.5)` gives only 75% correct lock, 25% wrong lock, catastrophic ancestry collapse in 100% of development runs, dominant-clone events in 100%, and a mean minimum unique-parent fraction of only 0.0316.
+
+Two qualitative effects are therefore clear in this controlled study. First, increasing the normalized threshold above the aggressive P1F-B value substantially reduces premature cloning. Second, the best safety-ranked settings remove the inverse-distance contribution (`beta=0`). This does not establish that spatial distance is generally harmful; it establishes only that, for this controlled bimodal UWB experiment, the distance heuristic is unnecessary for reliable mode selection and can contribute to locally attractive cloning decisions.
+
 ## Held-out validation and freeze criterion
 
-The selected tuple is then evaluated on 20 unseen seeds per scenario, i.e. 40 validation runs. It is accepted for P1F-D only if all three conditions hold:
+The selected tuple is frozen before validation and then evaluated on 20 unseen seeds per scenario, i.e. 40 validation runs. It is accepted for P1F-D only if all three conditions hold:
 
 - correct-mode concentration fraction >= 0.80;
 - wrong-mode-lock fraction <= 0.05;
 - catastrophic-collapse fraction <= 0.25.
 
-Failure of this criterion is a valid P1F-C outcome. In that case P1F-D should not silently use a tuned literal AACOPF setting; the mechanism or threshold parameterization must first be reconsidered.
+The held-out result is:
+
+| Metric | All validation runs | Balanced | Minority-correct |
+|---|---:|---:|---:|
+| Runs | 40 | 20 | 20 |
+| Correct-mode terminal lock | **100%** | **100%** | **100%** |
+| Wrong-mode terminal lock | **0%** | **0%** | **0%** |
+| Catastrophic ancestry collapse | **22.5%** | 25% | 20% |
+| Mean final correct-mode fraction | 0.999625 | 0.999375 | 0.999875 |
+
+Across all 40 validation runs, the mean minimum unique-parent fraction is 0.3414 and the mean moved-particle fraction is 0.0392. Mean full-horizon position and yaw RMSE are 2.846 m and 21.812 deg, respectively. These RMSE values include the deliberately ambiguous initial interval and are not used as final localization-performance claims.
+
+The frozen tuple therefore **passes** the predeclared P1F-C acceptance criterion:
+
+`freeze_accepted = true`.
+
+## Interpretation of the residual diversity risk
+
+Passing the freeze criterion does not mean that the literal transition has become benign. A dominant-clone event still occurs in 85% of held-out runs, and the catastrophic-collapse diagnostic is triggered in 9/40 runs. The difference relative to P1F-B is that these events no longer produce a terminal wrong-mode lock in the held-out controlled experiment.
+
+The correct interpretation is therefore narrow:
+
+- the tuple is sufficiently reliable to be frozen for an unbiased P1F-D comparison;
+- the tuning substantially reduces the wrong-lock failure observed with the provisional P1F-B setting;
+- the literal ACO mechanism remains genealogically aggressive;
+- P1F-G is still required before making any diversity, scalability, or embedded-deployment claim.
+
+The frequent dominant-clone diagnostic does not violate the freeze criterion because a maximum dominant-clone frequency was deliberately not part of the predeclared acceptance rule. It remains an important warning metric that must be carried into P1F-D.
 
 ## Claim boundary
 
-P1F-C selects an explicit repository configuration for a later matched comparison. It does not claim that the selected values are those used by Han et al., and it does not optimize against the P1F-D evaluation seeds.
+P1F-C selects an explicit repository configuration for a later matched comparison. It does not claim that the selected values are those used by Han et al., and it does not optimize against the P1F-D evaluation seeds. The selected values are
+
+`alpha = 0.5`, `beta = 0`, `c_lambda = 2`.
+
+They must be used unchanged in P1F-D unless a separately documented methodological reason requires reopening P1F-C.
+
+## Reproducibility
+
+- configuration: `configs/phase1f_c.yaml`;
+- runner: `experiments/run_phase1f_c.py`;
+- aggregate result: `results/phase1/p1f_c/summary.json` and `summary.md`;
+- workflow run: `33803059007`;
+- full generated result artifact: `p1f-c-results`, artifact ID `9912216810`.
+
+## Decision
+
+P1F-C is complete. Proceed to **P1F-D**, using the frozen tuple `(alpha,beta,c_lambda)=(0.5,0,2)` for the literal-small AACOPF. P1F-D must compare conventional PF and AACOPF under matched trajectories, UWB realizations, initial particle clouds, and declared particle budgets, while retaining correct-mode survival, ancestry-collapse, destination-multiplicity, and runtime diagnostics alongside localization error.
