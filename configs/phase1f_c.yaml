@@ -1,0 +1,54 @@
+simulation:
+  dt: 0.1
+  duration: 8.0
+
+uwb:
+  sigma_range_m: 0.12
+
+aco:
+  epsilon_distance: 1.0e-12
+  epsilon_weight: 1.0e-15
+
+sweep:
+  alpha: [0.5, 1.0, 2.0]
+  beta: [0.0, 0.5, 1.0, 2.0]
+  c_lambda: [0.5, 1.0, 2.0, 4.0, 8.0]
+
+particle_cloud:
+  n_particles: 400
+  position_std_m: 0.25
+  yaw_std_deg: 5.0
+  wrong_bearing_offset_deg: 90.0
+  wrong_yaw_offset_deg: 90.0
+  correct_mode_position_threshold_m: 1.0
+  correct_mode_yaw_threshold_deg: 10.0
+  concentration_fraction: 0.9
+  wrong_lock_fraction: 0.1
+  hold_time_s: 1.0
+  catastrophic_unique_parent_fraction: 0.1
+  dominant_clone_fraction: 0.5
+
+scenarios:
+  balanced:
+    correct_fraction: 0.5
+  minority_correct:
+    correct_fraction: 0.2
+
+development:
+  seed_start: 20
+  n_seeds: 8
+
+validation:
+  seed_start: 100
+  n_seeds: 20
+
+selection:
+  minimum_development_correct_lock_fraction: 0.75
+  validation_correct_lock_target: 0.80
+  validation_wrong_lock_maximum: 0.05
+  validation_catastrophic_collapse_maximum: 0.25
+  policy: "Safety-first lexicographic ranking among settings meeting the development success floor: wrong-lock fraction, catastrophic-collapse fraction, dominant-clone fraction, then higher correct-lock fraction and correct-mode mass. If no setting meets the success floor, maximize correct-lock fraction first and report that no setting is eligible."
+
+randomness:
+  range_seed_offset: 310000
+  initializer_seed_offset: 320000
