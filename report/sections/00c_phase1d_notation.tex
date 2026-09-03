@@ -1,0 +1,27 @@
+\section*{Phase-P1D geometry and observability quantities}
+\begin{longtable}{p{0.30\textwidth}p{0.62\textwidth}}
+\toprule
+Symbol & Meaning\\
+\midrule
+\endfirsthead
+\toprule
+Symbol & Meaning\\
+\midrule
+\endhead
+$\bm r_k$ & Relative position vector from the target to auxiliary node $A$ at sample $k$, $\bm r_k=\bm p_{A,k}-\bm p_k$.\\
+$d_k=\lVert\bm r_k\rVert_2$ & Target--auxiliary geometric range at sample $k$.\\
+$\alpha_k$ & Navigation-frame line-of-sight (LOS) bearing of the auxiliary relative to the target, $\alpha_k=\operatorname{atan2}(r_{y,k},r_{x,k})$.\\
+$\Delta\alpha_{\mathrm{span}}$ & Span of the unwrapped LOS bearing over an experiment, $\max_k\alpha_k-\min_k\alpha_k$.\\
+$\Delta\alpha_{\mathrm{TV}}$ & Total variation of the unwrapped LOS bearing, $\sum_k|\alpha_{k+1}-\alpha_k|$.\\
+$\mathcal O_{0:k}$ & Cumulative finite-horizon local observability matrix formed from samples $0$ through $k$.\\
+$\sigma_j(\mathcal O_{0:k})$ & $j$th singular value of the cumulative observability matrix, ordered from largest to smallest.\\
+$\sigma_{\min,k}$ & Smallest singular value $\sigma_5(\mathcal O_{0:k})$ for the five-state P1D model.\\
+$\sigma_{\max,k}$ & Largest singular value $\sigma_1(\mathcal O_{0:k})$ for the five-state P1D model.\\
+$\eta_{\mathcal O,k}$ & Normalized local observability-conditioning diagnostic, $\sigma_{\min,k}/\sigma_{\max,k}$.\\
+$\eta_{\mathrm{thr}}$ & Diagnostic threshold used only to report a comparable information-accumulation time in P1D; $\eta_{\mathrm{thr}}=10^{-4}$.\\
+$\operatorname{rank}(\mathcal O_{0:k})$ & Numerical matrix rank of the cumulative local observability matrix using a relative singular-value tolerance.\\
+$t_{\eta}$ & First time at which the cumulative matrix is full rank and $\eta_{\mathcal O,k}\geq\eta_{\mathrm{thr}}$.\\
+$R_{\psi,k}$ & Resultant length of the weighted particle yaw distribution; $R_{\psi,k}=1$ indicates angular concentration, but not necessarily a correct yaw mode.\\
+$\sigma_{p,k}^{\mathrm{PF}}$ & Weighted root-mean-square spatial spread of the particle cloud around the PF position estimate.\\
+\bottomrule
+\end{longtable}
