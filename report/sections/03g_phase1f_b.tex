@@ -1,0 +1,184 @@
+\section{Experiment P1F-B: literal-small ACO mechanism validation}
+\subsection{Purpose and claim boundary}
+P1F-B is the first implementation experiment for the ant-colony particle-transition mechanism audited in P1E. Its purpose is deliberately narrower than a final accuracy comparison. The experiment asks three questions:
+\begin{enumerate}
+    \item Does the implementation execute the candidate-selection, transition-score, threshold, lineage-copy, and synchronous-update semantics fixed in P1E?
+    \item What does that transition actually do to a controlled multimodal particle cloud when sequential UWB information begins to distinguish the modes?
+    \item How quickly does the literal dense all-pairs interpretation become computationally impractical as the particle count grows?
+\end{enumerate}
+
+The experiment therefore does \emph{not} yet claim that AACOPF outperforms the conventional PF. In particular, the values $\alpha=1$, $\beta=1$, and $c_\lambda=0.5$ used below are repository-defined mechanism-check values. Han et al.~\cite{han2020cooperative} do not report these numerical values, and they are not frozen for the later matched comparison. Parameter sensitivity and selection belong to P1F-C.
+
+\subsection{Literal-small transition implemented in the repository}
+Let $w_i$ denote the normalized pre-transition posterior weight of particle $i$ and let $\bm p_i=[x_i,y_i]^\top$ denote its position. Consistent with the P1E implementation contract, only particles with strictly larger posterior weight are admissible destinations:
+\begin{equation}
+    \mathcal C_i=\{j\mid w_j>w_i\}.
+\end{equation}
+For $j\in\mathcal C_i$, define the weight and position-information terms
+\begin{align}
+    \Delta w_{ij}&=w_j-w_i,\\
+    \eta_{ij}&=\frac{1}{\lVert\bm p_i-\bm p_j\rVert_2+\epsilon_d}.
+\end{align}
+The repository transition score is
+\begin{equation}
+    s_{ij}=(\Delta w_{ij}+\epsilon_w)^\alpha\eta_{ij}^{\beta},
+\end{equation}
+and the candidate-normalized score fraction is
+\begin{equation}
+    P_{ij}=\frac{s_{ij}}{\sum_{l\in\mathcal C_i}s_{il}}.
+\end{equation}
+The preferred destination is
+\begin{equation}
+    j_i^*=\arg\max_{j\in\mathcal C_i}P_{ij}.
+\end{equation}
+To make the transition threshold comparable across particles having different candidate counts $K_i=|\mathcal C_i|$, the implementation uses
+\begin{equation}
+    \lambda_i=\frac{c_\lambda}{K_i}.
+\end{equation}
+Particle $i$ moves only if $\mathcal C_i\neq\emptyset$ and
+\begin{equation}
+    P_{i j_i^*}>\lambda_i.
+\end{equation}
+Otherwise it is retained.
+
+All destination decisions are computed from the same immutable pre-transition cloud. The transition is therefore \emph{synchronous}: if particle $i$ copies particle $j$, while particle $j$ itself copies particle $l$, particle $i$ still receives the pre-transition state and lineage of $j$, not the already-modified state of $j$. A moved particle copies the complete three-state vector $[x,y,\phi]^\top$ and the associated initial-azimuth lineage. After all moves are applied, the next-generation weights are reset to $1/N_p$.
+
+The posterior estimate and the MAP lineage reported at a sample are computed \emph{before} this ACO movement. This ordering resolves the P1E ambiguity caused by the source's later uniform weight reset: after a uniform reset there would be no meaningful largest-weight particle from which to read the MAP lineage.
+
+\subsection{Deterministic mechanism checks}
+Before executing a stochastic filtering campaign, the transition is covered by deterministic unit tests. The tests verify that equal weights produce no candidates and therefore no motion, that the selected destination follows the documented weight-difference/inverse-distance score, that the update is synchronous rather than cascading, that initial-yaw lineage follows the copied state, that a sufficiently restrictive normalized threshold can block motion, and that equal-weight neighbors cannot select one another because the candidate relation is strictly higher weight. An integrated short filtering test additionally checks that the complete literal-small filter produces finite estimates and bounded transition diagnostics.
+
+These tests are important because the P1E audit showed that the source does not define a unique implementation. Passing the tests establishes consistency with the repository interpretation; it is not evidence that this interpretation is the only possible reading of Han et al.
+
+\subsection{Controlled bimodal mechanism experiment}
+A full random-annulus global-localization campaign would confound transition semantics with the already-documented finite-particle global-search problem from P1F-A. P1F-B therefore uses a controlled bimodal cloud in which both the correct and a competing wrong mode are deliberately represented with substantial particle mass.
+
+The deterministic paper-state truth and the informative moving auxiliary from P1F-A are used for \SI{12}{s} at $\Delta t=\SI{0.1}{s}$. The DR increments are exact, and UWB measurements obey
+\begin{equation}
+    z_k=\lVert\bm p_k-\bm p_{A,k}\rVert_2+\nu_k,
+    \qquad
+    \nu_k\sim\mathcal N(0,\sigma_{\mathrm{UWB}}^2),
+\end{equation}
+with $\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$.
+
+Each run contains $N_p=400$ particles. Half are sampled locally around the true initial pose with position standard deviation \SI{0.25}{m} and yaw standard deviation $5^\circ$. The other half are centered on a competing pose constructed by rotating the target--auxiliary bearing by $90^\circ$ while retaining the same nominal first range; their yaw is also offset by $90^\circ$. Consequently, both modes are plausible under the first range alone, and later relative motion is required to discriminate them.
+
+The diagnostic correct-mode region is defined as
+\begin{equation}
+    \lVert\bm p_k^{(i)}-\bm p_k\rVert_2<\SI{1}{m},
+    \qquad
+    |\operatorname{wrap}(\phi_k^{(i)}-\phi_k)|<10^\circ.
+\end{equation}
+For each sample, the experiment records the posterior probability mass in this region immediately before ACO movement and the unweighted particle fraction in the region immediately after ACO movement. A run is counted as having terminally concentrated on the correct mode when at least $90\%$ of the particles are in this region and this condition remains true through the rest of the trajectory, with at least a \SI{1}{s} terminal hold interval.
+
+The experiment uses ten independent range/initialization realizations. The provisional mechanism parameters are
+\begin{equation}
+    \alpha=1,\qquad \beta=1,\qquad c_\lambda=0.5.
+\end{equation}
+These values are intentionally not interpreted as an optimum.
+
+\subsection{Diversity and transition diagnostics}
+P1F-B records diagnostics that distinguish posterior weight concentration from actual loss of particle ancestry. Let $a_i$ denote the pre-transition parent index represented by output particle $i$ after an ACO step. The unique-parent fraction is defined as
+\begin{equation}
+    f_{\mathrm{parent},k}
+    =\frac{|\{a_i\}_{i=1}^{N_p}|}{N_p}.
+\end{equation}
+A value of one means that every pre-transition particle remains represented exactly once, whereas a small value indicates strong cloning/collapse. The moved-particle fraction is
+\begin{equation}
+    f_{\mathrm{move},k}=\frac{N_{\mathrm{move},k}}{N_p}.
+\end{equation}
+For particles that move, the destination multiplicity counts how many sources choose the same destination. Its maximum,
+\begin{equation}
+    m_{\max,k}=\max_j |\{i:j_i^*=j\text{ and }i\text{ moves}\}|,
+\end{equation}
+reveals single-particle cloning events that may be hidden by aggregate error metrics.
+
+The conventional effective sample size is also evaluated before the ACO transition,
+\begin{equation}
+    N_{\mathrm{eff},k}=\frac{1}{\sum_i w_{k,i}^2},
+\end{equation}
+but P1F-B specifically tests whether this statistic remains sufficient once the particle cloud is repeatedly replaced and its weights are reset uniformly.
+
+\subsection{Controlled-campaign results}
+Table~\ref{tab:p1fb_controlled} summarizes the ten-seed mechanism campaign. Nine of ten runs terminally concentrate at least $90\%$ of the particle population on the correct mode. Among these successful realizations, the median terminal concentration time is \SI{0.60}{s}. The mean final correct-mode particle fraction and the mean final pre-ACO posterior mass in the correct region are both $0.90$.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-B controlled bimodal mechanism experiment. The error RMSE values include the deliberately ambiguous initial interval and are therefore diagnostic rather than headline localization metrics.}
+    \label{tab:p1fb_controlled}
+    \begin{tabular}{lr}
+        \toprule
+        Quantity & Result\\
+        \midrule
+        Runs & 10\\
+        Particles per run & 400\\
+        Terminal correct-mode concentration & $9/10$\\
+        Median concentration time, successful runs & \SI{0.60}{s}\\
+        Mean final correct-mode particle fraction & $0.90$\\
+        Mean final pre-ACO correct-mode mass & $0.90$\\
+        Mean position RMSE over full horizon & \SI{1.421}{m}\\
+        Mean yaw RMSE over full horizon & $10.97^\circ$\\
+        Mean moved-particle fraction over all updates & $0.0442$\\
+        Mean unique-parent fraction over all updates & $0.9595$\\
+        Mean per-run maximum destination multiplicity & $300.7$\\
+        Mean ACO transition runtime at $N_p=400$ & \SI{5.89}{ms}/update\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The low mean moved-particle fraction of approximately $4.4\%$ is misleading if interpreted as evidence for gentle particle modification. Movement is highly episodic: at a small number of informative early updates, almost the entire cloud can be replaced.
+
+\subsection{Representative correct-mode and wrong-mode lock events}
+Two representative traces illustrate the mechanism more directly. In seed~0, the strongest early cloning event occurs at $t=\SI{0.5}{s}$. At this update, $94.25\%$ of the particles move and the unique-parent fraction falls to $0.06$. Immediately before the ACO transition the posterior assigns $79.7\%$ probability mass to the diagnostic correct region. Immediately after the transition, $66.25\%$ of the particles lie in the correct region. One update later, at $t=\SI{0.6}{s}$, the post-transition cloud contains $100\%$ correct-mode particles. Here the aggressive transition accelerates selection of the correct global mode.
+
+Seed~4 demonstrates the corresponding failure mechanism. At $t=\SI{0.3}{s}$, $98.5\%$ of the particles move and the unique-parent fraction falls to $0.04$. Although the pre-ACO posterior still assigns $76.4\%$ mass to the correct region, only $46.25\%$ of the post-transition particles remain there. At $t=\SI{0.5}{s}$ another $92.75\%$ of the particles move, the unique-parent fraction is only $0.075$, and one destination particle is copied by 302 sources. The correct-mode particle fraction becomes exactly zero. With no process-noise/rejuvenation mechanism in this literal experiment, the missing mode cannot subsequently be recovered.
+
+This observation is the principal P1F-B result. Under the provisional threshold, the literal ACO step is not merely a mild resampling correction. It is a strong \emph{mode-selection and cloning operator}. When the early likelihood ordering is favorable, it rapidly concentrates the correct mode; when a noisy early ordering is unfavorable, the same mechanism can make a wrong-mode decision effectively irreversible.
+
+\subsection{Why effective sample size alone is insufficient}
+The representative failures also expose an important diagnostic issue. After every ACO transition, the audited implementation resets all weights to $1/N_p$. Immediately after such a reset,
+\begin{equation}
+    N_{\mathrm{eff}}=N_p,
+\end{equation}
+even if nearly all particles are clones of only a few pre-transition parents. Consequently, high effective sample size can coexist with severe genealogical collapse. For AACOPF experiments, $N_{\mathrm{eff}}$ must therefore be interpreted together with unique-parent fraction, destination multiplicity, correct-mode survival, and spatial/yaw diversity. P1F-C and P1F-D retain these diagnostics explicitly.
+
+\subsection{Literal all-pairs runtime scaling}
+The P1E audit already showed that an all-pairs interpretation has quadratic pair count. P1F-B measures the actual transition runtime for manageable populations. For unique particle weights, the number of strictly higher-weight directed candidate pairs is $N_p(N_p-1)/2$, while the dense pairwise distance representation contains $N_p^2$ elements. Table~\ref{tab:p1fb_runtime} reports median runtime after warm-up.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-B median runtime of one literal dense all-pairs ACO transition. Runtime values characterize the current Python/NumPy implementation and are not hardware benchmarks.}
+    \label{tab:p1fb_runtime}
+    \begin{tabular}{rrrr}
+        \toprule
+        $N_p$ & Dense pair entries & Higher-weight candidate scores & Median runtime\\
+        \midrule
+        50   & 2,500     & 1,225   & \SI{0.315}{ms}\\
+        100  & 10,000    & 4,950   & \SI{0.633}{ms}\\
+        200  & 40,000    & 19,900  & \SI{2.08}{ms}\\
+        400  & 160,000   & 79,800  & \SI{7.03}{ms}\\
+        800  & 640,000   & 319,600 & \SI{33.05}{ms}\\
+        1,200& 1,440,000 & 719,400 & \SI{73.32}{ms}\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+A log--log fit over the measured range gives an empirical runtime slope of approximately $1.76$. This finite-range fit is not used to redefine the complexity: the implementation explicitly constructs dense pairwise arrays and therefore remains structurally $\mathcal O(N_p^2)$ in work/storage.
+
+The implication for the particle count discussed by Han et al. is severe. Their choice $N=M=400$ corresponds to $N_p=160000$. A single dense pair matrix then contains
+\begin{equation}
+    N_p^2=2.56\times10^{10}
+\end{equation}
+entries. At eight bytes per \texttt{float64} element, one such matrix alone would require approximately
+\begin{equation}
+    2.56\times10^{10}\times 8\ \mathrm{bytes}
+    \approx \SI{204.8}{GB}.
+\end{equation}
+The current literal implementation uses multiple pairwise arrays, so this population is already infeasible from memory alone. A naive quadratic extrapolation of the measured $N_p=1200$ timing gives roughly 22 minutes for one transition at $N_p=160000$, but this value is only illustrative because the memory requirement becomes prohibitive before such a transition can be executed. This result directly motivates the later bounded-candidate scalable adaptation in P1F-G.
+
+\subsection{P1F-B decision}
+P1F-B is complete as a mechanism-validation experiment. The deterministic tests establish the semantics of the repository interpretation, and the controlled experiment demonstrates that the transition can strongly amplify informative likelihood differences. At the same time, the seed-4 failure shows that premature mode collapse is a real risk under the provisional threshold. The runtime study confirms that the literal dense all-pairs interpretation is unsuitable for the source's nominal $160000$-particle population and for the intended embedded deployment.
+
+The correct next experiment is therefore P1F-C, not the headline PF--AACOPF comparison. P1F-C must study $\alpha$, $\beta$, and especially $c_\lambda$ on development seeds. Parameter selection must penalize wrong-mode lock and catastrophic ancestry collapse in addition to localization error. Only after this study is a setting frozen for P1F-D.
+
+The reproducible result provenance for P1F-B is GitHub Actions workflow run \texttt{33751243293}, artifact \texttt{9891624402}; the aggregate result files are stored in \texttt{results/phase1/p1f\_b/}.
