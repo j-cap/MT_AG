@@ -43,7 +43,10 @@ convergence:
 
 observability:
   # Diagnostic threshold only. eta_O = sigma_min(O) / sigma_max(O).
-  sigma_ratio_threshold: 0.001
+  # 1e-4 is below the final ratio already observed for the informative P1A
+  # geometry, so it provides a finite comparison time without implying a
+  # physical observability threshold.
+  sigma_ratio_threshold: 0.0001
   rank_rtol: 1.0e-9
 
 realistic:
