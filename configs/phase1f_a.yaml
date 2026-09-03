@@ -1,0 +1,46 @@
+simulation:
+  dt: 0.1
+  duration: 60.0
+
+uwb:
+  sigma_range_m: 0.12
+
+initialization:
+  delta_d_sigma_factor: 3.0
+
+particle_filter:
+  resample_fraction: 0.5
+  sigma_delta_l_m: 0.0
+  sigma_delta_phi_rad: 0.0
+
+convergence:
+  position_threshold_m: 1.0
+  yaw_threshold_deg: 10.0
+  hold_time_s: 5.0
+  late_window_s: 20.0
+
+randomness:
+  range_seed_offset: 110000
+  initializer_seed_offset: 120000
+  pf_seed_offset: 130000
+
+core_random:
+  n_seeds: 20
+  n_particles: 10000
+  propagation_convention: pre_turn
+
+propagation_sensitivity:
+  n_seeds: 10
+  n_particles: 10000
+  conventions: [pre_turn, post_turn]
+
+structured_control:
+  n_seeds: 10
+  n_bearing: 100
+  n_yaw: 100
+  propagation_convention: pre_turn
+
+particle_count:
+  n_seeds: 20
+  values: [2500, 5000, 10000, 20000, 40000]
+  propagation_convention: pre_turn

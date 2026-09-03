@@ -1,0 +1,155 @@
+{
+  "reconstruction_max_abs_error": 0.0,
+  "core_random": {
+    "n": 20,
+    "n_particles": 10000,
+    "pose_success_fraction": 0.2,
+    "pose_convergence_median_s": 9.45,
+    "late_position_rmse_mean_m": 8.414253990080972,
+    "late_yaw_rmse_mean_deg": 22.614844910532412,
+    "final_initial_yaw_lineage_error_mean_deg": 21.17748296178365,
+    "final_correct_mode_mass_mean": 0.2,
+    "mean_neff_fraction": 0.8207089268239528,
+    "resampling_events_mean": 14.05,
+    "runtime_mean_s": 1.5943230807500008
+  },
+  "propagation_sensitivity": {
+    "pre_turn": {
+      "n": 10,
+      "n_particles": 10000,
+      "pose_success_fraction": 0.1,
+      "pose_convergence_median_s": 7.5,
+      "late_position_rmse_mean_m": 10.69834415404245,
+      "late_yaw_rmse_mean_deg": 28.925213394370378,
+      "final_initial_yaw_lineage_error_mean_deg": 25.888179730259857,
+      "final_correct_mode_mass_mean": 0.09999999999999999,
+      "mean_neff_fraction": 0.8232283491373114,
+      "resampling_events_mean": 14.3,
+      "runtime_mean_s": 1.6286885736000016
+    },
+    "post_turn": {
+      "n": 10,
+      "n_particles": 10000,
+      "pose_success_fraction": 0.1,
+      "pose_convergence_median_s": 8.4,
+      "late_position_rmse_mean_m": 14.343666126256593,
+      "late_yaw_rmse_mean_deg": 40.929682600792134,
+      "final_initial_yaw_lineage_error_mean_deg": 38.583709626180486,
+      "final_correct_mode_mass_mean": 0.09999999999999998,
+      "mean_neff_fraction": 0.8294477316926956,
+      "resampling_events_mean": 14.6,
+      "runtime_mean_s": 1.630471262100005
+    }
+  },
+  "structured_control": {
+    "n": 10,
+    "n_particles": 10000,
+    "pose_success_fraction": 0.0,
+    "pose_convergence_median_s": null,
+    "late_position_rmse_mean_m": 15.281716151596052,
+    "late_yaw_rmse_mean_deg": 47.16000000000007,
+    "final_initial_yaw_lineage_error_mean_deg": 47.160000000000004,
+    "final_correct_mode_mass_mean": 0.0,
+    "mean_neff_fraction": 0.834926065378523,
+    "resampling_events_mean": 15.1,
+    "runtime_mean_s": 1.6659315037000026
+  },
+  "particle_count": {
+    "2500": {
+      "n": 20,
+      "n_particles": 2500,
+      "pose_success_fraction": 0.05,
+      "pose_convergence_median_s": 7.5,
+      "late_position_rmse_mean_m": 12.536505287801639,
+      "late_yaw_rmse_mean_deg": 35.99335338423546,
+      "final_initial_yaw_lineage_error_mean_deg": 34.74125743899691,
+      "final_correct_mode_mass_mean": 0.05,
+      "mean_neff_fraction": 0.859783602970275,
+      "resampling_events_mean": 12.45,
+      "runtime_mean_s": 0.43416003294999683
+    },
+    "5000": {
+      "n": 20,
+      "n_particles": 5000,
+      "pose_success_fraction": 0.05,
+      "pose_convergence_median_s": 5.0,
+      "late_position_rmse_mean_m": 17.198106343232933,
+      "late_yaw_rmse_mean_deg": 53.56270005725548,
+      "final_initial_yaw_lineage_error_mean_deg": 50.18589609043587,
+      "final_correct_mode_mass_mean": 0.05,
+      "mean_neff_fraction": 0.8416083251212172,
+      "resampling_events_mean": 13.15,
+      "runtime_mean_s": 0.7901741280500019
+    },
+    "10000": {
+      "n": 20,
+      "n_particles": 10000,
+      "pose_success_fraction": 0.2,
+      "pose_convergence_median_s": 9.45,
+      "late_position_rmse_mean_m": 8.414253990080972,
+      "late_yaw_rmse_mean_deg": 22.614844910532412,
+      "final_initial_yaw_lineage_error_mean_deg": 21.17748296178365,
+      "final_correct_mode_mass_mean": 0.2,
+      "mean_neff_fraction": 0.8207089268239528,
+      "resampling_events_mean": 14.05,
+      "runtime_mean_s": 1.640893255400006
+    },
+    "20000": {
+      "n": 20,
+      "n_particles": 20000,
+      "pose_success_fraction": 0.1,
+      "pose_convergence_median_s": 7.25,
+      "late_position_rmse_mean_m": 13.619791501454824,
+      "late_yaw_rmse_mean_deg": 40.19086222781254,
+      "final_initial_yaw_lineage_error_mean_deg": 38.51053411704818,
+      "final_correct_mode_mass_mean": 0.1,
+      "mean_neff_fraction": 0.781605798405129,
+      "resampling_events_mean": 17.55,
+      "runtime_mean_s": 3.2313178223999928
+    },
+    "40000": {
+      "n": 20,
+      "n_particles": 40000,
+      "pose_success_fraction": 0.45,
+      "pose_convergence_median_s": 14.4,
+      "late_position_rmse_mean_m": 3.532237157918355,
+      "late_yaw_rmse_mean_deg": 9.506556902113868,
+      "final_initial_yaw_lineage_error_mean_deg": 9.506556902113882,
+      "final_correct_mode_mass_mean": 0.45,
+      "mean_neff_fraction": 0.7733409341047888,
+      "resampling_events_mean": 17.75,
+      "runtime_mean_s": 6.526038186949998
+    }
+  },
+  "initial_support": {
+    "random_10000": {
+      "n": 20,
+      "fraction_with_at_least_one_correct_mode_particle": 1.0,
+      "correct_mode_count_mean": 19.75,
+      "correct_mode_count_median": 18.5,
+      "correct_mode_count_min": 13,
+      "correct_mode_count_max": 27,
+      "correct_mode_fraction_mean": 0.001975,
+      "best_normalized_joint_score_mean": 0.27473825274940666
+    },
+    "structured_100x100": {
+      "n": 10,
+      "fraction_with_at_least_one_correct_mode_particle": 1.0,
+      "correct_mode_count_mean": 18.9,
+      "correct_mode_count_min": 17,
+      "correct_mode_count_max": 20
+    },
+    "particle_count_fraction_with_support": {
+      "2500": 1.0,
+      "5000": 1.0,
+      "10000": 1.0,
+      "20000": 1.0,
+      "40000": 1.0
+    }
+  },
+  "workflow": {
+    "run_id": 33726102884,
+    "artifact_id": 9882181349,
+    "head_sha": "428ef7cd889142206b58b255b53caadcc44b66c2"
+  }
+}

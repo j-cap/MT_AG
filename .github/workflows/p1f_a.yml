@@ -1,0 +1,27 @@
+name: P1F-A Experiment
+
+on:
+  push:
+    branches: ["phase1/p1f-a"]
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Run P1F-A campaign
+        run: python experiments/run_phase1f_a.py
+      - name: Analyze initial support
+        run: python experiments/analyze_phase1f_a_initial_support.py
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1f-a-results
+          path: results/phase1/p1f_a
