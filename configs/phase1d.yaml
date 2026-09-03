@@ -1,0 +1,66 @@
+# Phase P1D: geometry and observability in the unknown-pose problem.
+# P1D keeps the P1C target motion, sensor models, 10 Hz ranging, and aligned
+# fixed-speed global initializer fixed. Only the auxiliary geometry changes.
+
+simulation:
+  dt: 0.1
+  duration: 60.0
+
+geometry_cases:
+  - stationary
+  - constant_bearing
+  - moving
+
+uwb:
+  sigma_range_m: 0.12
+  initial_radial_std_m: 0.12
+
+imu:
+  sigma_accel_mps2: 0.02
+  sigma_gyro_rps: 0.001
+  accel_bias_initial_mps2: [0.0, 0.0]
+  gyro_bias_initial_rps: 0.0
+  sigma_accel_bias_rw_mps2_sqrt_s: 0.00005
+  sigma_gyro_bias_rw_rps_sqrt_s: 0.000005
+
+initialization:
+  n_bearing: 100
+  n_yaw: 100
+  yaw_mode: uniform
+  velocity_mode: aligned_fixed_speed
+  speed_mean_mps: 0.75
+
+particle_filter:
+  sigma_process_accel_mps2: 0.025
+  sigma_process_gyro_rps: 0.0015
+  resample_fraction: 0.5
+
+convergence:
+  position_threshold_m: 1.0
+  yaw_threshold_deg: 10.0
+  hold_time_s: 5.0
+  late_window_s: 20.0
+
+observability:
+  # Diagnostic threshold only. eta_O = sigma_min(O) / sigma_max(O).
+  # 1e-4 is below the final ratio already observed for the informative P1A
+  # geometry, so it provides a finite comparison time without implying a
+  # physical observability threshold.
+  sigma_ratio_threshold: 0.0001
+  rank_rtol: 1.0e-9
+
+realistic:
+  n_seeds: 20
+  representative_seed: 0
+  snapshot_times_s: [0.0, 10.0, 30.0, 60.0]
+
+idealized:
+  n_seeds: 3
+  n_bearing: 200
+  n_yaw: 200
+  uwb_likelihood_sigma_m: 0.02
+
+randomness:
+  sensor_seed_offset: 5000
+  initializer_seed_offset: 500000
+  pf_seed_offset: 600000

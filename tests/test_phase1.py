@@ -2,9 +2,10 @@ import numpy as np
 
 from mt_ag.geometry import wrap_angle
 from mt_ag.imu import mechanize_planar, simulate_imu_measurements
+from mt_ag.observability import observability_history_planar_imu, relative_geometry_metrics
 from mt_ag.particle_filter import systematic_resample
 from mt_ag.sensors import generate_uwb_ranges
-from mt_ag.simulation import generate_curved_trajectory
+from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory
 
 
 def test_angle_wrap():
@@ -37,3 +38,38 @@ def test_systematic_resampling_preserves_particle_count():
     indices = systematic_resample(weights, rng)
     assert len(indices) == len(weights)
     assert np.all((indices >= 0) & (indices < len(weights)))
+
+
+def test_constant_bearing_auxiliary_keeps_line_of_sight_direction():
+    trajectory = generate_curved_trajectory(dt=0.1, duration=5.0)
+    auxiliary = auxiliary_trajectory(
+        trajectory.t,
+        "constant_bearing",
+        target_positions=trajectory.state[:, :2],
+    )
+    metrics = relative_geometry_metrics(trajectory.state[:, :2], auxiliary)
+    assert metrics["bearing_span_deg"] < 1e-10
+    assert metrics["range_span_m"] > 0.0
+
+
+def test_moving_geometry_is_better_conditioned_than_constant_bearing():
+    trajectory = generate_curved_trajectory(dt=0.1, duration=20.0)
+    constant_bearing = auxiliary_trajectory(
+        trajectory.t,
+        "constant_bearing",
+        target_positions=trajectory.state[:, :2],
+    )
+    moving = auxiliary_trajectory(trajectory.t, "moving")
+    degenerate = observability_history_planar_imu(
+        trajectory.state,
+        trajectory.ideal_imu,
+        constant_bearing,
+        trajectory.dt,
+    )
+    informative = observability_history_planar_imu(
+        trajectory.state,
+        trajectory.ideal_imu,
+        moving,
+        trajectory.dt,
+    )
+    assert informative["sigma_ratio"][-1] > degenerate["sigma_ratio"][-1]

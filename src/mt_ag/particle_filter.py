@@ -12,6 +12,7 @@ class PFResult:
     particles_final: np.ndarray
     position_spread: np.ndarray
     yaw_resultant: np.ndarray
+    snapshots: dict | None = None
 
 
 def systematic_resample(weights, rng):
@@ -39,6 +40,7 @@ def _run_imu_bootstrap_pf_core(
     sigma_uwb_m,
     resample_fraction,
     use_initial_measurement,
+    snapshot_steps=None,
 ):
     imu_measurements = np.asarray(imu_measurements, dtype=float)
     z = np.asarray(ranges_meas, dtype=float)
@@ -52,24 +54,32 @@ def _run_imu_bootstrap_pf_core(
     if len(z) != n_steps or len(aux) != n_steps:
         raise ValueError("range and auxiliary arrays must have len(imu)+1 samples")
 
+    requested_snapshots = set() if snapshot_steps is None else set(snapshot_steps)
+    if any(k < 0 or k >= n_steps for k in requested_snapshots):
+        raise ValueError("snapshot_steps must be valid state indices")
+
     particles[:, 4] = wrap_angle(particles[:, 4])
     weights = np.full(n_particles, 1.0 / n_particles)
     estimate = np.zeros((n_steps, 5), dtype=float)
     neff = np.zeros(n_steps, dtype=float)
     position_spread = np.zeros(n_steps, dtype=float)
     yaw_resultant = np.zeros(n_steps, dtype=float)
+    snapshots = {}
 
     def record_estimate(k):
         estimate[k, :4] = np.sum(particles[:, :4] * weights[:, None], axis=0)
         estimate[k, 4] = circular_mean(particles[:, 4], weights)
         delta = particles[:, :2] - estimate[k, :2]
-        position_spread[k] = np.sqrt(
-            np.sum(weights * np.sum(delta**2, axis=1))
-        )
+        position_spread[k] = np.sqrt(np.sum(weights * np.sum(delta**2, axis=1)))
         c = np.sum(weights * np.cos(particles[:, 4]))
         s = np.sum(weights * np.sin(particles[:, 4]))
         yaw_resultant[k] = np.hypot(c, s)
         neff[k] = 1.0 / np.sum(weights**2)
+        if k in requested_snapshots:
+            snapshots[k] = {
+                "particles": particles.copy(),
+                "weights": weights.copy(),
+            }
 
     def measurement_update(k):
         nonlocal particles, weights
@@ -89,21 +99,12 @@ def _run_imu_bootstrap_pf_core(
     if use_initial_measurement:
         measurement_update(0)
     else:
-        # The initial particle cloud may already be conditioned on z_0, for
-        # example by sampling the range ring. In that case z_0 must not be
-        # applied again because this would double-count the same information.
         record_estimate(0)
 
     for k, measurement in enumerate(imu_measurements):
-        a_x_b = measurement[0] + rng.normal(
-            0.0, sigma_process_accel_mps2, n_particles
-        )
-        a_y_b = measurement[1] + rng.normal(
-            0.0, sigma_process_accel_mps2, n_particles
-        )
-        omega_z = measurement[2] + rng.normal(
-            0.0, sigma_process_gyro_rps, n_particles
-        )
+        a_x_b = measurement[0] + rng.normal(0.0, sigma_process_accel_mps2, n_particles)
+        a_y_b = measurement[1] + rng.normal(0.0, sigma_process_accel_mps2, n_particles)
+        omega_z = measurement[2] + rng.normal(0.0, sigma_process_gyro_rps, n_particles)
         psi = particles[:, 4].copy()
         psi_mid = psi + 0.5 * omega_z * dt
         c = np.cos(psi_mid)
@@ -123,6 +124,7 @@ def _run_imu_bootstrap_pf_core(
         particles_final=particles.copy(),
         position_spread=position_spread,
         yaw_resultant=yaw_resultant,
+        snapshots=snapshots,
     )
 
 
@@ -139,6 +141,7 @@ def run_imu_bootstrap_pf(
     sigma_process_gyro_rps=0.0015,
     sigma_uwb_m=0.12,
     resample_fraction=0.5,
+    snapshot_steps=None,
 ):
     """Bootstrap PF with a local Gaussian initial state distribution."""
     particles = rng.normal(
@@ -158,6 +161,7 @@ def run_imu_bootstrap_pf(
         sigma_uwb_m=sigma_uwb_m,
         resample_fraction=resample_fraction,
         use_initial_measurement=True,
+        snapshot_steps=snapshot_steps,
     )
 
 
@@ -174,6 +178,7 @@ def run_imu_bootstrap_pf_from_particles(
     sigma_uwb_m=0.12,
     resample_fraction=0.5,
     initial_particles_conditioned_on_z0=False,
+    snapshot_steps=None,
 ):
     """Bootstrap PF starting from an explicitly constructed particle cloud.
 
@@ -193,4 +198,5 @@ def run_imu_bootstrap_pf_from_particles(
         sigma_uwb_m=sigma_uwb_m,
         resample_fraction=resample_fraction,
         use_initial_measurement=not initial_particles_conditioned_on_z0,
+        snapshot_steps=snapshot_steps,
     )
