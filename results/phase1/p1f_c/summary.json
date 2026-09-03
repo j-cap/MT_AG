@@ -1,0 +1,94 @@
+{
+  "selected_setting": {
+    "alpha": 0.5,
+    "beta": 0.0,
+    "c_lambda": 2.0
+  },
+  "development": {
+    "n_runs": 16,
+    "correct_lock_fraction": 0.9375,
+    "wrong_lock_fraction": 0.0,
+    "catastrophic_collapse_fraction": 0.0625,
+    "dominant_clone_fraction": 0.625,
+    "final_correct_mode_fraction_mean": 0.993125,
+    "minimum_unique_parent_fraction_mean": 0.40234375,
+    "mean_moved_fraction": 0.03987890625
+  },
+  "validation": {
+    "n_runs": 40,
+    "overall": {
+      "correct_lock_fraction": 1.0,
+      "wrong_lock_fraction": 0.0,
+      "catastrophic_collapse_fraction": 0.225,
+      "dominant_clone_fraction": 0.85,
+      "final_correct_mode_fraction_mean": 0.999625,
+      "minimum_unique_parent_fraction_mean": 0.3414375,
+      "mean_moved_fraction": 0.0391921875,
+      "position_rmse_mean_m": 2.8460616967645933,
+      "yaw_rmse_mean_deg": 21.812167950466062
+    },
+    "balanced": {
+      "n_runs": 20,
+      "correct_lock_fraction": 1.0,
+      "wrong_lock_fraction": 0.0,
+      "catastrophic_collapse_fraction": 0.25,
+      "final_correct_mode_fraction_mean": 0.999375
+    },
+    "minority_correct": {
+      "n_runs": 20,
+      "correct_lock_fraction": 1.0,
+      "wrong_lock_fraction": 0.0,
+      "catastrophic_collapse_fraction": 0.2,
+      "final_correct_mode_fraction_mean": 0.999875
+    }
+  },
+  "freeze_accepted": true,
+  "development_top_settings": [
+    {
+      "alpha": 0.5,
+      "beta": 0.0,
+      "c_lambda": 2.0,
+      "correct_lock_fraction": 0.9375,
+      "wrong_lock_fraction": 0.0,
+      "catastrophic_collapse_fraction": 0.0625,
+      "dominant_clone_fraction": 0.625,
+      "minimum_unique_parent_fraction_mean": 0.40234375
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.0,
+      "c_lambda": 4.0,
+      "correct_lock_fraction": 0.9375,
+      "wrong_lock_fraction": 0.0,
+      "catastrophic_collapse_fraction": 0.0625,
+      "dominant_clone_fraction": 0.625,
+      "minimum_unique_parent_fraction_mean": 0.42515625
+    },
+    {
+      "alpha": 2.0,
+      "beta": 0.0,
+      "c_lambda": 8.0,
+      "correct_lock_fraction": 1.0,
+      "wrong_lock_fraction": 0.0,
+      "catastrophic_collapse_fraction": 0.125,
+      "dominant_clone_fraction": 0.6875,
+      "minimum_unique_parent_fraction_mean": 0.45734375
+    }
+  ],
+  "reference_aggressive_setting": {
+    "alpha": 1.0,
+    "beta": 1.0,
+    "c_lambda": 0.5,
+    "development_correct_lock_fraction": 0.75,
+    "development_wrong_lock_fraction": 0.25,
+    "development_catastrophic_collapse_fraction": 1.0,
+    "development_dominant_clone_fraction": 1.0,
+    "development_minimum_unique_parent_fraction_mean": 0.0315625
+  },
+  "provenance": {
+    "workflow_run_id": 33803059007,
+    "artifact_id": 9912216810,
+    "artifact_name": "p1f-c-results",
+    "workflow_commit": "69529e72d1e7c88314b9d8aae2f19bc6ffd7827b"
+  }
+}
