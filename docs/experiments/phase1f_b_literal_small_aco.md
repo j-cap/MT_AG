@@ -59,13 +59,35 @@ The literal implementation forms dense pairwise distances and candidate scores. 
 
 For unique weights, the number of admissible directed higher-weight candidate scores is approximately `N(N-1)/2`, while the dense pairwise representation itself contains `N^2` entries. Runtime is measured after warmup and summarized by the median of repeated transitions. The empirical log-log runtime slope is reported only as an implementation diagnostic; the structural all-pairs complexity is already quadratic by construction.
 
-## Acceptance / decision rule
+## Results
 
-P1F-B is complete when:
+The controlled bimodal campaign concentrates at least 90% of the particles on the correct mode in 9/10 runs. Among those successful runs, the median concentration time is 0.60 s. The mean final correct-mode particle fraction and mean final pre-ACO posterior correct-mode mass are both 0.90.
 
-- all deterministic transition tests pass;
-- the controlled filter executes without numerical failures and produces the required mechanism diagnostics;
-- the runtime experiment confirms the practical cost growth of the dense all-pairs interpretation;
-- no tuning conclusion is drawn from the provisional `c_lambda` value.
+These aggregate numbers hide the most important mechanism finding. The transition is **episodic and potentially catastrophic**: although only 4.42% of particles move on average over all updates, individual early updates can move more than 90% of the cloud and reduce the represented ancestry to only a few percent.
 
-The next step is P1F-C: sensitivity of `alpha`, `beta`, and normalized threshold `c_lambda` on development seeds, followed by freezing a setting for the matched P1F-D comparison.
+For representative seed 0, at `t=0.5 s` 94.25% of particles move and the unique-parent fraction falls to 6%. The pre-ACO posterior has already assigned 79.7% mass to the correct region. After the transition 66.25% of particles are in that region, and at `t=0.6 s` the cloud reaches 100% correct-mode particles.
+
+For representative seed 4, at `t=0.3 s` 98.5% of particles move and the unique-parent fraction falls to 4%. Despite a 76.4% pre-ACO posterior mass on the correct region, the post-transition correct fraction is only 46.25%. At `t=0.5 s`, another 92.75% of particles move, one destination is copied by 302 particles, and the correct-mode fraction becomes exactly zero. This wrong-mode collapse is then irreversible in the tested horizon.
+
+The practical lesson is that the current literal transition is not simply a mild diversity-preserving resampling alternative. With the provisional threshold it is a strong **mode-selection and cloning operator**. This is exactly why P1F-C must tune the threshold jointly with the score exponents before any PF-vs-AACOPF performance comparison.
+
+A second diagnostic lesson is that effective sample size alone is insufficient after the audited uniform weight reset. A cloud may have nearly uniform weights and therefore high `N_eff` while having very few distinct parents. Unique-parent fraction and destination multiplicity must remain first-class diagnostics.
+
+The runtime benchmark gives median transition times of approximately 0.315 ms, 0.633 ms, 2.08 ms, 7.03 ms, 33.05 ms, and 73.32 ms for 50, 100, 200, 400, 800, and 1200 particles respectively. The empirical log-log slope is approximately 1.76 over this finite range, while the structural dense all-pairs implementation remains `O(N^2)`.
+
+At the `N_p=160000` population implied by the paper's `N=M=400`, a single dense float64 pairwise matrix would contain `2.56e10` entries and require roughly 204.8 GB. Since the implementation requires multiple such arrays, the literal dense interpretation is computationally infeasible at the paper's nominal population. A naive quadratic timing extrapolation from 1200 particles would also imply roughly 22 minutes per update; this extrapolation is illustrative only because memory becomes prohibitive first.
+
+## Acceptance / decision
+
+P1F-B is complete:
+
+- deterministic mechanism tests pass;
+- the controlled filter executes and provides the required diagnostics;
+- the ACO transition can rapidly amplify the correct mode but can also prematurely destroy it;
+- explicit diversity diagnostics are necessary in addition to effective sample size;
+- the literal dense all-pairs interpretation is unsuitable for the paper's nominal particle count and for the intended embedded platform;
+- no tuning conclusion is drawn from `c_lambda=0.5`.
+
+The next step is P1F-C: sensitivity of `alpha`, `beta`, and normalized threshold `c_lambda` on development seeds. The P1F-C selection criterion must penalize both wrong-mode lock and catastrophic ancestry collapse, not just final position error. Only after that study should a setting be frozen for P1F-D.
+
+Provenance: workflow run `33751243293`, artifact `9891624402`, commit `c24f751891a6e57fe6e75d86c63340854141066a`.
