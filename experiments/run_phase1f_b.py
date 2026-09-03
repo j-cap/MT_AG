@@ -38,7 +38,7 @@ def terminal_hold_time(mask, dt, hold_steps):
 
 def controlled_bimodal_particles(trajectory, auxiliary, cfg, rng):
     n_particles = cfg["n_particles"]
-    n_correct = int(round(cfg["correct_fraction"] * n_particles))
+    n_correct = round(cfg["correct_fraction"] * n_particles)
     n_wrong = n_particles - n_correct
     position_std = cfg["position_std_m"]
     yaw_std = np.deg2rad(cfg["yaw_std_deg"])
