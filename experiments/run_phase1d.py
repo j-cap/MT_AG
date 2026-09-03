@@ -146,8 +146,7 @@ def write_summary_markdown(path, summary):
         "",
         "## Core geometry comparison",
         "",
-        "| Geometry | Bearing span | Final obs. ratio | Realistic pose success | "
-        "Ideal pose success | Realistic late position RMSE |",
+        "| Geometry | Bearing span | Final obs. ratio | Realistic pose success | Ideal pose success | Realistic late position RMSE |",
         "|---|---:|---:|---:|---:|---:|",
     ]
     for mode, result in summary["cases"].items():
@@ -168,8 +167,7 @@ def write_summary_markdown(path, summary):
             "",
             summary["interpretation"],
             "",
-            "The observability ratio used here is a local finite-horizon diagnostic, not a "
-            "complete nonlinear observability proof or an application threshold.",
+            "The observability ratio is a local finite-horizon diagnostic, not a complete nonlinear observability proof or an application threshold.",
         ]
     )
     path.write_text("\n".join(lines) + "\n")
