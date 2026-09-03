@@ -203,7 +203,7 @@ def run_literal_small_aacopf(
     initial_particles_conditioned_on_z0=True,
     truth_state=None,
     correct_mode_position_threshold_m=1.0,
-    correct_mode_yaw_threshold_rad=np.deg2rad(10.0),
+    correct_mode_yaw_threshold_rad=0.17453292519943295,
 ):
     """Run the audited literal-small AACOPF sequence on the paper state.
 
