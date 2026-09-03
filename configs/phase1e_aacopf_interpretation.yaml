@@ -1,0 +1,119 @@
+source:
+  paper: "Han et al., Sensors 2020, 20(2):467"
+  doi: "10.3390/s20020467"
+
+scope:
+  phase: "P1E"
+  purpose: "implementation contract for P1F"
+  exact_numerical_reproduction_required: false
+
+paper_state:
+  state: [x, y, phi]
+  inputs: [delta_L, delta_phi]
+  auxiliary_position_known_globally: true
+  primary_propagation_convention: "pre_turn_equation_3"
+  sensitivity_propagation_convention: "post_turn_algorithm_1"
+
+initialization:
+  primary: "random_annulus_random_yaw"
+  theta_distribution: "uniform_-pi_pi"
+  radial_distribution: "uniform_within_bound"
+  yaw_distribution: "uniform_-pi_pi"
+  delta_d_rule: "3_sigma_uwb"
+  delta_d_source_status: "repository_choice_not_reported_by_paper"
+  structured_grid_control: true
+
+proposal:
+  type: "bootstrap"
+  deterministic_dr_first: true
+  process_noise_later_configurable: true
+
+likelihood:
+  type: "gaussian_range"
+  use_log_weights: true
+  normalize_over: "N_times_M"
+  preserve_particle_identity: true
+  algorithm_1_sort_used: false
+  source_status: "principled_interpretation_of_paper_gaussian_statement"
+
+undefined_particle_rejection:
+  implement_in_core: false
+  reason: "paper condition x_t_i dot x < 0 is not sufficiently defined"
+
+auxiliary_rejection:
+  enabled_in_single_aux_core: false
+  later_optional_module: true
+  thresholds_reported_by_paper: false
+  rolling_window_reported_by_paper: false
+
+aco_transition:
+  literal_small_all_pairs: true
+  candidate_rule: "strictly_higher_weight"
+  weight_difference: "w_j_minus_w_i"
+  position_factor: "1_over_distance_plus_epsilon"
+  exclude_self: true
+  update_mode: "synchronous_from_pre_transition_cloud"
+  destination_rule: "argmax_probability"
+  move_condition: "max_probability_gt_lambda"
+  no_candidate_action: "retain_source_particle"
+  post_transition_weight_reset: "uniform"
+  epsilon_distance: 1.0e-12
+  epsilon_weight: 1.0e-15
+
+state_output:
+  compute_before_aco: true
+  position_estimate: "weighted_mean"
+  current_yaw_estimate: "weighted_circular_mean"
+  initial_yaw_estimate: "pre_aco_map_lineage"
+  literal_post_aco_uniform_mean_variant: true
+
+aco_tuning:
+  alpha_reference: 1.0
+  beta_reference: 1.0
+  alpha_reported_by_paper: false
+  beta_reported_by_paper: false
+  lambda_reported_by_paper: false
+  lambda_parameterization: "c_lambda_over_candidate_count"
+  tune_on_development_seeds_then_freeze: true
+  sensitivity_required: true
+
+particle_population:
+  paper_recommended_N: 400
+  paper_recommended_M: 400
+  paper_recommended_total_particles: 160000
+  literal_all_pairs_at_paper_population_scores_per_update_approx: 2.56e10
+  paper_runtime_reported: false
+  p1f_variants:
+    - "literal_small_all_pairs"
+    - "scalable_bounded_candidate_adaptation"
+
+p1f_required_sequence:
+  - "P1F-A paper-state PF baseline"
+  - "P1F-B literal-small ACO mechanism"
+  - "P1F-C alpha-beta-lambda sensitivity"
+  - "P1F-D matched PF versus AACOPF informative geometry"
+  - "P1F-E rank-deficient negative controls"
+  - "P1F-F non-Gaussian/outlier stress"
+  - "P1F-G scalable transition adaptation"
+
+required_diagnostics:
+  - position_rmse
+  - yaw_rmse
+  - convergence_fraction
+  - convergence_time
+  - correct_mode_mass
+  - effective_sample_size_pre_aco
+  - unique_particle_fraction_post_aco
+  - spatial_spread
+  - yaw_spread
+  - moved_particle_fraction
+  - destination_multiplicity
+  - transition_score_concentration
+  - runtime_per_update
+  - total_runtime
+
+claim_boundary:
+  exact_paper_errors_as_regression_targets: false
+  qualitative_problem_reproduction: true
+  qualitative_geometry_behavior: true
+  matched_pf_aacopf_mechanism_comparison: true
