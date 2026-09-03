@@ -1,0 +1,157 @@
+\section{Experiment P1E: AACOPF reproduction audit}
+\subsection{Purpose}
+P1E does not yet implement the Adaptive Ant Colony Optimization Particle Filter (AACOPF). Its purpose is to convert the description of Han et al.~\cite{han2020cooperative} into a reproducible implementation contract and to record explicitly which parts of the method are source-specified, source-ambiguous, or repository interpretations. This is required because P1D separated two failure mechanisms: structural non-observability caused by geometry and failure of a finite particle approximation in an informative geometry. AACOPF can only be evaluated meaningfully for the latter.
+
+\subsection{Paper-level estimator to be reproduced}
+Han et al. formulate the cooperative-localization state as
+\begin{equation}
+    \bm x_t=[x_t,y_t,\phi_t]^\top
+\end{equation}
+with dead-reckoning increments
+\begin{equation}
+    \bm u_t=[\Delta L_t,\Delta\phi_t]^\top.
+\end{equation}
+The AACOPF core therefore receives displacement and azimuth increments rather than raw accelerometer and gyroscope samples. In the vehicle experiment the increments are produced by an odometer/INS system, while the pedestrian experiment uses a separate inertial/ZUPT processing chain. Consequently, P1F will implement the paper-level three-state estimator as a separate baseline. The five-state IMU-driven model
+\begin{equation}
+    [p_x,p_y,v_x,v_y,\psi]^\top
+\end{equation}
+remains the hardware-oriented thesis baseline and will receive an adapted particle-management method only after the paper-level mechanism is understood.
+
+The reproduction also retains the paper's operating assumptions: the auxiliary node has a more accurate, globally known trajectory; the target may lack initial global position and azimuth but has DR capability; target--auxiliary ranging is available; and communication is available. Thus the paper is not interpreted as absolute localization of a completely unreferenced network from pairwise ranges alone.
+
+\subsection{Propagation inconsistency}
+Equation (3) of Han et al. gives the update
+\begin{align}
+    x_t &= x_{t-1}+\Delta L_{t-1}\cos\phi_{t-1},\\
+    y_t &= y_{t-1}+\Delta L_{t-1}\sin\phi_{t-1},\\
+    \phi_t &= \phi_{t-1}+\Delta\phi_{t-1}.
+\end{align}
+However, the explanatory text and Algorithm~1 instead use the updated direction $\phi_{t-1}+\Delta\phi_t$ for the translational increment. Therefore two propagation conventions are present in the source. P1F adopts the formal Equation~(3), i.e. translation with the pre-turn azimuth, as the primary convention because the later observability Jacobian is also based on it. A post-turn variant is retained as a mandatory sensitivity check.
+
+\subsection{First-range initialization}
+The paper constrains the initial target position to an annulus centered on the known auxiliary, with radius described as $d_{12}(1)\pm\Delta d$, and associates $M$ candidate azimuths with $N$ candidate positions. It later states that the particles are randomly generated. The paper does not specify the numerical value of $\Delta d$, the probability law for radius, whether position bearings or azimuths are random or evenly spaced, or the random seed.
+
+The primary P1F interpretation will therefore use
+\begin{align}
+    \theta_i &\sim \mathcal U[-\pi,\pi),\\
+    r_i &= z_0+\delta r_i,\qquad \delta r_i\sim\mathcal U[-\Delta d,\Delta d],\\
+    \phi_{0,i} &\sim\mathcal U[-\pi,\pi),
+\end{align}
+with the explicit repository choice
+\begin{equation}
+    \Delta d=3\sigma_{\mathrm{UWB}}.
+\end{equation}
+This value is not reported by Han et al. A structured grid, as used in P1C, is retained as a control variant only.
+
+\subsection{Proposal density and measurement likelihood}
+Han et al. write a generic proposal density and the standard sequential-importance expression
+\begin{equation}
+    w_t^i=w_{t-1}^i
+    \frac{p(z_t\mid x_t^i)p(x_t^i\mid x_{t-1}^i)}
+         {q(x_t^i\mid x_{t-1}^i,z_t)},
+\end{equation}
+but do not define $q$ or a process-noise covariance for the AACOPF core. P1F therefore uses a bootstrap proposal, $q=p(x_t\mid x_{t-1})$, so the update reduces to the measurement likelihood.
+
+The paper states that ranging observations are modelled as Gaussian for the weight update, but Algorithm~1 line~12 is not a directly usable probability-density expression: the signs/parentheses are ambiguous, the measurement variance is absent, and a sorting operation appears inside the expression. The primary P1F implementation therefore uses the standard Gaussian range log-likelihood
+\begin{equation}
+    \ell_t^i=-\frac{1}{2}\sum_j
+    \left(\frac{\hat d_{ij,t}-z_{j,t}}{\sigma_j}\right)^2,
+\end{equation}
+followed by numerically stable normalization over all $N_p=NM$ particles. This is an explicit probabilistic interpretation of the source text rather than a claim of literal reproduction of Algorithm~1 line~12.
+
+The source also contains a particle-rejection statement of the form $x_t^i\cdot x<0$, but the second factor and intended physical constraint are not defined sufficiently. It is therefore omitted from the core reproduction.
+
+\subsection{Adaptive auxiliary rejection}
+For auxiliary $j$, the paper introduces a range residual $\rho_j$ and rejects the auxiliary when both
+\begin{equation}
+    E[\rho_j]>\Omega_1
+\end{equation}
+and
+\begin{equation}
+    D[\rho_j]>\Omega_2
+\end{equation}
+hold. The numerical thresholds, averaging window, residual-estimate definition, minimum sample count, and re-entry logic are not reported. Because the principal P1F comparison uses a single auxiliary and is intended to isolate the ACO particle transition, this rejection mechanism is disabled in the core comparison. It may later be introduced as a separately tuned robustness module; any such thresholds are repository parameters rather than paper parameters.
+
+\subsection{Ant-colony transition mechanism}
+The source intent is clear even though the complete implementation is not. Lower-weight particles should preferentially move toward more promising particles while shorter moves are preferred. Equation~(14) defines a transition score using a weight-information factor with exponent $\alpha$ and a position-information factor with exponent $\beta$. Algorithm~1 defines the latter through inverse particle distance. Movement occurs when the maximum transition probability exceeds a threshold $\lambda$, which the paper states is selected empirically or from experience.
+
+The paper does not specify numerical values for $\alpha$, $\beta$, or $\lambda$, nor whether the weight difference is signed, absolute, or normalized. It does not define whether lower-weight destinations are allowed, whether self-transitions are included, how zero particle distances are treated, or whether particle moves modify the candidate cloud sequentially.
+
+The P1F primary interpretation is
+\begin{equation}
+    \mathcal C_i=\{j:w_j>w_i\},
+\end{equation}
+\begin{equation}
+    \Delta w_{ij}=w_j-w_i,
+\end{equation}
+\begin{equation}
+    \eta_{ij}=\frac{1}{\lVert\bm p_i-\bm p_j\rVert_2+\epsilon_d},
+\end{equation}
+and
+\begin{equation}
+    s_{ij}=(\Delta w_{ij}+\epsilon_w)^\alpha\eta_{ij}^{\beta},
+    \qquad
+    P_{ij}=\frac{s_{ij}}{\sum_{l\in\mathcal C_i}s_{il}}.
+\end{equation}
+The destination is
+\begin{equation}
+    j^*=\arg\max_{j\in\mathcal C_i}P_{ij}.
+\end{equation}
+If no higher-weight candidate exists or $P_{ij^*}\le\lambda$, particle $i$ is retained. Otherwise the state and lineage of $j^*$ are copied. All movements are computed synchronously from an immutable pre-transition cloud. This interpretation implements the paper's verbal intention but is not uniquely determined by Equation~(14).
+
+\subsection{Output ordering and weight reset}
+The paper states that particle weights are reset to $1/(NM)$ after ACO movement. It subsequently gives a weighted state estimate and determines initial azimuth using the index of the largest-weight particle. These statements are inconsistent if the reset has already occurred because all particles then have equal weight.
+
+P1F therefore uses the following filtering order:
+\begin{enumerate}
+    \item propagate the particle cloud;
+    \item compute and normalize the UWB likelihood weights;
+    \item compute the current posterior estimate and MAP lineage from these pre-ACO weights;
+    \item apply the ACO transition to construct the next particle generation;
+    \item reset post-transition weights uniformly.
+\end{enumerate}
+The current position uses the weighted mean, the current azimuth uses a circular weighted mean, and the inferred initial azimuth is taken from the lineage of the pre-ACO MAP particle. A literal post-ACO uniform mean can be retained only as a diagnostic variant.
+
+\subsection{Particle count and computational implication}
+Han et al. vary $N=M$ from 50 to 1500 and select $N=M=400$ as an appropriate setting for their experiment. This corresponds to
+\begin{equation}
+    N_p=NM=160000
+\end{equation}
+particles. The paper also notes non-monotonic accuracy due to random particle generation and UWB error.
+
+Equation~(14) is written as if each source particle can consider all destination particles. A literal all-pairs implementation at $N_p=160000$ therefore requires approximately
+\begin{equation}
+    N_p^2=2.56\times10^{10}
+\end{equation}
+transition scores per update. The source does not state how this is made computationally practical and does not report AACOPF runtime or the processor used for filtering. This is directly relevant to the embedded thesis objective.
+
+P1F will consequently distinguish two implementations: a \emph{literal-small} all-pairs AACOPF for mechanism validation, and a later bounded-candidate \emph{scalable adaptation} for P1C-scale and embedded-oriented experiments. The latter must not be labelled as a literal paper reproduction.
+
+\subsection{Tuning protocol}
+No source values are available for $\alpha$, $\beta$, or $\lambda$. The neutral starting point in the repository will be $\alpha=1$ and $\beta=1$. To make the transition threshold interpretable across candidate counts $K_i$, define
+\begin{equation}
+    c_\lambda=\lambda K_i.
+\end{equation}
+P1F will perform a compact sensitivity study in $(\alpha,\beta,c_\lambda)$ on development seeds and freeze the chosen setting before held-out matched comparisons. This procedure is a repository design decision and will be reported as such.
+
+\subsection{Reproduction boundary}
+The paper provides enough information to reproduce the problem structure and the intended AACOPF mechanism, but not enough for an exact source-unique implementation. In particular, exact numerical reproduction is prevented by missing raw trajectories, ranging series, random seeds, update frequency, complete noise distributions, $\Delta d$, $\alpha$, $\beta$, $\lambda$, $\Omega_1$, $\Omega_2$, and several ambiguous algorithmic expressions.
+
+The concrete paper-level reference points remain useful: the vehicle experiment reports failure with a stationary trolley and convergence with an appropriately moving trolley; the moving case reports an initial-azimuth error of $0.0539^\circ$ and tracking accuracy described as approximately \SI{0.3}{m}; the particle-count study selects $N=M=400$; and the pedestrian robustness experiment reports \SI{0.66372}{m} localization accuracy and $0.22658^\circ$ azimuth accuracy for the shown AACOPF run. These are qualitative reference points rather than regression targets.
+
+\subsection{Fixed P1F sequence}
+Based on the audit, P1F is divided into seven ordered sub-experiments:
+\begin{enumerate}
+    \item \textbf{P1F-A:} paper-state conventional PF baseline with random annular position/yaw initialization;
+    \item \textbf{P1F-B:} literal-small all-pairs ACO transition with deterministic unit/mechanism checks;
+    \item \textbf{P1F-C:} sensitivity of $\alpha$, $\beta$, and normalized $\lambda$;
+    \item \textbf{P1F-D:} matched PF versus AACOPF on informative moving geometry;
+    \item \textbf{P1F-E:} stationary and constant-bearing rank-deficient negative controls;
+    \item \textbf{P1F-F:} non-Gaussian/outlier ranging stress test;
+    \item \textbf{P1F-G:} scalable bounded-candidate adaptation, only after the literal-small mechanism is understood.
+\end{enumerate}
+
+The comparison must record not only position and azimuth error but also convergence fraction/time, effective sample size, correct-mode survival, particle spread, unique-particle fraction, fraction of particles moved, destination multiplicity, transition-score concentration, and runtime. These quantities test the mechanism Han et al. actually motivate: mitigation of particle starvation and preservation of useful particle diversity.
+
+\subsection{P1E decision}
+P1E is complete. The paper's AACOPF description is sufficiently detailed for a transparent, assumption-labelled qualitative reproduction, but not for an exact numerical replication. The committed machine-readable interpretation file \texttt{configs/phase1e\_aacopf\_interpretation.yaml} is the implementation contract for P1F. Any deviation from it during implementation must be documented as an explicit design change.
