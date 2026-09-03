@@ -1,0 +1,88 @@
+{
+  "controlled_bimodal": {
+    "n": 10,
+    "n_particles": 400,
+    "mode_concentration_fraction": 0.9,
+    "mode_concentration_time_median_s": 0.6000000000000001,
+    "position_rmse_mean_m": 1.4208937557599686,
+    "yaw_rmse_mean_deg": 10.973761385075267,
+    "final_correct_mode_fraction_mean": 0.9,
+    "final_correct_mode_mass_pre_aco_mean": 0.8999999999999998,
+    "mean_moved_fraction": 0.04423333333333333,
+    "mean_unique_parent_fraction": 0.9595166666666666,
+    "max_destination_multiplicity_mean": 300.7,
+    "mean_max_transition_probability": 0.0028337781788046034,
+    "mean_transition_runtime_ms": 5.888532121666673
+  },
+  "runtime_scaling": {
+    "rows": [
+      {
+        "n_particles": 50,
+        "dense_pair_count": 2500,
+        "candidate_score_count": 1225,
+        "runtime_median_s": 0.00031541500000287215
+      },
+      {
+        "n_particles": 100,
+        "dense_pair_count": 10000,
+        "candidate_score_count": 4950,
+        "runtime_median_s": 0.0006331740000007358
+      },
+      {
+        "n_particles": 200,
+        "dense_pair_count": 40000,
+        "candidate_score_count": 19900,
+        "runtime_median_s": 0.00207687599999673
+      },
+      {
+        "n_particles": 400,
+        "dense_pair_count": 160000,
+        "candidate_score_count": 79800,
+        "runtime_median_s": 0.0070277500000059945
+      },
+      {
+        "n_particles": 800,
+        "dense_pair_count": 640000,
+        "candidate_score_count": 319600,
+        "runtime_median_s": 0.03304871000000276
+      },
+      {
+        "n_particles": 1200,
+        "dense_pair_count": 1440000,
+        "candidate_score_count": 719400,
+        "runtime_median_s": 0.07331928800000043
+      }
+    ],
+    "empirical_loglog_runtime_slope": 1.7601675557367564,
+    "theoretical_dense_pair_scaling": "N^2"
+  },
+  "representative_trace_events": {
+    "seed_0_correct_lock": {
+      "strongest_collapse_time_s": 0.5,
+      "unique_parent_fraction": 0.06,
+      "moved_fraction": 0.9425,
+      "correct_mode_fraction_post_aco": 0.6625,
+      "correct_mode_mass_pre_aco": 0.7973907831587139,
+      "next_step_correct_lock_time_s": 0.6000000000000001,
+      "next_step_correct_mode_fraction_post_aco": 1.0
+    },
+    "seed_4_wrong_lock": {
+      "strongest_collapse_time_s": 0.30000000000000004,
+      "unique_parent_fraction": 0.04,
+      "moved_fraction": 0.985,
+      "correct_mode_fraction_post_aco": 0.4625,
+      "correct_mode_mass_pre_aco": 0.7639498506826057,
+      "wrong_lock_time_s": 0.5,
+      "correct_mode_fraction_post_aco_at_lock": 0.0,
+      "correct_mode_mass_pre_aco_at_lock": 0.08106517814442678,
+      "moved_fraction_at_lock": 0.9275,
+      "unique_parent_fraction_at_lock": 0.075,
+      "max_destination_multiplicity_at_lock": 302
+    }
+  },
+  "provenance": {
+    "workflow_run": 33751243293,
+    "artifact": 9891624402,
+    "head_sha": "c24f751891a6e57fe6e75d86c63340854141066a"
+  }
+}
