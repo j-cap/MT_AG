@@ -1,0 +1,309 @@
+\section{Experiment P1F-A: Paper-state conventional PF baseline}
+\subsection{Purpose}
+P1F-A is the first implementation step after the P1E reproduction audit. It intentionally does \emph{not} implement the ant-colony transition. Instead, it establishes the conventional particle-filter reference in the same three-state representation used by Han et al.~\cite{han2020cooperative}. This separation is important: any improvement observed in later P1F sub-experiments should be attributable to particle management rather than to a simultaneous change in state representation, inertial mechanization, initialization, or measurement likelihood.
+
+The P1F-A questions are:
+\begin{enumerate}
+    \item is the audited paper-state motion model implemented consistently;
+    \item how reliably does a conventional PF solve the unknown-position/unknown-azimuth problem when the DR increments themselves are exact;
+    \item does the propagation inconsistency identified in P1E matter numerically;
+    \item does deterministic angular coverage of the initial annulus solve the global-mode problem;
+    \item does increasing particle count alone make the conventional PF reliable?
+\end{enumerate}
+
+\subsection{Paper-state model and deterministic truth}
+The P1F-A state is
+\begin{equation}
+    \bm x_k^{\mathrm{paper}}
+    =
+    \begin{bmatrix}
+        x_k & y_k & \phi_k
+    \end{bmatrix}^{\top},
+\end{equation}
+where $x_k$ and $y_k$ are the global navigation-frame target coordinates and $\phi_k$ is the global azimuth. The input is
+\begin{equation}
+    \bm u_k^{\mathrm{paper}}
+    =
+    \begin{bmatrix}
+        \Delta L_k & \Delta\phi_k
+    \end{bmatrix}^{\top},
+\end{equation}
+where $\Delta L_k$ is the travelled-distance increment and $\Delta\phi_k$ is the azimuth increment during interval $k$.
+
+The primary propagation follows Equation~(3) of Han et al.:
+\begin{align}
+    x_{k+1} &= x_k+\Delta L_k\cos\phi_k,\\
+    y_{k+1} &= y_k+\Delta L_k\sin\phi_k,\\
+    \phi_{k+1} &= \operatorname{wrap}(\phi_k+\Delta\phi_k).
+\end{align}
+This is referred to as the \emph{pre-turn} convention because translation uses the azimuth before applying the current azimuth increment. The alternative \emph{post-turn} convention identified in Algorithm~1 uses $\phi_k+\Delta\phi_k$ for the translational direction and is evaluated only as a sensitivity case.
+
+To avoid introducing the five-state IMU mechanization into this paper-level baseline, the truth trajectory is generated directly from deterministic DR increments. The simulation uses
+\begin{equation}
+    \Delta t=\SI{0.1}{s},\qquad T=\SI{60}{s},
+\end{equation}
+and initial state
+\begin{equation}
+    \bm x_0^{\mathrm{paper}}=
+    \begin{bmatrix}0&0&0\end{bmatrix}^{\top}.
+\end{equation}
+Define the deterministic speed profile
+\begin{equation}
+    s_k^{\mathrm{paper}}
+    =0.75+0.08\sin(0.11t_k)+0.03\cos(0.05t_k)
+    \quad [\mathrm{m/s}],
+\end{equation}
+and azimuth-rate profile
+\begin{equation}
+    \omega_k^{\mathrm{paper}}
+    =0.055+0.025\sin(0.07t_k)
+    \quad [\mathrm{rad/s}].
+\end{equation}
+The increments are then
+\begin{align}
+    \Delta L_k &= s_k^{\mathrm{paper}}\Delta t,\\
+    \Delta\phi_k &= \omega_k^{\mathrm{paper}}\Delta t.
+\end{align}
+The truth trajectory is propagated with the pre-turn equations above. Reapplying the same increments from the same initial state gives a maximum absolute reconstruction error of exactly zero in floating-point evaluation for the committed experiment. This is the deterministic model-consistency check for P1F-A.
+
+\subsection{Auxiliary trajectory and UWB model}
+The globally known auxiliary follows the informative moving trajectory used in the earlier Phase-1 experiments,
+\begin{equation}
+    \bm p_A(t)=
+    \begin{bmatrix}
+        8-0.10t\\
+        -4+0.22t+1.2\sin(0.08t)
+    \end{bmatrix}\,\mathrm{m}.
+\end{equation}
+One UWB measurement is available at every \SI{0.1}{s} sample. For the paper-state position
+\begin{equation}
+    \bm p_k^{\mathrm{paper}}=\begin{bmatrix}x_k&y_k\end{bmatrix}^{\top},
+\end{equation}
+the measurement is
+\begin{equation}
+    z_k
+    =\left\lVert\bm p_k^{\mathrm{paper}}-\bm p_{A,k}\right\rVert_2+\nu_k,
+    \qquad
+    \nu_k\sim\mathcal N(0,\sigma_{\mathrm{UWB}}^2),
+\end{equation}
+with
+\begin{equation}
+    \sigma_{\mathrm{UWB}}=\SI{0.12}{m}.
+\end{equation}
+The DR increments are exact in P1F-A. Therefore UWB noise, global initialization, sequential weighting, and resampling are the only stochastic localization mechanisms in the primary experiment.
+
+\subsection{Random first-range initialization}
+The primary initialization implements the P1E interpretation of the source description. For particle $i\in\{1,\ldots,N_p\}$,
+\begin{align}
+    \theta_i &\sim\mathcal U[-\pi,\pi),\\
+    \delta r_i &\sim\mathcal U[-\Delta d,\Delta d],\\
+    r_i &= z_0+\delta r_i,\\
+    \phi_0^{(i)} &\sim\mathcal U[-\pi,\pi),
+\end{align}
+where $\theta_i$ is the position-bearing angle around the known auxiliary, $r_i$ is the radial distance, and $\phi_0^{(i)}$ is the initial azimuth hypothesis. The repository-defined annulus half-width is
+\begin{equation}
+    \Delta d=3\sigma_{\mathrm{UWB}}=\SI{0.36}{m}.
+\end{equation}
+The initial particle coordinates are
+\begin{align}
+    x_0^{(i)} &= p_{A,x,0}+r_i\cos\theta_i,\\
+    y_0^{(i)} &= p_{A,y,0}+r_i\sin\theta_i.
+\end{align}
+All particles begin with equal weight
+\begin{equation}
+    w_0^{(i)}=\frac{1}{N_p}.
+\end{equation}
+Because $z_0$ is already used to construct the radial prior, it is not used again as a likelihood update. Bayesian range weighting begins at $z_1$.
+
+A structured control uses $100$ equally spaced position-bearing hypotheses and $100$ equally spaced azimuth hypotheses, yielding $N_p=10000$. The radial perturbation remains sampled within the same annulus. This control tests angular coverage only and is not presented as the source-reported Han initialization because Han et al. describe random particle generation.
+
+\subsection{Conventional PF implementation}
+Each particle is propagated with the same exact DR increment. For the primary convention,
+\begin{align}
+    x_{k+1}^{(i)} &= x_k^{(i)}+\Delta L_k\cos\phi_k^{(i)},\\
+    y_{k+1}^{(i)} &= y_k^{(i)}+\Delta L_k\sin\phi_k^{(i)},\\
+    \phi_{k+1}^{(i)} &= \operatorname{wrap}(\phi_k^{(i)}+\Delta\phi_k).
+\end{align}
+The range predicted by particle $i$ is
+\begin{equation}
+    \hat d_k^{(i)}
+    =\left\lVert
+        \begin{bmatrix}x_k^{(i)}&y_k^{(i)}\end{bmatrix}^{\top}
+        -\bm p_{A,k}
+    \right\rVert_2.
+\end{equation}
+The log-weight update is
+\begin{equation}
+    \ell_k^{(i)}
+    =\log\!\left(w_{k-1}^{(i)}\right)
+    -\frac{1}{2}
+    \left(
+        \frac{z_k-\hat d_k^{(i)}}{\sigma_{\mathrm{UWB}}}
+    \right)^2,
+\end{equation}
+followed by a numerically stable exponential normalization. The position estimate is the weighted mean,
+\begin{equation}
+    \hat{\bm p}_k
+    =\sum_{i=1}^{N_p}w_k^{(i)}
+    \begin{bmatrix}x_k^{(i)}&y_k^{(i)}\end{bmatrix}^{\top},
+\end{equation}
+and the azimuth estimate is the weighted circular mean,
+\begin{equation}
+    \hat\phi_k
+    =\operatorname{atan2}
+    \left(
+        \sum_iw_k^{(i)}\sin\phi_k^{(i)},
+        \sum_iw_k^{(i)}\cos\phi_k^{(i)}
+    \right).
+\end{equation}
+
+Each particle carries the initial azimuth of its ancestor as a lineage variable. Let $i_{\mathrm{MAP},k}=\arg\max_iw_k^{(i)}$ denote the pre-resampling maximum-a-posteriori particle index. The inferred initial azimuth lineage is
+\begin{equation}
+    \phi_{0,\mathrm{MAP},k}
+    =\phi_{0,\mathrm{lineage}}^{(i_{\mathrm{MAP},k})}.
+\end{equation}
+This is required because later AACOPF comparisons must distinguish current-state estimation from preservation of the original global hypothesis.
+
+The effective sample size is
+\begin{equation}
+    N_{\mathrm{eff},k}=\frac{1}{\sum_i(w_k^{(i)})^2}.
+\end{equation}
+Systematic resampling is performed when
+\begin{equation}
+    N_{\mathrm{eff},k}<0.5N_p.
+\end{equation}
+After conventional resampling, weights are reset uniformly and the selected ancestor lineage is copied. No source-ambiguous particle rejection and no adaptive auxiliary rejection are enabled.
+
+\subsection{Correct-mode diagnostic}
+P1F-A additionally records whether the particle cloud contains and preserves probability mass near the known simulation truth. For particle $i$, define
+\begin{align}
+    e_{p,k}^{(i)}
+    &=\left\lVert
+        \begin{bmatrix}x_k^{(i)}&y_k^{(i)}\end{bmatrix}^{\top}
+        -\bm p_k^{\mathrm{paper}}
+      \right\rVert_2,\\
+    e_{\phi,k}^{(i)}
+    &=\operatorname{wrap}(\phi_k^{(i)}-\phi_k).
+\end{align}
+The diagnostic correct-mode region is
+\begin{equation}
+    \mathcal M_k
+    =\left\{i:
+        e_{p,k}^{(i)}<\SI{1}{m},\;
+        |e_{\phi,k}^{(i)}|<10^\circ
+      \right\}.
+\end{equation}
+The posterior correct-mode mass is
+\begin{equation}
+    W_{\mathrm{mode},k}
+    =\sum_{i\in\mathcal M_k}w_k^{(i)},
+\end{equation}
+and the initial count is
+\begin{equation}
+    C_{\mathrm{mode},0}=|\mathcal M_0|.
+\end{equation}
+These quantities are diagnostic because the simulation truth is not available to a real estimator. Their purpose is to determine whether failures arise because the initial cloud contains no plausible correct hypothesis or because a represented mode is subsequently lost or not selected.
+
+Terminal pose convergence uses the same Phase-1 rule as P1C/P1D: estimated position error below \SI{1}{m} and absolute azimuth error below $10^\circ$ continuously to the end of the run, with at least \SI{5}{s} remaining. Late-window metrics use the final \SI{20}{s}.
+
+\subsection{Primary 10000-particle result}
+The primary random-annulus campaign contains 20 stochastic realizations with $N_p=10000$. Table~\ref{tab:p1fa_core} summarizes the aggregate result.
+\begin{table}[ht]
+\centering
+\caption{P1F-A primary paper-state conventional-PF result, 20 random-annulus runs.}
+\label{tab:p1fa_core}
+\begin{tabular}{lr}
+\toprule
+Metric & Result\\
+\midrule
+Terminal pose convergence & 4/20 (20\%)\\
+Median convergence time, successful runs & \SI{9.45}{s}\\
+Mean late position RMSE & \SI{8.414}{m}\\
+Mean late azimuth RMSE & $22.615^\circ$\\
+Mean final initial-azimuth-lineage error & $21.177^\circ$\\
+Mean $N_{\mathrm{eff}}/N_p$ & 0.821\\
+Mean number of resampling events & 14.05\\
+Mean runtime per run & \SI{1.59}{s}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The mean errors are dominated by wrong-mode runs and should not be interpreted as the conditional accuracy after successful localization. The four successful runs converge to sub-metre and sub-degree solutions. In the failed runs, the conventional PF frequently selects a globally incorrect position/azimuth lineage.
+
+\subsection{Initial-support result}
+All 20 primary runs contain particles in the diagnostic correct-mode region at initialization. The count statistics are
+\begin{equation}
+    \operatorname{mean}(C_{\mathrm{mode},0})=19.75,
+\end{equation}
+with median 18.5, minimum 13, and maximum 27. The mean initial fraction is therefore approximately
+\begin{equation}
+    \frac{19.75}{10000}=1.975\times10^{-3},
+\end{equation}
+or about $0.20\%$ of the global particle cloud.
+
+This result is important for the later AACOPF mechanism test. The 20\% conventional-PF success rate is not adequately explained by the initializer failing to place \emph{any} particle in the diagnostic correct region. A potentially useful hypothesis is present in every tested run, yet it is often lost or not selected during sequential likelihood weighting and resampling. This does not prove that every initially accepted particle would satisfy the terminal criterion if propagated indefinitely; it establishes the narrower and defensible statement that zero initial support is not the observed failure mechanism.
+
+\subsection{Propagation-convention sensitivity}
+Ten matched stochastic realizations were evaluated with both propagation conventions while the truth trajectory follows Equation~(3). Table~\ref{tab:p1fa_prop} summarizes the result.
+\begin{table}[ht]
+\centering
+\caption{P1F-A sensitivity to the propagation inconsistency identified in P1E.}
+\label{tab:p1fa_prop}
+\begin{tabular}{lrrr}
+\toprule
+Convention & Pose success & Late position RMSE & Late azimuth RMSE\\
+\midrule
+Pre-turn, Equation~(3) & 1/10 & \SI{10.698}{m} & $28.925^\circ$\\
+Post-turn, Algorithm~1 & 1/10 & \SI{14.344}{m} & $40.930^\circ$\\
+\bottomrule
+\end{tabular}
+\end{table}
+The success count is identical in this small matched set, but the post-turn convention increases mean late position RMSE by approximately \SI{3.65}{m} and mean late azimuth RMSE by approximately $12.0^\circ$. Because the formal Equation~(3) also underlies the source observability derivation, P1F retains the pre-turn convention as the primary reproduction model.
+
+\subsection{Structured-initialization control}
+The structured $100\times100$ angular initialization achieves 0/10 terminal pose convergences. Its mean late position RMSE is \SI{15.282}{m} and mean late azimuth RMSE is $47.16^\circ$. This failure is not due to complete absence of the diagnostic correct region: all ten structured runs contain 17--20 particles in $\mathcal M_0$. Consequently, deterministic angular coverage alone does not prevent later wrong-mode selection.
+
+This outcome should not be interpreted as a general statement that random initialization is superior to structured sampling. The structured experiment has only one finite grid design and retains a randomly perturbed radius. Its purpose is narrower: it demonstrates that replacing random angular draws by uniform angular coverage does not by itself remove the observed conventional-PF failure mode.
+
+\subsection{Particle-count sensitivity}
+The particle-count study uses 20 stochastic realizations at each population. Table~\ref{tab:p1fa_particles} gives the aggregate results.
+\begin{table}[ht]
+\centering
+\caption{P1F-A paper-state conventional-PF particle-count sensitivity.}
+\label{tab:p1fa_particles}
+\begin{tabular}{rrrrr}
+\toprule
+$N_p$ & Pose success & Late pos. RMSE & Late azimuth RMSE & Runtime\\
+\midrule
+2500 & 1/20 & \SI{12.537}{m} & $35.993^\circ$ & \SI{0.43}{s}\\
+5000 & 1/20 & \SI{17.198}{m} & $53.563^\circ$ & \SI{0.79}{s}\\
+10000 & 4/20 & \SI{8.414}{m} & $22.615^\circ$ & \SI{1.64}{s}\\
+20000 & 2/20 & \SI{13.620}{m} & $40.191^\circ$ & \SI{3.23}{s}\\
+40000 & 9/20 & \SI{3.532}{m} & $9.507^\circ$ & \SI{6.53}{s}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The initial-support diagnostic finds at least one particle in $\mathcal M_0$ for all 20 realizations at every tested population. The mean number of particles in the diagnostic region increases from approximately 4 at $N_p=2500$ to approximately 74 at $N_p=40000$. Therefore increasing particle count improves representational density. The $40000$-particle configuration is clearly best in aggregate, but it still fails in 11/20 runs and the intermediate populations are non-monotonic.
+
+The populations at different $N_p$ are independent random realizations generated from the same seed labels rather than nested prefixes of one common maximum-size cloud. Individual-seed success should therefore not be interpreted as a paired monotonic particle-count trajectory. The supported conclusion is that more particles can materially improve the probability of maintaining a useful global hypothesis, but particle count alone does not make this conventional PF reliable.
+
+Runtime of the conventional PF scales approximately linearly over this range. The \SI{6.53}{s} mean runtime at 40000 particles is roughly four times the \SI{1.64}{s} runtime at 10000 particles. These values are software-runner timings and are not embedded hardware measurements. They are nevertheless useful when contrasted with the literal ACO transition, whose candidate evaluation is quadratic if every particle considers every other particle.
+
+\subsection{P1F-A interpretation and decision}
+P1F-A establishes six points needed before implementing AACOPF:
+\begin{enumerate}
+    \item the three-state paper-level propagation is internally consistent under the selected Equation~(3) interpretation;
+    \item wrong-mode failures remain even when DR increments are exact, so they are not a consequence of the five-state IMU adaptation or unknown initial velocity;
+    \item correct-region particles are present initially in every primary run, while terminal conventional-PF success is only 20\%;
+    \item structured angular coverage does not automatically preserve the correct mode;
+    \item increasing particle count improves density and helps at 40000 particles, but does not provide reliable global localization;
+    \item the paper's propagation ambiguity has a measurable quantitative effect and therefore must remain documented.
+\end{enumerate}
+
+For later full global PF--AACOPF comparisons, $N_p=10000$ is retained as the practical conventional-PF reference. It is substantially cheaper than 40000 particles while preserving the difficult wrong-mode regime that the AACOPF mechanism is intended to address. The 40000-particle result is retained as an upper-population conventional reference rather than the default.
+
+P1F-A is therefore complete. The next task is P1F-B: implement and verify the literal-small all-pairs ACO transition on a computationally controlled particle cloud. P1F-B is a mechanism-verification experiment; it should not yet be treated as the headline PF--AACOPF performance comparison.
+
+\subsection{Known limitations of P1F-A}
+The result is intentionally narrow. The DR increments are exact, only one deterministic truth trajectory and one informative auxiliary trajectory are used, the UWB error is Gaussian, and the auxiliary position is globally known. The diagnostic correct-mode mass depends on simulation truth and is unavailable in deployment. The structured control is one particular finite grid rather than an optimized deterministic sampler. Particle populations in the particle-count sweep are not nested. Finally, the measured runtime is produced by the GitHub Actions software environment and is not representative of the target ESP32 hardware. These limitations are acceptable because P1F-A exists to establish a controlled conventional-PF reference before the AACOPF transition is introduced.
