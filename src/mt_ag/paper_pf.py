@@ -5,6 +5,8 @@ import numpy as np
 from .geometry import wrap_angle
 from .particle_filter import circular_mean, systematic_resample
 
+_DEFAULT_CORRECT_MODE_YAW_THRESHOLD_RAD = np.deg2rad(10.0)
+
 
 @dataclass(frozen=True)
 class PaperTrajectory:
@@ -127,7 +129,7 @@ def run_paper_bootstrap_pf(
     initial_particles_conditioned_on_z0=True,
     truth_state=None,
     correct_mode_position_threshold_m=1.0,
-    correct_mode_yaw_threshold_rad=np.deg2rad(10.0),
+    correct_mode_yaw_threshold_rad=_DEFAULT_CORRECT_MODE_YAW_THRESHOLD_RAD,
 ):
     """Conventional bootstrap PF for the audited three-state paper model."""
     increments = np.asarray(increments, dtype=float)
