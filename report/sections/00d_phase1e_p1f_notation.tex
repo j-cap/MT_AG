@@ -1,0 +1,66 @@
+\section*{Additional abbreviations introduced in P1E--P1F}
+\begin{longtable}{>{\bfseries}p{0.20\textwidth}p{0.72\textwidth}}
+\toprule
+Abbreviation & Meaning\\
+\midrule
+\endfirsthead
+\toprule
+Abbreviation & Meaning\\
+\midrule
+\endhead
+MAP & Maximum A Posteriori; in the particle implementation, the state or lineage associated with the particle having the largest pre-transition posterior weight.\\
+ZUPT & Zero-Velocity Update; an inertial-navigation correction used in the pedestrian processing chain discussed by Han et al.\\
+\bottomrule
+\end{longtable}
+
+\section*{P1E--P1F paper-reproduction quantities}
+The symbols in this table belong to the separate three-state reproduction of Han et al. and should not be confused with the five-state IMU-driven thesis estimator defined above.
+\begin{longtable}{p{0.30\textwidth}p{0.62\textwidth}}
+\toprule
+Symbol & Meaning\\
+\midrule
+\endfirsthead
+\toprule
+Symbol & Meaning\\
+\midrule
+\endhead
+$\bm x_t^{\mathrm{paper}}$ & Paper-level target state $[x_t,y_t,\phi_t]^\top$ used in P1E--P1F. The superscript ``paper'' is used in this notation table only to distinguish the model from the five-state thesis baseline; equations may omit it when the context is unambiguous.\\
+$x_t$ & Global target $x$-coordinate in the paper-level navigation frame at sample $t$.\\
+$y_t$ & Global target $y$-coordinate in the paper-level navigation frame at sample $t$.\\
+$\phi_t$ & Global target azimuth/yaw in the paper-level model.\\
+$\bm u_t^{\mathrm{paper}}$ & Paper-level DR input $[\Delta L_t,\Delta\phi_t]^\top$.\\
+$\Delta L_t$ & Travelled-distance increment supplied by the higher-level DR system for one propagation interval.\\
+$\Delta\phi_t$ & Azimuth increment supplied by the higher-level DR system for one propagation interval.\\
+$N$ & Number of initial position hypotheses in the $N\times M$ notation used by Han et al.\\
+$M$ & Number of initial azimuth hypotheses associated with the paper's $N\times M$ particle construction.\\
+$N_p=NM$ & Total number of particles in the paper-level reproduction when the $N\times M$ notation is used.\\
+$\theta_i$ & Position-bearing angle used to place initial particle $i$ around the known auxiliary node.\\
+$r_i$ & Initial radial distance from the auxiliary node to particle $i$.\\
+$\delta r_i$ & Radial perturbation applied to the first measured UWB range when constructing particle $i$.\\
+$\Delta d$ & Half-width of the first-range annulus. P1F uses the repository choice $\Delta d=3\sigma_{\mathrm{UWB}}$.\\
+$q(\bm x_t^i\mid\bm x_{t-1}^i,z_t)$ & Generic particle-filter proposal density appearing in the source formulation.\\
+$\ell_t^i$ & Log-likelihood assigned to particle $i$ at sample $t$ from the UWB range residuals.\\
+$\rho_j$ & Range residual associated with auxiliary node $j$ in the adaptive auxiliary-rejection mechanism of Han et al.\\
+$\Omega_1,\Omega_2$ & Source-defined but numerically unspecified thresholds for residual mean and residual variance in adaptive auxiliary rejection.\\
+$\mathcal C_i$ & Set of candidate destination particles considered for ACO movement of source particle $i$.\\
+$\Delta w_{ij}$ & Weight-information difference between candidate particle $j$ and source particle $i$; the repository interpretation is $w_j-w_i$ for $w_j>w_i$.\\
+$\eta_{ij}$ & Position-information factor between particles $i$ and $j$; the repository interpretation is inverse Euclidean distance.\\
+$\epsilon_d$ & Small positive distance regularizer used to avoid division by zero in $\eta_{ij}$.\\
+$\epsilon_w$ & Small positive weight regularizer used in the ACO transition score.\\
+$\alpha$ & Exponent controlling the contribution of weight information to the ACO transition score.\\
+$\beta$ & Exponent controlling the contribution of spatial-distance information to the ACO transition score.\\
+$s_{ij}$ & Unnormalized ACO transition score from source particle $i$ to candidate particle $j$.\\
+$P_{ij}$ & Normalized ACO transition probability/score fraction from source particle $i$ to candidate particle $j$.\\
+$j^*$ & Candidate index with the maximum transition probability for a given source particle.\\
+$\lambda$ & ACO movement threshold: movement occurs only when the maximum candidate transition probability exceeds this value.\\
+$K_i$ & Number of candidate destination particles in $\mathcal C_i$.\\
+$c_\lambda$ & Candidate-count-normalized transition-threshold factor defined by $c_\lambda=\lambda K_i$.\\
+$s_k^{\mathrm{paper}}$ & Deterministic speed profile used only to generate the P1F-A paper-state truth trajectory.\\
+$\omega_k^{\mathrm{paper}}$ & Deterministic azimuth-rate profile used only to generate the P1F-A paper-state truth trajectory.\\
+$e_{p,k}^{(i)}$ & Position error of paper-state particle $i$ relative to the known simulation truth at sample $k$.\\
+$e_{\phi,k}^{(i)}$ & Wrapped azimuth error of paper-state particle $i$ relative to the known simulation truth.\\
+$W_{\mathrm{mode},k}$ & Posterior probability mass contained in the diagnostic correct-mode region at sample $k$.\\
+$C_{\mathrm{mode},0}$ & Number of initial particles lying in the diagnostic correct-mode region.\\
+$\phi_{0,\mathrm{MAP},k}$ & Initial-azimuth lineage carried by the MAP particle at sample $k$.\\
+\bottomrule
+\end{longtable}
