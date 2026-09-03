@@ -1,0 +1,237 @@
+\section{Experiment P1D: Geometry and observability}
+\subsection{Purpose and research question}
+P1C showed that the unknown-position/yaw problem can be resolved under ideal information for the selected moving auxiliary, but that a conventional bootstrap PF remains fragile under realistic uncertainty. P1D isolates the next explanatory variable: the relative geometry between target and auxiliary node. The research question is
+\begin{quote}
+How does target--auxiliary relative motion determine local observability, and how is this reflected in global-pose convergence and particle-cloud behaviour?
+\end{quote}
+
+The target trajectory, IMU and UWB error models, \SI{10}{Hz} ranging schedule, first-range-conditioned global initialization, aligned fixed initial speed $s_0=\SI{0.75}{m/s}$, and bootstrap-PF settings are kept fixed. Only the known auxiliary trajectory is changed. This makes P1D a controlled geometry experiment rather than a general algorithm comparison.
+
+\subsection{Relative geometry quantities}
+Let
+\begin{equation}
+    \bm r_k = \bm p_{A,k}-\bm p_k
+\end{equation}
+be the relative position vector from the target position $\bm p_k$ to the known auxiliary position $\bm p_{A,k}$. The corresponding geometric range is
+\begin{equation}
+    d_k=\lVert\bm r_k\rVert_2,
+\end{equation}
+and the navigation-frame line-of-sight (LOS) bearing is
+\begin{equation}
+    \alpha_k=\operatorname{atan2}(r_{y,k},r_{x,k}),
+\end{equation}
+where $r_{x,k}$ and $r_{y,k}$ denote the two components of $\bm r_k$. For interpretation, the unwrapped LOS-bearing span and total variation are reported as
+\begin{align}
+    \Delta\alpha_{\mathrm{span}}
+    &= \max_k \alpha_k-\min_k\alpha_k,\\
+    \Delta\alpha_{\mathrm{TV}}
+    &= \sum_{k=0}^{K-1}|\alpha_{k+1}-\alpha_k|.
+\end{align}
+These are descriptive geometry quantities only. P1D explicitly tests whether apparent LOS variation by itself is sufficient to guarantee observability.
+
+\subsection{Controlled auxiliary trajectories}
+All three auxiliary trajectories begin at
+\begin{equation}
+    \bm p_{A,0}=\begin{bmatrix}8&-4\end{bmatrix}^{\top}\,\mathrm{m},
+\end{equation}
+so the initial true UWB range is identical.
+
+\paragraph{Stationary auxiliary.}
+The first case keeps the globally known auxiliary fixed,
+\begin{equation}
+    \bm p_A(t)=\begin{bmatrix}8&-4\end{bmatrix}^{\top}\,\mathrm{m}.
+\end{equation}
+Although the moving target changes its LOS bearing relative to this point, a fixed single range reference retains a global rotational symmetry when the target's initial global yaw is unknown.
+
+\paragraph{Constant-bearing relative motion.}
+The second case is a deliberately synthetic degeneracy test. Let
+\begin{equation}
+    \bm e_r = \frac{\bm p_{A,0}-\bm p_0}{\lVert\bm p_{A,0}-\bm p_0\rVert_2}
+\end{equation}
+be the initial unit vector from target to auxiliary and let
+\begin{equation}
+    \rho(t)=\lVert\bm p_{A,0}-\bm p_0\rVert_2+0.08t.
+\end{equation}
+The auxiliary is then prescribed as
+\begin{equation}
+    \bm p_A(t)=\bm p(t)+\rho(t)\bm e_r.
+\end{equation}
+Consequently, the scalar range changes while the navigation-frame LOS direction remains constant. This case is not a proposed motion controller; it exists only to distinguish changing range magnitude from changing measurement direction.
+
+\paragraph{Informative moving auxiliary.}
+The third case reuses the moving trajectory from P1A--P1C,
+\begin{equation}
+    \bm p_A(t)=
+    \begin{bmatrix}
+        8-0.10t\\
+        -4+0.22t+1.2\sin(0.08t)
+    \end{bmatrix}\,\mathrm{m}.
+\end{equation}
+This produces substantial variation in both range and LOS direction.
+
+\subsection{Finite-horizon local observability diagnostic}
+The five-state local model is the IMU-driven state
+\begin{equation}
+    \bm x_k=[p_{x,k},p_{y,k},v_{x,k},v_{y,k},\psi_k]^{\top}.
+\end{equation}
+Using the state-transition Jacobian $F_k$ and UWB range Jacobian $H_k$ introduced previously, the cumulative finite-horizon local observability matrix through sample $k$ is
+\begin{equation}
+\mathcal O_{0:k}=\begin{bmatrix}
+H_0\\
+H_1F_0\\
+H_2F_1F_0\\
+\vdots\\
+H_kF_{k-1}\cdots F_0
+\end{bmatrix}.
+\end{equation}
+For the five-state model, local full rank requires
+\begin{equation}
+    \operatorname{rank}(\mathcal O_{0:k})=5.
+\end{equation}
+P1D evaluates the singular values directly using an SVD of $\mathcal O_{0:k}$. This is important numerically: evaluating singular values through the Gram matrix $\mathcal O^{\top}\mathcal O$ squares the condition number and can produce misleading numerical rank in nearly singular cases.
+
+In addition to numerical rank, P1D uses the normalized conditioning diagnostic
+\begin{equation}
+    \eta_{\mathcal O,k}
+    =\frac{\sigma_{\min,k}}{\sigma_{\max,k}},
+\end{equation}
+where $\sigma_{\min,k}$ and $\sigma_{\max,k}$ are respectively the smallest and largest singular values of $\mathcal O_{0:k}$. A diagnostic threshold
+\begin{equation}
+    \eta_{\mathrm{thr}}=10^{-4}
+\end{equation}
+is used only to report an information-accumulation time $t_{\eta}$. It is not an application requirement and the SVD analysis remains a local linearized diagnostic rather than a complete nonlinear observability proof.
+
+\subsection{Filtering experiment design}
+Two filtering layers are evaluated for each geometry.
+
+\paragraph{Realistic layer.}
+Twenty matched stochastic runs use the P1C IMU/UWB uncertainty and a structured $100\times100$ global position/yaw grid, i.e.
+\begin{equation}
+    N_p=10000.
+\end{equation}
+For each seed, sensor-noise, initialization, and PF random-number streams are matched across the three geometries. This reduces stochastic confounding when comparing geometry cases.
+
+\paragraph{Idealized layer.}
+Three runs per geometry use a $200\times200$ grid with $N_p=40000$, exact IMU measurements, exact UWB ranges, zero initial radial uncertainty, zero PF process perturbation, and no resampling. The small range-likelihood width used in P1C is retained. This layer asks whether a geometry can resolve the global hypothesis set when measurement and process uncertainty are removed.
+
+The terminal convergence criteria remain those of P1C: position error below \SI{1}{m} and absolute yaw error below $10^{\circ}$ continuously to the end, with at least \SI{5}{s} remaining. Late-window metrics are computed over the final \SI{20}{s}.
+
+\subsection{Geometry and observability results}
+Table~\ref{tab:p1d_observability} gives the principal deterministic geometry and observability results.
+\begin{table}[ht]
+\centering
+\caption{P1D geometry and finite-horizon observability results. The LOS bearing is unwrapped before computing the span.}
+\label{tab:p1d_observability}
+\begin{tabular}{lrrrr}
+\toprule
+Geometry & LOS span & Rank & $\eta_{\mathcal O,K}$ & $t_{\eta}$\\
+\midrule
+Stationary & $81.99^{\circ}$ & 4 & $3.72\times10^{-17}$ & --\\
+Constant bearing & $\approx0^{\circ}$ & 3 & $1.74\times10^{-17}$ & --\\
+Moving & $102.59^{\circ}$ & 5 & $6.57\times10^{-4}$ & \SI{26.6}{s}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The final singular-value spectra are
+\begin{align}
+\bm\sigma_{\mathrm{stat}}
+&\approx
+[931.97,\,232.84,\,49.46,\,7.046,\,3.46\times10^{-14}],\\
+\bm\sigma_{\mathrm{cb}}
+&\approx
+[861.38,\,155.44,\,10.68,\,8.16\times10^{-14},\,1.50\times10^{-14}],\\
+\bm\sigma_{\mathrm{mov}}
+&\approx
+[916.48,\,320.81,\,45.58,\,8.047,\,0.602].
+\end{align}
+Only the informative moving geometry is locally full rank for the five-state model.
+
+The stationary result is especially instructive. The LOS bearing changes by approximately $82^{\circ}$ because the target moves around the fixed auxiliary, yet one state direction remains unobservable. The reason is the global rotational symmetry of a single fixed range reference: rotating the complete target trajectory around the fixed auxiliary while rotating the unknown initial global yaw consistently leaves the range history unchanged. Therefore LOS-bearing variation alone is not a sufficient scalar criterion for observability.
+
+The constant-bearing construction is more degenerate and has numerical rank three. Although its scalar range changes by \SI{4.8}{m}, repeated measurements do not provide enough independent directions. This confirms that range variation alone is also insufficient.
+
+\subsection{Realistic global-pose filtering results}
+Table~\ref{tab:p1d_realistic} summarizes the 20 matched realistic runs for each geometry.
+\begin{table}[ht]
+\centering
+\caption{P1D realistic global-pose filtering results, 20 matched runs per geometry.}
+\label{tab:p1d_realistic}
+\begin{tabular}{lrrrr}
+\toprule
+Geometry & Pose success & Late pos. RMSE & Final pos. error & Late yaw RMSE\\
+\midrule
+Stationary & 0/20 & 33.874 m & 34.781 m & $85.574^{\circ}$\\
+Constant bearing & 0/20 & 3.975 m & 4.510 m & $1.992^{\circ}$\\
+Moving & 5/20 & 10.507 m & 9.148 m & $23.838^{\circ}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The observability hierarchy is reflected directly in the convergence outcome. Neither rank-deficient geometry ever achieves terminal full-pose convergence. The moving geometry is the only case that succeeds, with 5 of 20 runs satisfying the terminal criterion. Among these successful moving runs, the median terminal pose-convergence time is approximately \SI{49.8}{s}.
+
+The moving case also shows that full local observability is \emph{necessary rather than sufficient} for robust conventional PF global localization. The deterministic conditioning diagnostic reaches $\eta_{\mathrm{thr}}=10^{-4}$ at \SI{26.6}{s}, yet the stochastic PF often still selects an incorrect global mode and successful terminal convergence occurs substantially later.
+
+\subsection{Idealized geometry experiment}
+Table~\ref{tab:p1d_ideal} shows the corresponding idealized experiments.
+\begin{table}[ht]
+\centering
+\caption{P1D idealized global-pose filtering results, three runs per geometry.}
+\label{tab:p1d_ideal}
+\begin{tabular}{lrrr}
+\toprule
+Geometry & Pose success & Late pos. RMSE & Late yaw RMSE\\
+\midrule
+Stationary & 0/3 & 33.151 m & $91.595^{\circ}$\\
+Constant bearing & 0/3 & 4.897 m & $3.204^{\circ}$\\
+Moving & 2/3 & 2.893 m & $8.951^{\circ}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The rank-deficient stationary and constant-bearing cases remain unable to recover the full global pose even when sensor uncertainty and PF process noise are removed. In contrast, two of the three moving runs converge. The successful ideal moving runs converge at approximately \SI{12.0}{s} and \SI{5.7}{s}; their late position RMSE values are \SI{0.069}{m} and \SI{0.190}{m}, respectively.
+
+One ideal moving run still fails. This does not contradict the local observability result. The global posterior is approximated by a finite structured set of point particles and a narrow likelihood. Consequently, a full-rank geometry makes the correct pose distinguishable in principle, but does not guarantee that a particular finite particle approximation preserves a sufficiently good hypothesis through all likelihood updates. This is directly relevant to the later AACOPF assessment.
+
+\subsection{Particle-cloud interpretation}
+Two additional outcomes prevent over-interpreting PF confidence measures. First, the stationary realistic runs remain very diffuse, with mean final spatial spread
+\begin{equation}
+    \sigma_{p,K}^{\mathrm{PF}}\approx\SI{31.72}{m}
+\end{equation}
+and mean yaw resultant
+\begin{equation}
+    R_{\psi,K}\approx0.314.
+\end{equation}
+This is consistent with an unresolved global symmetry.
+
+Second, the constant-bearing case behaves differently. Its realistic mean late yaw RMSE is only $1.992^{\circ}$ and the mean final yaw resultant is approximately
+\begin{equation}
+    R_{\psi,K}\approx0.996,
+\end{equation}
+yet full pose convergence remains 0/20 and mean late position RMSE is \SI{3.975}{m}. The idealized point-particle approximation can become essentially concentrated on one hypothesis despite the rank-deficient geometry. Therefore particle concentration is not equivalent to correctness, and accurate estimation of one sub-state does not imply observability of the complete state.
+
+Representative weighted particle snapshots at \SI{0}{s}, \SI{10}{s}, \SI{30}{s}, and \SI{60}{s}, together with full time histories of observability, error, spread, yaw concentration, and effective sample size, were generated by the experiment workflow. These multi-megabyte diagnostic outputs are retained as GitHub Actions artifacts rather than normal Git files; aggregate result summaries remain version controlled in the repository.
+
+\subsection{P1D interpretation and decision}
+The P1D evidence supports three distinct statements.
+
+\begin{enumerate}
+    \item \textbf{Geometry determines whether full global-pose recovery is possible.} The stationary single auxiliary leaves one rotational degree of freedom, the constant-bearing construction is more degenerate, and only the tested moving auxiliary yields full local rank.
+    \item \textbf{Full observability does not guarantee robust bootstrap-PF convergence.} The informative moving geometry is the only case with successful global-pose recovery, but realistic success remains only 25\%.
+    \item \textbf{Estimator confidence must not be confused with information content.} A PF may be diffuse because a true ambiguity remains, or it may become highly concentrated on a wrong/discrete mode. State observability and posterior approximation must therefore be analysed separately.
+\end{enumerate}
+
+This distinction changes how the subsequent AACOPF reproduction should be evaluated. AACOPF cannot create information when the geometry is structurally unobservable. Its potential value is instead in the \emph{informative but multimodal} regime, where the measurements distinguish the true state but a conventional finite-particle approximation may lose or under-represent the correct mode.
+
+P1D is therefore considered complete. The next task is P1E: a line-by-line reproduction audit of Han et al.\ \cite{han2020cooperative}, with particular attention to the AACOPF particle-transition mechanism, auxiliary-reliability thresholds, initialization assumptions, and parameters that are insufficiently specified for exact reproduction.
+
+\subsection{Known limitations of P1D}
+The following limitations are retained deliberately:
+\begin{itemize}
+    \item the observability calculation is a local linearization along the true trajectory and is not a global nonlinear proof;
+    \item the constant-bearing auxiliary trajectory is synthetic and uses target ground truth solely to create a controlled degenerate geometry;
+    \item only one informative moving trajectory is evaluated, so no universal numerical geometry threshold is claimed;
+    \item the idealized global PF still uses a finite angular grid and is therefore sensitive to discretization;
+    \item realistic moving-case failures combine sensor uncertainty, particle approximation, and process-model uncertainty after geometry has made the state locally observable;
+    \item the aligned fixed-speed prior from P1C remains in place so that initial-velocity ambiguity is not confounded with geometry.
+\end{itemize}
