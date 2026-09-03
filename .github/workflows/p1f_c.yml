@@ -1,0 +1,31 @@
+name: P1F-C Experiment
+
+on:
+  push:
+    branches: ["phase1/p1f-c"]
+    paths:
+      - "configs/phase1f_c.yaml"
+      - "experiments/run_phase1f_c.py"
+      - "src/mt_ag/aacopf.py"
+      - "src/mt_ag/paper_pf.py"
+      - ".github/workflows/p1f_c.yml"
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Run P1F-C tuning campaign
+        run: python experiments/run_phase1f_c.py
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1f-c-results
+          path: results/phase1/p1f_c
