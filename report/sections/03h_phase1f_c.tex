@@ -1,0 +1,114 @@
+\section{Experiment P1F-C: safety-aware AACOPF parameter tuning}
+\subsection{Purpose}
+P1F-B established that the audited literal-small ant-colony transition is capable of rapidly amplifying an informative global mode, but also showed that the same mechanism can irreversibly eliminate the correct mode through aggressive early cloning. The purpose of P1F-C is therefore to select the source-underspecified parameters $\alpha$, $\beta$, and $c_\lambda$ before any headline PF--AACOPF comparison. Since Han et al.~\cite{han2020cooperative} do not report numerical values for these parameters, all values selected in this section are explicitly repository-defined tuning choices.
+
+The experiment is designed around a stricter criterion than localization RMSE alone. A useful AACOPF setting must both select the correct mode reliably and limit catastrophic loss of particle ancestry. The selected tuple is frozen on development data and is then checked on held-out validation seeds before it may be used in P1F-D.
+
+\subsection{Parameter sweep and controlled scenarios}
+The audited transition score remains
+\begin{equation}
+    s_{ij}=(w_j-w_i+\epsilon_w)^\alpha
+    \left(\frac{1}{\lVert\bm p_i-\bm p_j\rVert_2+\epsilon_d}\right)^\beta,
+\end{equation}
+for strictly higher-weight destination candidates $j\in\mathcal C_i$. The move threshold is normalized by candidate count according to
+\begin{equation}
+    \lambda_i=\frac{c_\lambda}{K_i}.
+\end{equation}
+The development sweep evaluates
+\begin{align}
+    \alpha &\in \{0.5,1,2\},\\
+    \beta &\in \{0,0.5,1,2\},\\
+    c_\lambda &\in \{0.5,1,2,4,8\},
+\end{align}
+for a total of 60 parameter tuples.
+
+Each tuple is evaluated on the same stochastic inputs and initial particle clouds. Two controlled bimodal initializations are used with $N_p=400$ particles. In the \emph{balanced} case, 50\% of particles are initialized near the true global mode and 50\% near the competing mode used in P1F-B. In the more difficult \emph{minority-correct} case, only 20\% of the initial particles represent the correct mode. The wrong position bearing and wrong yaw are offset by $90^\circ$. Paper-level DR increments remain exact, UWB range noise has standard deviation $\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$, and the informative moving auxiliary is used over an \SI{8}{s} horizon.
+
+Eight development seeds are used for each scenario, yielding 16 matched development runs per tuple. The subsequently selected setting is evaluated on 20 previously unused seeds per scenario, yielding 40 held-out validation runs.
+
+\subsection{Safety-aware diagnostics and predeclared selection rule}
+A run is counted as a terminal correct-mode lock when at least 90\% of the particle population lies in the diagnostic correct region for the final \SI{1}{s}. A terminal wrong-mode lock is defined analogously by a correct-mode particle fraction no larger than 10\% over the same terminal interval.
+
+Two additional diagnostics quantify genealogical collapse. A \emph{catastrophic ancestry-collapse event} is recorded when the unique-parent fraction $f_{\mathrm{parent},k}$ drops below 0.1 at any update. A \emph{dominant-clone event} is recorded when a single destination particle receives at least 50\% of the complete population during one ACO transition. These quantities are retained because P1F-B showed that uniform post-transition weights can restore a superficially favorable effective sample size even after severe ancestry loss.
+
+A parameter tuple is eligible on the development set only if its correct-mode-lock fraction is at least 0.75. Eligible tuples are ranked lexicographically by lower wrong-lock fraction, lower catastrophic-collapse fraction, lower dominant-clone fraction, higher correct-lock fraction, higher final correct-mode fraction, and finally better parent preservation. This rule is fixed before the validation runs are evaluated.
+
+The frozen tuple is accepted for P1F-D only if held-out validation simultaneously satisfies
+\begin{align}
+    f_{\mathrm{correct}} &\ge 0.80,\\
+    f_{\mathrm{wrong}} &\le 0.05,\\
+    f_{\mathrm{collapse}} &\le 0.25.
+\end{align}
+The dominant-clone frequency remains a diagnostic but is deliberately not an acceptance threshold in P1F-C.
+
+\subsection{Development results and selected parameters}
+The safety-aware development ranking selects
+\begin{equation}
+    \boxed{\alpha=0.5,\qquad \beta=0,\qquad c_\lambda=2.}
+\end{equation}
+Table~\ref{tab:p1fc_development} summarizes its behavior on the 16 development runs.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-C development result for the selected AACOPF tuple.}
+    \label{tab:p1fc_development}
+    \begin{tabular}{lr}
+        \toprule
+        Quantity & Result\\
+        \midrule
+        Correct-mode terminal lock & $15/16=93.75\%$\\
+        Wrong-mode terminal lock & $0/16=0\%$\\
+        Catastrophic ancestry collapse & $1/16=6.25\%$\\
+        Dominant-clone event & $10/16=62.5\%$\\
+        Mean final correct-mode fraction & 0.9931\\
+        Mean minimum unique-parent fraction & 0.4023\\
+        Mean moved-particle fraction & 0.0399\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The next two safety-ranked tuples are $(\alpha,\beta,c_\lambda)=(1,0,4)$ and $(2,0,8)$. Thus all three leading settings use $\beta=0$. In the present controlled bimodal experiment, the inverse-distance factor is therefore not required for reliable mode selection. This observation must not be generalized into a claim that the spatial term is intrinsically harmful; it only shows that the weight-information term plus a more selective threshold is sufficient and safer for the present scenario.
+
+The comparison with the provisional P1F-B point is more decisive. The earlier setting $(1,1,0.5)$ achieves only 75\% correct lock on the P1F-C development data, produces 25\% wrong lock, and triggers both catastrophic ancestry collapse and a dominant-clone event in every development run. Its mean minimum unique-parent fraction is approximately 0.0316. Increasing the normalized threshold from $c_\lambda=0.5$ to the selected value $c_\lambda=2$ therefore materially reduces premature mode elimination.
+
+\subsection{Held-out validation and freeze decision}
+Table~\ref{tab:p1fc_validation} gives the held-out result after freezing $(0.5,0,2)$ on the development data.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-C held-out validation of the frozen AACOPF tuple.}
+    \label{tab:p1fc_validation}
+    \begin{tabular}{lrrr}
+        \toprule
+        Quantity & All runs & Balanced & Minority-correct\\
+        \midrule
+        Number of runs & 40 & 20 & 20\\
+        Correct-mode terminal lock & $100\%$ & $100\%$ & $100\%$\\
+        Wrong-mode terminal lock & $0\%$ & $0\%$ & $0\%$\\
+        Catastrophic ancestry collapse & $22.5\%$ & $25\%$ & $20\%$\\
+        Mean final correct-mode fraction & 0.999625 & 0.999375 & 0.999875\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Across all validation runs, the mean minimum unique-parent fraction is 0.3414 and the mean moved-particle fraction is 0.0392. The mean full-horizon position and yaw RMSE values are \SI{2.846}{m} and $21.812^\circ$. These RMSE values include the deliberately ambiguous initial interval and are not treated as final accuracy claims; the matched performance comparison belongs to P1F-D.
+
+The validation result satisfies all three predeclared freeze criteria: correct lock is $40/40$, wrong lock is $0/40$, and catastrophic-collapse incidence is $9/40=22.5\%$. The tuple
+\begin{equation}
+    (\alpha,\beta,c_\lambda)=(0.5,0,2)
+\end{equation}
+is therefore frozen for P1F-D.
+
+\subsection{Residual diversity risk}
+The freeze decision is intentionally narrower than a declaration that AACOPF diversity is solved. A dominant-clone event still occurs in 34 of 40 held-out runs, or 85\%. Catastrophic ancestry collapse still occurs in 22.5\% of runs. The important improvement is that none of these held-out events produces a terminal wrong-mode lock in the controlled P1F-C experiment.
+
+Accordingly, ``accepted for P1F-D'' means only that the parameter tuple has been selected without using the P1F-D evaluation data and has passed the predeclared mode-selection safety test. It does not mean that the literal all-pairs operator is diversity-safe, computationally scalable, or suitable for the embedded platform. Parent preservation, destination multiplicity, moved fraction, and runtime remain mandatory diagnostics in the next comparison, and P1F-G remains necessary for a scalable adaptation.
+
+\subsection{P1F-C decision}
+P1F-C is considered complete. The principal result is the frozen repository setting
+\begin{equation}
+    \boxed{\alpha=0.5,\quad \beta=0,\quad c_\lambda=2,}
+\end{equation}
+which passes the held-out controlled validation with 100\% correct-mode terminal lock and no wrong locks. These values are not attributed to Han et al. The next experiment, P1F-D, compares conventional PF and AACOPF under matched informative geometry using this tuple unchanged.
+
+The reproducible experiment provenance is GitHub Actions workflow run \texttt{33803059007}; the full generated result is stored in artifact \texttt{p1f-c-results} (artifact ID \texttt{9912216810}), while aggregate results are version controlled in \texttt{results/phase1/p1f\_c/}.
