@@ -1,0 +1,27 @@
+name: P1C Experiment
+
+on:
+  push:
+    branches: ["phase1/p1c"]
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Run full P1C campaign
+        run: python experiments/run_phase1c.py
+      - name: Run idealized P1C sanity check
+        run: python experiments/run_phase1c_ideal.py
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1c-results
+          path: results/phase1/p1c
