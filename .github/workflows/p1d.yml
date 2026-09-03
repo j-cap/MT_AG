@@ -1,8 +1,6 @@
 name: P1D Experiment
 
 on:
-  push:
-    branches: ["phase1/p1d"]
   workflow_dispatch:
 
 jobs:
