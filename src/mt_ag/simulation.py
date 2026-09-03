@@ -30,7 +30,17 @@ def generate_curved_trajectory(dt=0.1, duration=60.0):
     return Trajectory(t=t, state=state, ideal_imu=ideal_imu, dt=dt)
 
 
-def auxiliary_trajectory(t, mode="moving"):
+def auxiliary_trajectory(t, mode="moving", target_positions=None):
+    """Return controlled single-auxiliary trajectories used in Phase 1.
+
+    ``stationary`` fixes the globally known auxiliary at [8, -4] m.
+    ``moving`` is the informative trajectory used in P1A--P1C.
+    ``constant_bearing`` is a deliberately degenerate P1D construction: the
+    auxiliary follows the target such that the target-to-auxiliary line of
+    sight retains one fixed navigation-frame direction while its range changes.
+    All modes start from the same auxiliary position so the initial UWB range
+    does not confound the P1D geometry comparison.
+    """
     t = np.asarray(t, dtype=float)
     if mode == "stationary":
         return np.column_stack((np.full_like(t, 8.0), np.full_like(t, -4.0)))
@@ -38,4 +48,15 @@ def auxiliary_trajectory(t, mode="moving"):
         return np.column_stack(
             (8.0 - 0.10 * t, -4.0 + 0.22 * t + 1.2 * np.sin(0.08 * t))
         )
+    if mode == "constant_bearing":
+        if target_positions is None:
+            raise ValueError("target_positions are required for constant_bearing mode")
+        target = np.asarray(target_positions, dtype=float)
+        if target.shape != (len(t), 2):
+            raise ValueError("target_positions must have shape (len(t), 2)")
+        initial_relative = np.array([8.0, -4.0], dtype=float) - target[0]
+        initial_range = np.linalg.norm(initial_relative)
+        unit_relative = initial_relative / initial_range
+        range_profile = initial_range + 0.08 * t
+        return target + range_profile[:, None] * unit_relative[None, :]
     raise ValueError(f"Unknown auxiliary mode: {mode}")
