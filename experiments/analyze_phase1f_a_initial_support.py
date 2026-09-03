@@ -53,7 +53,7 @@ def main():
         yaw_compatible = yaw_error < yaw_threshold
         pos_compatible = pos_error < pos_threshold
         return {
-            "n_particles": int(len(particles)),
+            "n_particles": len(particles),
             "correct_mode_count": int(np.sum(correct)),
             "correct_mode_fraction": float(np.mean(correct)),
             "best_normalized_joint_score": float(np.min(normalized_score)),
@@ -131,13 +131,19 @@ def main():
     out_dir = ROOT / "results/phase1/p1f_a"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "initial_support.json").write_text(json.dumps(output, indent=2))
-    print(json.dumps({
-        "random_10000": output["random_10000"]["aggregate"],
-        "structured_100x100": output["structured_100x100"]["aggregate"],
-        "particle_count": {
-            key: value["aggregate"] for key, value in output["particle_count"].items()
-        },
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "random_10000": output["random_10000"]["aggregate"],
+                "structured_100x100": output["structured_100x100"]["aggregate"],
+                "particle_count": {
+                    key: value["aggregate"]
+                    for key, value in output["particle_count"].items()
+                },
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":
