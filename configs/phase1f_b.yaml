@@ -1,0 +1,35 @@
+simulation:
+  dt: 0.1
+  duration: 12.0
+
+uwb:
+  sigma_range_m: 0.12
+
+aco:
+  alpha: 1.0
+  beta: 1.0
+  c_lambda_mechanism_reference: 0.5
+  epsilon_distance: 1.0e-12
+  epsilon_weight: 1.0e-15
+  note: "c_lambda=0.5 is a provisional mechanism-check setting only; P1F-C performs tuning and freezes the comparison setting."
+
+controlled_bimodal:
+  n_seeds: 10
+  n_particles: 400
+  correct_fraction: 0.5
+  position_std_m: 0.25
+  yaw_std_deg: 5.0
+  wrong_bearing_offset_deg: 90.0
+  wrong_yaw_offset_deg: 90.0
+  correct_mode_position_threshold_m: 1.0
+  correct_mode_yaw_threshold_deg: 10.0
+
+runtime_scaling:
+  particle_counts: [50, 100, 200, 400, 800, 1200]
+  repeats: 7
+  warmup_repeats: 2
+
+randomness:
+  range_seed_offset: 210000
+  initializer_seed_offset: 220000
+  runtime_seed: 230000
