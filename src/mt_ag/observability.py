@@ -56,17 +56,17 @@ def observability_history_planar_imu(
 ):
     """Return cumulative finite-horizon observability diagnostics at every sample.
 
-    The accumulated Gram matrix O^T O is updated one range-observation row at a
-    time. Its eigenvalues are the squared singular values of the cumulative
-    observability matrix. ``sigma_ratio`` is sigma_min / sigma_max and is useful
-    as a scale-normalized conditioning diagnostic. It is not an application
-    threshold and should not be interpreted as a complete nonlinear proof.
+    Each cumulative observability matrix is evaluated by direct SVD. This avoids
+    the loss of numerical rank information that can occur when forming O^T O,
+    whose condition number is squared. ``sigma_ratio`` is sigma_min/sigma_max
+    and is used only as a local finite-horizon conditioning diagnostic; it is
+    neither an application threshold nor a complete nonlinear observability proof.
     """
     states = np.asarray(states, dtype=float)
     ideal_imu = np.asarray(ideal_imu, dtype=float)
     auxiliary_positions = np.asarray(auxiliary_positions, dtype=float)
     phi = np.eye(5)
-    gram = np.zeros((5, 5), dtype=float)
+    rows = []
     n = len(states)
     singular_values = np.zeros((n, 5), dtype=float)
     rank = np.zeros(n, dtype=int)
@@ -78,10 +78,11 @@ def observability_history_planar_imu(
             raise ValueError("Target and auxiliary node coincide; range Jacobian undefined")
         h = np.zeros((1, 5), dtype=float)
         h[0, :2] = displacement / distance
-        row = h @ phi
-        gram += row.T @ row
-        eig = np.linalg.eigvalsh(gram)
-        sigma = np.sqrt(np.maximum(eig, 0.0))[::-1]
+        rows.append((h @ phi).ravel())
+        matrix = np.asarray(rows, dtype=float)
+        sigma_available = np.linalg.svd(matrix, compute_uv=False)
+        sigma = np.zeros(5, dtype=float)
+        sigma[: len(sigma_available)] = sigma_available
         singular_values[k] = sigma
         tol = rank_rtol * sigma[0] if sigma[0] > 0.0 else 0.0
         rank[k] = int(np.sum(sigma > tol))
