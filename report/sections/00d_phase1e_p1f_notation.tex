@@ -54,13 +54,18 @@ $P_{ij}$ & Normalized ACO transition probability/score fraction from source part
 $j^*$ & Candidate index with the maximum transition probability for a given source particle.\\
 $\lambda$ & ACO movement threshold: movement occurs only when the maximum candidate transition probability exceeds this value.\\
 $K_i$ & Number of candidate destination particles in $\mathcal C_i$.\\
-$c_\lambda$ & Candidate-count-normalized transition-threshold factor defined by $c_\lambda=\lambda K_i$.\\
+$c_\lambda$ & Candidate-count-normalized transition-threshold factor defined by $c_\lambda=\lambda K_i$. In P1F-B the implementation equivalently uses $\lambda_i=c_\lambda/K_i$.\\
 $s_k^{\mathrm{paper}}$ & Deterministic speed profile used only to generate the P1F-A paper-state truth trajectory.\\
 $\omega_k^{\mathrm{paper}}$ & Deterministic azimuth-rate profile used only to generate the P1F-A paper-state truth trajectory.\\
 $e_{p,k}^{(i)}$ & Position error of paper-state particle $i$ relative to the known simulation truth at sample $k$.\\
 $e_{\phi,k}^{(i)}$ & Wrapped azimuth error of paper-state particle $i$ relative to the known simulation truth.\\
-$W_{\mathrm{mode},k}$ & Posterior probability mass contained in the diagnostic correct-mode region at sample $k$.\\
+$W_{\mathrm{mode},k}$ & Posterior probability mass contained in the diagnostic correct-mode region at sample $k$, evaluated before ACO movement in P1F-B.\\
 $C_{\mathrm{mode},0}$ & Number of initial particles lying in the diagnostic correct-mode region.\\
 $\phi_{0,\mathrm{MAP},k}$ & Initial-azimuth lineage carried by the MAP particle at sample $k$.\\
+$N_{\mathrm{move},k}$ & Number of source particles that copy a destination during the ACO transition at sample $k$.\\
+$f_{\mathrm{move},k}$ & Moved-particle fraction $N_{\mathrm{move},k}/N_p$ in P1F-B.\\
+$a_i$ & Pre-transition parent index represented by output particle $i$ after a synchronous ACO transition.\\
+$f_{\mathrm{parent},k}$ & Unique-parent fraction after the ACO transition, equal to the number of distinct represented pre-transition parents divided by $N_p$.\\
+$m_{\max,k}$ & Maximum destination multiplicity: largest number of moving source particles that copy the same destination at sample $k$.\\
 \bottomrule
 \end{longtable}
