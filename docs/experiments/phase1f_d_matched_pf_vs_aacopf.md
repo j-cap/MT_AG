@@ -24,9 +24,7 @@ Instead, P1F-D performs equal-budget matched comparisons at manageable populatio
 - 800 particles;
 - 1,200 particles.
 
-The 1,200-particle case is the primary literal-small comparison. This is the largest population already characterized in the P1F-B runtime study and is large enough that the random global initialization often contains at least one particle in the diagnostic correct region. The lower budgets deliberately expose the interaction between initial support and particle-management behavior.
-
-P1F-A's 10,000- and 40,000-particle conventional-PF results remain contextual upper-population references, not matched AACOPF comparisons.
+The 1,200-particle case is the primary literal-small comparison. P1F-A's 10,000- and 40,000-particle conventional-PF results remain contextual upper-population references, not matched AACOPF comparisons.
 
 ## Matched experiment design
 
@@ -45,9 +43,7 @@ The first-range annulus half-width remains the P1E/P1F repository choice
 
 `Delta d = 3 sigma_UWB = 0.36 m`.
 
-The first measurement is used only to construct the initial cloud; likelihood updates begin at the next sample to avoid double-counting `z0`.
-
-Twenty unseen seeds are evaluated at each particle budget. These random streams are separate from the P1F-C development and validation streams.
+The first measurement is used only to construct the initial cloud; likelihood updates begin at the next sample to avoid double-counting `z0`. Twenty unseen seeds are evaluated at each particle budget. These random streams are separate from the P1F-C development and validation streams.
 
 ## Methods
 
@@ -61,7 +57,7 @@ There is no artificial process noise in `Delta L` or `Delta phi` in this experim
 
 ### Frozen literal AACOPF
 
-AACOPF uses the P1E/P1F-B audited transition with the P1F-C frozen parameters:
+AACOPF uses the P1E/P1F-B audited transition with the P1F-C frozen parameters
 
 `alpha = 0.5`, `beta = 0`, `c_lambda = 2`.
 
@@ -76,59 +72,84 @@ Pose convergence uses the Phase-1 paper-state criterion:
 - both conditions hold continuously to the end of the run;
 - at least 5 s remain after the convergence time.
 
-Late-window RMSE is computed over the final 20 s.
-
-The primary comparison is the matched success table at each budget:
-
-- both methods converge;
-- AACOPF only converges;
-- conventional PF only converges;
-- neither converges.
-
-Paired late-position and late-yaw RMSE differences are retained as secondary metrics because unconditional mean RMSE can be dominated by wrong-mode runs.
+Late-window RMSE is computed over the final 20 s. The primary comparison is the matched success table at each budget: both methods converge, AACOPF only, conventional PF only, or neither. Paired late-position and late-yaw RMSE differences are retained as secondary metrics because unconditional mean RMSE can be dominated by wrong-mode runs.
 
 ## Initial-support diagnostic
 
-A finite global particle cloud cannot recover a mode that is never represented when neither method contains rejuvenation/process noise. P1F-D therefore explicitly counts the initial particles satisfying
-
-- position error < 1 m;
-- yaw error < 10 deg.
-
-Results are stratified by initial correct-region support:
-
-- zero particles;
-- one or two particles;
-- three or more particles;
-- any positive support.
-
-This diagnostic prevents failures caused by missing initial support from being incorrectly attributed to the resampling mechanism.
+A finite global particle cloud cannot recover a mode that is never represented when neither method contains rejuvenation/process noise. P1F-D therefore counts the initial particles satisfying position error below 1 m and yaw error below 10 deg. Results are stratified by zero particles, one or two particles, three or more particles, and any positive support.
 
 ## Diversity diagnostics
 
-For the conventional PF, P1F-D records the number of systematic-resampling events and the minimum unique-particle fraction after resampling.
+For the conventional PF, P1F-D records the number of systematic-resampling events and the minimum unique-particle fraction after resampling. For AACOPF, it retains minimum unique-parent fraction, catastrophic ancestry collapse (`<0.1`), dominant cloning (one destination receives at least 50% of the population), maximum destination multiplicity, moved fraction, and runtime.
 
-For AACOPF, P1F-D retains the P1F-B/P1F-C genealogy diagnostics:
+## Results
 
-- minimum unique-parent fraction;
-- catastrophic ancestry collapse: unique-parent fraction < 0.1 at any update;
-- dominant clone: one destination receives at least 50% of the population;
-- maximum destination multiplicity;
-- mean moved-particle fraction;
-- total literal-transition runtime.
+### Aggregate matched comparison
 
-The comparison therefore distinguishes localization success from genealogical health.
+| Np | Initial support >0 | PF success | AACOPF success | PF late position RMSE | AACOPF late position RMSE | PF late yaw RMSE | AACOPF late yaw RMSE |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 400 | 50% | 0/20 | 0/20 | 17.678 m | 16.894 m | 56.45 deg | 50.32 deg |
+| 800 | 95% | 1/20 | 0/20 | 21.371 m | 19.080 m | 64.89 deg | 57.33 deg |
+| 1,200 | 95% | 2/20 | 1/20 | 19.945 m | 12.782 m | 66.95 deg | 33.99 deg |
 
-## Interpretation rules fixed before results
+The strict pose-convergence result is therefore negative with respect to the primary hypothesis: at no tested budget does the frozen literal AACOPF achieve a higher convergence fraction than conventional PF.
 
-1. AACOPF is considered beneficial only if it improves matched convergence without hiding a severe support imbalance.
-2. Zero-support runs are reported separately; neither method can be expected to reconstruct an absent global mode in this deterministic-propagation experiment.
-3. Higher AACOPF convergence does not by itself imply deployment readiness if ancestry collapse remains frequent.
-4. Runtime is interpreted as the cost of the literal reproduction only. P1F-G remains responsible for scalable adaptation.
-5. The P1F-C parameters are not retuned after seeing P1F-D results.
+At the primary 1,200-particle budget, the matched outcome counts are
+
+- both methods succeed: 0;
+- AACOPF only succeeds: 1;
+- conventional PF only succeeds: 2;
+- neither succeeds: 17.
+
+The successful realizations are therefore disjoint rather than showing a consistent AACOPF rescue of conventional-PF failures.
+
+### Secondary paired error result
+
+The convergence result should not hide a secondary effect. At 1,200 particles, AACOPF has lower late position RMSE than PF in 65% of matched runs and lower late yaw RMSE in 70%. The mean paired differences, AACOPF minus PF, are -7.162 m in late position RMSE and -32.96 deg in late yaw RMSE. Aggregate mean late yaw RMSE decreases from 66.95 deg to 33.99 deg, while mean late position RMSE decreases from 19.95 m to 12.78 m.
+
+This means the frozen ACO operator often selects a global hypothesis closer to the truth even though it rarely enters and retains the strict 1 m / 10 deg terminal convergence region. This is an error-shaping effect, not evidence of a higher global-localization success rate.
+
+### Initial-support result and transfer from P1F-C
+
+The finite random annulus cloud is extremely sparse in the diagnostic correct region:
+
+- 400 particles: mean support 0.80, positive in 10/20 runs;
+- 800 particles: mean support 2.05, positive in 19/20 runs;
+- 1,200 particles: mean support 2.35, positive in 19/20 runs, range 0--5.
+
+This is fundamentally different from the P1F-C tuning environment. There, the correct mode initially contained 200 particles in the balanced 50/50 case and 80 particles even in the minority-correct 20/80 case. P1F-D therefore shows that a tuple that performs extremely well when the useful mode already owns substantial population does not automatically transfer to a global random-annulus cloud in which only a few correct-region particles exist.
+
+At 1,200 particles, conditioning on positive initial support gives 2/19 PF successes and 1/19 AACOPF success. Restricting to the nine runs with at least three correct-region particles gives 1/9 success for each method. Thus positive support is necessary but a handful of particles is still insufficient for reliable survival and mode selection.
+
+### Genealogical behavior and runtime
+
+| Np | AACOPF catastrophic collapse | AACOPF dominant clone | PF runtime/run | AACOPF runtime/run |
+|---:|---:|---:|---:|---:|
+| 400 | 5% | 85% | 0.130 s | 6.19 s |
+| 800 | 30% | 80% | 0.190 s | 21.83 s |
+| 1,200 | 10% | 85% | 0.248 s | 47.08 s |
+
+The P1F-C freeze reduces the incidence of the most severe ancestry collapse compared with the provisional P1F-B tuple, but dominant cloning remains common. At 1,200 particles the literal AACOPF is approximately 190 times slower than the conventional PF in the current Python implementation. This is consistent with the dense quadratic transition structure already established in P1F-B.
+
+## Interpretation
+
+P1F-D provides an important correction to the optimistic controlled result from P1F-C. The frozen AACOPF does not provide a robust global-convergence advantage when the correct mode is represented by only a few initial particles. The ACO mechanism can amplify an existing mode, but without process noise or rejuvenation it cannot create missing state support, and aggressive cloning can still eliminate rare useful hypotheses.
+
+The appropriate conclusion is therefore not that AACOPF is ineffective. At the primary budget it shows a meaningful tendency to reduce the severity of wrong-mode errors. Rather, the literal mechanism by itself does not solve the sparse-support global-initialization problem.
+
+The frozen tuple must **not** be retuned using the P1F-D seeds. Doing so would invalidate the held-out comparison. Any change intended to improve sparse-mode preservation belongs to a new explicitly labelled experiment or to the later scalable adaptation.
+
+## P1F-D decision
+
+P1F-D is complete. The primary hypothesis of improved strict pose-convergence fraction is **not supported** by the matched equal-budget experiment. At 1,200 particles, conventional PF succeeds in 2/20 runs and AACOPF in 1/20. A secondary error-reduction effect is present, with AACOPF reducing mean late position and yaw RMSE and outperforming PF on those metrics in a majority of matched runs.
+
+Proceed to **P1F-E** as planned. The stationary and constant-bearing rank-deficient geometries should now be used as negative controls with the same frozen AACOPF settings. Their purpose is not to optimize performance but to verify that the particle-transition mechanism does not appear to overcome genuine missing observability. P1F-F then addresses non-Gaussian/outlier ranging, while P1F-G must address both the quadratic computational burden and the sparse-support/diversity problem revealed here.
 
 ## Reproducibility
 
-- configuration: `configs/phase1f_d.yaml`
-- runner: `experiments/run_phase1f_d.py`
-- full generated results: GitHub Actions artifact
-- aggregate summary: `results/phase1/p1f_d/summary.json` and `summary.md` after the campaign completes
+- workflow run: `33881931650`;
+- artifact: `p1f-d-results`, ID `9941206807`;
+- configuration: `configs/phase1f_d.yaml`;
+- runner: `experiments/run_phase1f_d.py`;
+- aggregate evidence: `results/phase1/p1f_d/summary.json` and `summary.md`;
+- full per-run raw results remain in the workflow artifact.
