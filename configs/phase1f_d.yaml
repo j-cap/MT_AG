@@ -1,0 +1,53 @@
+simulation:
+  dt: 0.1
+  duration: 60.0
+
+uwb:
+  sigma_range_m: 0.12
+
+initialization:
+  delta_d_sigma_factor: 3.0
+  mode: random_annulus_random_yaw
+
+paper_model:
+  propagation_convention: pre_turn
+  sigma_delta_l_m: 0.0
+  sigma_delta_phi_rad: 0.0
+
+conventional_pf:
+  resample_fraction: 0.5
+
+frozen_aacopf:
+  alpha: 0.5
+  beta: 0.0
+  c_lambda: 2.0
+  epsilon_distance: 1.0e-12
+  epsilon_weight: 1.0e-15
+  source: P1F-C repository-selected frozen tuple
+
+comparison:
+  n_seeds: 20
+  particle_budgets: [400, 800, 1200]
+  primary_particle_budget: 1200
+  matched_initial_particles: true
+  matched_uwb_realizations: true
+
+convergence:
+  position_threshold_m: 1.0
+  yaw_threshold_deg: 10.0
+  hold_time_s: 5.0
+  late_window_s: 20.0
+
+support_diagnostics:
+  correct_region_position_threshold_m: 1.0
+  correct_region_yaw_threshold_deg: 10.0
+  support_bins: [0, 1, 3]
+
+ancestry_diagnostics:
+  catastrophic_unique_parent_fraction: 0.1
+  dominant_clone_fraction: 0.5
+
+randomness:
+  range_seed_offset: 410000
+  initializer_seed_offset: 420000
+  pf_seed_offset: 430000
