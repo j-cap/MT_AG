@@ -8,6 +8,8 @@ on:
       - .github/workflows/p1f_f.yml
   workflow_dispatch:
 
+# Stress jobs are intentionally matrix-parallel; this workflow is only
+# retriggered by changes to this file or by manual dispatch.
 jobs:
   stress:
     runs-on: ubuntu-latest
