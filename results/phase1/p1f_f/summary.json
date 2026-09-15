@@ -1,0 +1,38 @@
+{
+  "frozen_aacopf": {"alpha": 0.5, "beta": 0.0, "c_lambda": 2.0},
+  "clean_overall": {
+    "n": 40,
+    "pf_correct_lock": 1.0,
+    "aacopf_correct_lock": 0.95,
+    "pf_wrong_lock": 0.0,
+    "aacopf_wrong_lock": 0.0
+  },
+  "stressed_overall": {
+    "n": 200,
+    "pf_correct_lock": 0.86,
+    "aacopf_correct_lock": 0.705,
+    "pf_wrong_lock": 0.135,
+    "aacopf_wrong_lock": 0.255,
+    "aacopf_catastrophic_collapse": 0.555,
+    "aacopf_wrong_lock_given_collapse": 0.36036036036036034,
+    "aacopf_wrong_lock_given_no_collapse": 0.12359550561797752
+  },
+  "cells": {
+    "balanced": {
+      "clean": {"pf_lock": 1.0, "aacopf_lock": 0.95, "pf_wrong": 0.0, "aacopf_wrong": 0.0, "pf_pos_rmse_m": 1.7154856057562546, "aacopf_pos_rmse_m": 2.251200158408598, "pf_yaw_rmse_deg": 12.574065383456661, "aacopf_yaw_rmse_deg": 16.95769056397539, "aacopf_collapse": 0.05},
+      "sparse_impulses": {"pf_lock": 1.0, "aacopf_lock": 0.8, "pf_wrong": 0.0, "aacopf_wrong": 0.15, "pf_pos_rmse_m": 1.817441195057328, "aacopf_pos_rmse_m": 2.739800834402036, "pf_yaw_rmse_deg": 13.385127835980617, "aacopf_yaw_rmse_deg": 21.775623407075685, "aacopf_collapse": 0.5},
+      "mixture_moderate": {"pf_lock": 0.9, "aacopf_lock": 0.7, "pf_wrong": 0.1, "aacopf_wrong": 0.25, "pf_pos_rmse_m": 2.422126592205922, "aacopf_pos_rmse_m": 2.649376771897791, "pf_yaw_rmse_deg": 19.706976044218933, "aacopf_yaw_rmse_deg": 21.375369601435562, "aacopf_collapse": 0.75},
+      "mixture_severe": {"pf_lock": 0.95, "aacopf_lock": 0.65, "pf_wrong": 0.05, "aacopf_wrong": 0.35, "pf_pos_rmse_m": 2.095347311278792, "aacopf_pos_rmse_m": 2.953950860156087, "pf_yaw_rmse_deg": 16.326202319414374, "aacopf_yaw_rmse_deg": 24.76309763580486, "aacopf_collapse": 0.9},
+      "nlos_burst_moderate": {"pf_lock": 0.75, "aacopf_lock": 0.6, "pf_wrong": 0.25, "aacopf_wrong": 0.35, "pf_pos_rmse_m": 3.030637791641204, "aacopf_pos_rmse_m": 3.8185120670537964, "pf_yaw_rmse_deg": 25.549549285077052, "aacopf_yaw_rmse_deg": 31.736177293853757, "aacopf_collapse": 0.5},
+      "nlos_burst_severe": {"pf_lock": 0.75, "aacopf_lock": 0.6, "pf_wrong": 0.25, "aacopf_wrong": 0.4, "pf_pos_rmse_m": 3.071175230069066, "aacopf_pos_rmse_m": 4.443295112428333, "pf_yaw_rmse_deg": 27.176921105920336, "aacopf_yaw_rmse_deg": 39.446448231385425, "aacopf_collapse": 0.45}
+    },
+    "minority_correct": {
+      "clean": {"pf_lock": 1.0, "aacopf_lock": 0.95, "pf_wrong": 0.0, "aacopf_wrong": 0.0, "pf_pos_rmse_m": 2.745165011465427, "aacopf_pos_rmse_m": 3.507682756172555, "pf_yaw_rmse_deg": 21.006291286251702, "aacopf_yaw_rmse_deg": 27.63707618364063, "aacopf_collapse": 0.15},
+      "sparse_impulses": {"pf_lock": 0.95, "aacopf_lock": 0.75, "pf_wrong": 0.05, "aacopf_wrong": 0.2, "pf_pos_rmse_m": 2.8191622805755094, "aacopf_pos_rmse_m": 4.158817352215225, "pf_yaw_rmse_deg": 21.80100978852834, "aacopf_yaw_rmse_deg": 35.08532719456146, "aacopf_collapse": 0.45},
+      "mixture_moderate": {"pf_lock": 0.9, "aacopf_lock": 0.8, "pf_wrong": 0.1, "aacopf_wrong": 0.15, "pf_pos_rmse_m": 3.354342827814917, "aacopf_pos_rmse_m": 4.146992566430024, "pf_yaw_rmse_deg": 27.1591554732796, "aacopf_yaw_rmse_deg": 34.14935118606228, "aacopf_collapse": 0.55},
+      "mixture_severe": {"pf_lock": 0.85, "aacopf_lock": 0.8, "pf_wrong": 0.1, "aacopf_wrong": 0.2, "pf_pos_rmse_m": 3.007005832980029, "aacopf_pos_rmse_m": 4.54970242677916, "pf_yaw_rmse_deg": 23.76684601581515, "aacopf_yaw_rmse_deg": 37.82768005370301, "aacopf_collapse": 0.7},
+      "nlos_burst_moderate": {"pf_lock": 0.8, "aacopf_lock": 0.7, "pf_wrong": 0.2, "aacopf_wrong": 0.25, "pf_pos_rmse_m": 3.893735786223189, "aacopf_pos_rmse_m": 4.945416777073479, "pf_yaw_rmse_deg": 31.99295491085885, "aacopf_yaw_rmse_deg": 42.16374859410513, "aacopf_collapse": 0.3},
+      "nlos_burst_severe": {"pf_lock": 0.75, "aacopf_lock": 0.65, "pf_wrong": 0.25, "aacopf_wrong": 0.25, "pf_pos_rmse_m": 4.168670827375891, "aacopf_pos_rmse_m": 5.204927211237283, "pf_yaw_rmse_deg": 36.40034481625134, "aacopf_yaw_rmse_deg": 45.83009972159243, "aacopf_collapse": 0.45}
+    }
+  }
+}

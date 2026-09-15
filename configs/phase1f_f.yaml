@@ -1,0 +1,96 @@
+simulation:
+  dt: 0.1
+  duration: 8.0
+
+geometry:
+  mode: moving
+
+uwb:
+  nominal_sigma_range_m: 0.12
+  assumed_likelihood_sigma_m: 0.12
+
+paper_model:
+  propagation_convention: pre_turn
+  sigma_delta_l_m: 0.0
+  sigma_delta_phi_rad: 0.0
+
+particle_cloud:
+  n_particles: 400
+  position_std_m: 0.25
+  yaw_std_deg: 5.0
+  wrong_bearing_offset_deg: 90.0
+  wrong_yaw_offset_deg: 90.0
+  correct_mode_position_threshold_m: 1.0
+  correct_mode_yaw_threshold_deg: 10.0
+  concentration_fraction: 0.9
+  wrong_lock_fraction: 0.1
+  hold_time_s: 1.0
+  catastrophic_unique_parent_fraction: 0.1
+  dominant_clone_fraction: 0.5
+
+initial_mode_scenarios:
+  balanced:
+    correct_fraction: 0.5
+  minority_correct:
+    correct_fraction: 0.2
+
+conventional_pf:
+  resample_fraction: 0.5
+
+frozen_aacopf:
+  alpha: 0.5
+  beta: 0.0
+  c_lambda: 2.0
+  epsilon_distance: 1.0e-12
+  epsilon_weight: 1.0e-15
+  source: P1F-C repository-selected frozen tuple
+
+ranging_conditions:
+  clean:
+    family: clean
+  sparse_impulses:
+    family: impulses
+    n_events: 2
+    magnitude_m: 1.5
+    symmetric_sign: true
+  mixture_moderate:
+    family: mixture
+    probability: 0.08
+    gross_sigma_m: 0.6
+  mixture_severe:
+    family: mixture
+    probability: 0.08
+    gross_sigma_m: 1.2
+  nlos_burst_moderate:
+    family: nlos_burst
+    duration_s: 1.0
+    positive_bias_m: 0.6
+    extra_sigma_m: 0.08
+  nlos_burst_severe:
+    family: nlos_burst
+    duration_s: 2.0
+    positive_bias_m: 1.2
+    extra_sigma_m: 0.12
+
+validation:
+  seed_start: 200
+  n_seeds: 20
+
+recovery:
+  threshold_fraction: 0.9
+  hold_time_s: 0.5
+
+randomness:
+  nominal_range_seed_offset: 610000
+  initializer_seed_offset: 620000
+  impulse_seed_offset: 630000
+  mixture_seed_offset: 640000
+  nlos_seed_offset: 650000
+  pf_seed_offset: 660000
+
+claim_boundary:
+  description: >-
+    Both filters retain the nominal Gaussian likelihood; P1F-F changes only the
+    measurement process. The experiment therefore tests inherent resilience of
+    conventional resampling versus frozen AACOPF particle management, not a
+    robust-likelihood or explicit outlier-rejection method.

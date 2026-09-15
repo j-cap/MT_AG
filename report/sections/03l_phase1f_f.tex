@@ -1,0 +1,116 @@
+\section{Experiment P1F-F: non-Gaussian and NLOS-like UWB stress}
+\subsection{Purpose and claim boundary}
+P1F-F tests whether the frozen literal AACOPF particle-management mechanism has any inherent robustness advantage over conventional particle-filter resampling when the UWB measurement process departs from the Gaussian likelihood assumed by both filters. The experiment deliberately leaves the estimator-side range model unchanged,
+\begin{equation}
+    p(z_k\mid\bm x_k)\propto
+    \exp\!\left[-\frac{(z_k-\hat d_k)^2}{2\sigma_{\mathrm{UWB}}^2}\right],
+    \qquad \sigma_{\mathrm{UWB}}=\SI{0.12}{m}.
+\end{equation}
+No robust likelihood, innovation gate, NLOS detector, measurement rejection rule, or parameter retuning is introduced. Hence P1F-F is not an evaluation of an explicitly robust ranging estimator. It isolates whether conventional resampling or the frozen ACO copying mechanism is more tolerant to measurement-model mismatch.
+
+The AACOPF parameters remain fixed at the P1F-C values
+\begin{equation}
+    (\alpha,\beta,c_\lambda)=(0.5,0,2).
+\end{equation}
+They are not retuned for any corruption condition.
+
+\subsection{Controlled mode-selection setting}
+The random-annulus initialization used in P1F-D is intentionally not used for this experiment. P1F-D showed that at the manageable literal-AACOPF budget $N_p=1200$, the clean-data experiment is already dominated by sparse initial support of the correct mode. Such failures would confound a measurement-robustness test.
+
+P1F-F therefore returns to the controlled two-mode setting from P1F-C with $N_p=400$ particles and the informative moving auxiliary. Two initial particle clouds are evaluated:
+\begin{itemize}
+    \item \textbf{balanced:} $50\%$ of particles represent the correct mode and $50\%$ the competing mode;
+    \item \textbf{minority-correct:} $20\%$ represent the correct mode and $80\%$ the competing mode.
+\end{itemize}
+The competing mode is displaced by $90^\circ$ in initial bearing and yaw. Twenty previously unused seeds, 200--219, are evaluated for every condition and both initial clouds.
+
+A correct-mode lock requires the method-specific correct-mode signal to remain at or above $0.9$ to the end of the run for at least \SI{1}{s}. A wrong-mode lock analogously requires the signal to remain at or below $0.1$. For conventional PF, the signal is the correct-mode posterior mass before resampling. For AACOPF, it is the post-transition correct-mode particle fraction. The experiment also retains strict pose success, position/yaw RMSE, post-corruption recovery, PF resampling diagnostics, and AACOPF ancestry-collapse diagnostics.
+
+\subsection{Ranging corruption models}
+All stressed runs share the same nominal Gaussian realization with their clean counterpart for a given seed. Corruption is added only after the first sample so that initialization is identical across conditions. The six measurement conditions are:
+\begin{enumerate}
+    \item \textbf{clean:} nominal Gaussian noise only;
+    \item \textbf{sparse impulses:} two isolated errors of magnitude \SI{1.5}{m} with random sign;
+    \item \textbf{moderate mixture:} $8\%$ of samples receive an additional zero-mean gross-error term with standard deviation \SI{0.6}{m};
+    \item \textbf{severe mixture:} the same contamination construction with gross-error standard deviation \SI{1.2}{m};
+    \item \textbf{moderate NLOS burst:} one contiguous \SI{1.0}{s} interval receives a \SI{0.6}{m} positive bias and \SI{0.08}{m} extra jitter;
+    \item \textbf{severe NLOS burst:} one contiguous \SI{2.0}{s} interval receives a \SI{1.2}{m} positive bias and \SI{0.12}{m} extra jitter.
+\end{enumerate}
+The moderate and severe variants within each stochastic family reuse the underlying corruption pattern where applicable, so the severity comparison is paired rather than generated from unrelated realizations.
+
+\subsection{Balanced-cloud results}
+Table~\ref{tab:p1ff_balanced} summarizes the balanced initialization. The clean reference is strong for both algorithms, but the corrupted-range experiments consistently favor conventional PF.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-F balanced-cloud robustness results over 20 matched seeds. Position RMSE is full-horizon RMSE.}
+    \label{tab:p1ff_balanced}
+    \begin{tabular}{lrrrrrrr}
+        \toprule
+        Condition & PF lock & ACO lock & PF wrong & ACO wrong & PF pos. & ACO pos. & ACO collapse\\
+        & & & & & [m] & [m] & \\
+        \midrule
+        Clean                 & 1.00 & 0.95 & 0.00 & 0.00 & 1.715 & 2.251 & 0.05\\
+        Sparse impulses       & 1.00 & 0.80 & 0.00 & 0.15 & 1.817 & 2.740 & 0.50\\
+        Mixture, moderate     & 0.90 & 0.70 & 0.10 & 0.25 & 2.422 & 2.649 & 0.75\\
+        Mixture, severe       & 0.95 & 0.65 & 0.05 & 0.35 & 2.095 & 2.954 & 0.90\\
+        NLOS burst, moderate  & 0.75 & 0.60 & 0.25 & 0.35 & 3.031 & 3.819 & 0.50\\
+        NLOS burst, severe    & 0.75 & 0.60 & 0.25 & 0.40 & 3.071 & 4.443 & 0.45\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The two-impulse condition is particularly informative. Conventional PF retains a $20/20$ correct-mode lock rate and no wrong locks, whereas AACOPF falls to $16/20$ correct locks and produces $3/20$ wrong locks. Because only two measurements are corrupted, this behavior is consistent with a short-lived likelihood error being amplified by the copying transition.
+
+\subsection{Minority-correct results}
+The harder minority-correct initialization gives the same qualitative ordering, as shown in Table~\ref{tab:p1ff_minority}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-F minority-correct robustness results over 20 matched seeds.}
+    \label{tab:p1ff_minority}
+    \begin{tabular}{lrrrrrrr}
+        \toprule
+        Condition & PF lock & ACO lock & PF wrong & ACO wrong & PF pos. & ACO pos. & ACO collapse\\
+        & & & & & [m] & [m] & \\
+        \midrule
+        Clean                 & 1.00 & 0.95 & 0.00 & 0.00 & 2.745 & 3.508 & 0.15\\
+        Sparse impulses       & 0.95 & 0.75 & 0.05 & 0.20 & 2.819 & 4.159 & 0.45\\
+        Mixture, moderate     & 0.90 & 0.80 & 0.10 & 0.15 & 3.354 & 4.147 & 0.55\\
+        Mixture, severe       & 0.85 & 0.80 & 0.10 & 0.20 & 3.007 & 4.550 & 0.70\\
+        NLOS burst, moderate  & 0.80 & 0.70 & 0.20 & 0.25 & 3.894 & 4.945 & 0.30\\
+        NLOS burst, severe    & 0.75 & 0.65 & 0.25 & 0.25 & 4.169 & 5.205 & 0.45\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Relative to the clean matched seeds, AACOPF loses more correct-lock runs than PF for every stress family. For the severe mixture the reduction in lock fraction is numerically equal ($0.15$) for both algorithms, but AACOPF starts from a lower clean lock rate, has a higher wrong-lock fraction, and has larger position/yaw RMSE.
+
+\subsection{Pooled robustness comparison}
+Pooling the five corrupted conditions, two initial clouds, and 20 seeds gives 200 stressed runs per algorithm. Conventional PF achieves
+\begin{equation}
+    172/200=86.0\% \quad \text{correct locks},
+\end{equation}
+with $27/200=13.5\%$ wrong locks. Frozen AACOPF achieves only
+\begin{equation}
+    141/200=70.5\% \quad \text{correct locks},
+\end{equation}
+with $51/200=25.5\%$ wrong locks. AACOPF has a lower correct-lock fraction than conventional PF in every one of the ten stressed cells.
+
+Pooling by corruption family gives correct-lock fractions of $97.5\%/77.5\%$ for sparse impulses, $90.0\%/73.75\%$ for mixture contamination, and $76.25\%/63.75\%$ for NLOS bursts, where each pair is conventional PF/AACOPF. The corresponding fractions that recover the correct-mode signal after the final corruption are $97.5\%/82.5\%$, $55.0\%/42.5\%$, and $71.25\%/65.0\%$.
+
+\subsection{Ancestry collapse under corrupted likelihood evidence}
+Catastrophic AACOPF ancestry collapse occurs in $111/200=55.5\%$ of stressed runs. Among these runs, $40/111=36.0\%$ finish in wrong-mode lock. Without catastrophic collapse, the corresponding rate is $11/89=12.4\%$. This is a descriptive association and does not establish causality, but it is consistent with the P1F-B/P1F-C mechanism diagnosis: if corrupted measurement evidence temporarily favors a wrong hypothesis, aggressive cloning can rapidly remove alternative support and make recovery difficult.
+
+The result is important because it clarifies that the ACO transition only sees posterior weight differences. It has no mechanism for distinguishing a trustworthy high-weight particle from one made temporarily attractive by an outlier or NLOS-biased range.
+
+\subsection{P1F-F interpretation and decision}
+P1F-F does \textbf{not} support an inherent robustness advantage of the frozen literal AACOPF. Under the deliberately misspecified Gaussian likelihood, AACOPF is systematically less robust than conventional PF in the controlled campaign: it loses more clean successes, produces more wrong-mode locks, and generally has larger position and yaw errors.
+
+The consequence for the thesis architecture is explicit. Robust UWB handling, if required in later phases, must be introduced as a separate mechanism---for example through a robust likelihood, innovation gating, an NLOS/reliability model, or reliability-aware measurement selection. The audited AACOPF copying transition must not itself be described as providing NLOS/outlier robustness.
+
+No retuning of $(\alpha,\beta,c_\lambda)$ is performed in response to P1F-F. The next experiment, P1F-G, instead addresses the two remaining structural weaknesses already identified before this stress test: the quadratic all-pairs computational cost and the loss of rare useful support through aggressive particle cloning. Any future robust measurement model is kept conceptually separate from that scalable particle-transition adaptation.
+
+The moderate/severe mixture cells are not strictly monotone in every empirical metric; for example, balanced PF correct-lock fraction is $0.90$ for the moderate case and $0.95$ for the severe case. With 20 seeds this cell-level ordering remains stochastic and is not interpreted as a benefit of larger outliers. The robust conclusion is based on the paired algorithm comparison across all stress cells.
+
+The reproducible campaign is GitHub Actions workflow run \texttt{35000315361}. The aggregate artifact is \texttt{p1f-f-results}, artifact ID \texttt{10409367838}. Compact aggregate evidence is version controlled in \texttt{results/phase1/p1f\_f/}; full per-run evidence remains in the workflow artifact.
