@@ -1,15 +1,10 @@
 name: P1F-F Ranging Stress
 
 on:
-  push:
-    branches:
-      - phase1/p1f-f
-    paths:
-      - .github/workflows/p1f_f.yml
   workflow_dispatch:
 
-# Stress jobs are intentionally matrix-parallel; this workflow is only
-# retriggered by changes to this file or by manual dispatch.
+# The completed P1F-F campaign is intentionally manual-only to avoid
+# rerunning the expensive matrix during report/result maintenance.
 jobs:
   stress:
     runs-on: ubuntu-latest
