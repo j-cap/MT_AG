@@ -1,13 +1,6 @@
 name: P1F-E Parallel Experiment
 
 on:
-  push:
-    branches:
-      - phase1/p1f-e
-    paths:
-      - experiments/run_phase1f_e_shard.py
-      - experiments/aggregate_phase1f_e.py
-      - .github/workflows/p1f_e_parallel.yml
   workflow_dispatch:
 
 jobs:
