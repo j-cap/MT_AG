@@ -106,6 +106,115 @@ def observability_history_planar_imu(
     }
 
 
+def _paper_local_transition(state, increment, convention):
+    """Jacobian of the three-state DR propagation with respect to prior state."""
+    delta_l, delta_phi = np.asarray(increment, dtype=float)
+    phi = float(state[2])
+    if convention == "pre_turn":
+        heading = phi
+    elif convention == "post_turn":
+        heading = phi + delta_phi
+    else:
+        raise ValueError("convention must be 'pre_turn' or 'post_turn'")
+    f = np.eye(3)
+    f[0, 2] = -delta_l * np.sin(heading)
+    f[1, 2] = delta_l * np.cos(heading)
+    return f
+
+
+def observability_matrix_paper_state(
+    states,
+    increments,
+    auxiliary_positions,
+    *,
+    convention="pre_turn",
+):
+    """Finite-horizon local range observability matrix for [x,y,phi].
+
+    The matrix linearizes the exact paper-level dead-reckoning recursion around
+    the supplied trajectory. It is a local finite-horizon diagnostic, not a
+    nonlinear global-observability proof.
+    """
+    states = np.asarray(states, dtype=float)
+    increments = np.asarray(increments, dtype=float)
+    auxiliary_positions = np.asarray(auxiliary_positions, dtype=float)
+    if states.ndim != 2 or states.shape[1] != 3:
+        raise ValueError("states must have shape (N, 3)")
+    if increments.shape != (len(states) - 1, 2):
+        raise ValueError("increments must have shape (N-1, 2)")
+    if auxiliary_positions.shape != (len(states), 2):
+        raise ValueError("auxiliary_positions must have shape (N, 2)")
+
+    phi_total = np.eye(3)
+    rows = []
+    for k in range(len(states)):
+        displacement = states[k, :2] - auxiliary_positions[k]
+        distance = np.linalg.norm(displacement)
+        if distance < 1e-12:
+            raise ValueError("Target and auxiliary node coincide; range Jacobian undefined")
+        h = np.zeros((1, 3), dtype=float)
+        h[0, :2] = displacement / distance
+        rows.append(h @ phi_total)
+        if k < len(increments):
+            phi_total = (
+                _paper_local_transition(states[k], increments[k], convention) @ phi_total
+            )
+    return np.vstack(rows)
+
+
+def observability_history_paper_state(
+    states,
+    increments,
+    auxiliary_positions,
+    *,
+    convention="pre_turn",
+    rank_rtol=1e-9,
+):
+    """Return cumulative SVD/rank diagnostics for the three-state paper model."""
+    states = np.asarray(states, dtype=float)
+    increments = np.asarray(increments, dtype=float)
+    auxiliary_positions = np.asarray(auxiliary_positions, dtype=float)
+    phi_total = np.eye(3)
+    rows = []
+    singular_values = np.zeros((len(states), 3), dtype=float)
+    rank = np.zeros(len(states), dtype=int)
+
+    for k in range(len(states)):
+        displacement = states[k, :2] - auxiliary_positions[k]
+        distance = np.linalg.norm(displacement)
+        if distance < 1e-12:
+            raise ValueError("Target and auxiliary node coincide; range Jacobian undefined")
+        h = np.zeros((1, 3), dtype=float)
+        h[0, :2] = displacement / distance
+        rows.append((h @ phi_total).ravel())
+        sigma_available = np.linalg.svd(np.asarray(rows), compute_uv=False)
+        sigma = np.zeros(3, dtype=float)
+        sigma[: len(sigma_available)] = sigma_available
+        singular_values[k] = sigma
+        tol = rank_rtol * sigma[0] if sigma[0] > 0.0 else 0.0
+        rank[k] = int(np.sum(sigma > tol))
+        if k < len(increments):
+            phi_total = (
+                _paper_local_transition(states[k], increments[k], convention) @ phi_total
+            )
+
+    sigma_max = singular_values[:, 0]
+    sigma_min = singular_values[:, -1]
+    ratio = np.divide(
+        sigma_min,
+        sigma_max,
+        out=np.zeros_like(sigma_min),
+        where=sigma_max > 0.0,
+    )
+    return {
+        "singular_values": singular_values,
+        "sigma_max": sigma_max,
+        "sigma_min": sigma_min,
+        "sigma_ratio": ratio,
+        "rank": rank,
+    }
+
+
 def relative_geometry_metrics(target_positions, auxiliary_positions):
     """Summarize range and line-of-sight variation for one geometry."""
     target = np.asarray(target_positions, dtype=float)
