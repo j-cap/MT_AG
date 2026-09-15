@@ -1,0 +1,73 @@
+name: P1F-F Ranging Stress
+
+on:
+  push:
+    branches:
+      - phase1/p1f-f
+    paths:
+      - .github/workflows/p1f_f.yml
+  workflow_dispatch:
+
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        condition:
+          - clean
+          - sparse_impulses
+          - mixture_moderate
+          - mixture_severe
+          - nlos_burst_moderate
+          - nlos_burst_severe
+        initial_scenario:
+          - balanced
+          - minority_correct
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint experiment
+        run: ruff check experiments/run_phase1f_f.py experiments/aggregate_phase1f_f.py
+      - name: Run stress case
+        run: |
+          python experiments/run_phase1f_f.py \
+            --condition ${{ matrix.condition }} \
+            --initial-scenario ${{ matrix.initial_scenario }}
+      - name: Upload shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1f-f-${{ matrix.condition }}-${{ matrix.initial_scenario }}
+          path: results/phase1/p1f_f/shards/*.json
+
+  aggregate:
+    needs: stress
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Download stress shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: p1f-f-*
+          path: results/phase1/p1f_f/shards
+          merge-multiple: true
+      - name: Aggregate
+        run: python experiments/aggregate_phase1f_f.py
+      - name: Upload aggregate results
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1f-f-results
+          path: |
+            results/phase1/p1f_f/summary.json
+            results/phase1/p1f_f/summary.md
+            results/phase1/p1f_f/raw_results.json
