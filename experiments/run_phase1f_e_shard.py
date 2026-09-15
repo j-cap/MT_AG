@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import yaml
+from run_phase1f_e import initial_support_count, method_metrics, observability_summary
 
 from mt_ag.aacopf import run_literal_small_aacopf
 from mt_ag.paper_pf import (
@@ -15,7 +16,6 @@ from mt_ag.paper_pf import (
     run_paper_bootstrap_pf,
 )
 from mt_ag.simulation import auxiliary_trajectory
-from run_phase1f_e import initial_support_count, method_metrics, observability_summary
 
 ROOT = Path(__file__).resolve().parents[1]
 
