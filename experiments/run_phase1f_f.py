@@ -151,7 +151,7 @@ def build_ranges(cfg, condition_name, trajectory, auxiliary, seed):
         raise ValueError(f"Unknown ranging family: {family}")
 
     indices = np.asarray(metadata["indices"], dtype=int)
-    metadata["n_corrupted"] = int(len(indices))
+    metadata["n_corrupted"] = len(indices)
     metadata["first_corrupted_index"] = int(indices[0]) if len(indices) else None
     metadata["last_corrupted_index"] = int(indices[-1]) if len(indices) else None
     metadata["max_abs_additional_error_m"] = float(np.max(np.abs(additional)))
