@@ -21,14 +21,10 @@ def main():
         raise RuntimeError("No P1F-E shard files found")
 
     by_geometry = {name: [] for name in cfg["geometry_cases"]}
-    observed = {}
     for path in shard_files:
         payload = json.loads(path.read_text())
         name = payload["geometry"]
         by_geometry[name].extend(payload["runs"])
-        observed.setdefault(name, payload["observability"])
-        if observed[name] != payload["observability"]:
-            raise RuntimeError(f"Observability payload mismatch across {name} shards")
 
     expected = cfg["comparison"]["n_seeds"]
     for name, runs in by_geometry.items():
@@ -39,6 +35,20 @@ def main():
             )
 
     trajectory = generate_paper_trajectory(**cfg["simulation"])
+    auxiliaries = {
+        name: auxiliary_trajectory(
+            trajectory.t,
+            name,
+            target_positions=(
+                trajectory.state[:, :2] if name == "constant_bearing" else None
+            ),
+        )
+        for name in cfg["geometry_cases"]
+    }
+    observed = {
+        name: observability_summary(trajectory, auxiliary, cfg)
+        for name, auxiliary in auxiliaries.items()
+    }
     moving = auxiliary_trajectory(trajectory.t, "moving")
     moving_observability = observability_summary(trajectory, moving, cfg)
 
@@ -88,6 +98,7 @@ def main():
             "n_seeds": expected,
             "n_particles": cfg["comparison"]["n_particles"],
             "parallel_shards": len(shard_files),
+            "observability_recomputed_centrally": True,
         },
         "negative_controls": raw_geometry,
         "moving_observability_reference": moving_observability,
