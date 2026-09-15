@@ -5,10 +5,10 @@ from pathlib import Path
 
 import numpy as np
 import yaml
+from run_phase1f_e import aggregate_method, compact_geometry, distribution, observability_summary
 
 from mt_ag.paper_pf import generate_paper_trajectory
 from mt_ag.simulation import auxiliary_trajectory
-from run_phase1f_e import aggregate_method, compact_geometry, distribution, observability_summary
 
 ROOT = Path(__file__).resolve().parents[1]
 
