@@ -1,0 +1,69 @@
+{
+  "frozen_aacopf": {
+    "alpha": 0.5,
+    "beta": 0.0,
+    "c_lambda": 2.0
+  },
+  "design": {
+    "n_seeds_per_geometry": 20,
+    "n_particles": 1200,
+    "initial_support_count_mean": 2.7,
+    "initial_support_positive_fraction": 0.95
+  },
+  "observability": {
+    "stationary": {
+      "final_rank": 2,
+      "final_sigma_ratio": 5.969368224186862e-17,
+      "final_singular_values": [175.95284591416078, 10.134295980629725, 1.0503273273552384e-14],
+      "interpretation": "exact global rotational gauge about the fixed auxiliary"
+    },
+    "constant_bearing": {
+      "final_rank": 2,
+      "final_sigma_ratio": 1.42e-16,
+      "final_singular_values_representative": [380.1748249745645, 10.279889251928678, 5.421765399193344e-14],
+      "interpretation": "local/first-order rank deficiency; not a complete nonlinear impossibility result"
+    }
+  },
+  "stationary": {
+    "pf_pose_success_count": 1,
+    "pf_pose_success_fraction": 0.05,
+    "aacopf_pose_success_count": 0,
+    "aacopf_pose_success_fraction": 0.0,
+    "pf_late_position_rmse_mean_m": 32.7706273869034,
+    "aacopf_late_position_rmse_mean_m": 37.07840345457097,
+    "pf_late_yaw_rmse_mean_deg": 85.46485112383542,
+    "aacopf_late_yaw_rmse_mean_deg": 109.1236568929792,
+    "pf_late_map_range_fit_rmse_mean_m": 0.0587050187686444,
+    "pf_late_map_range_fit_rmse_median_m": 0.046731608822005256,
+    "aacopf_late_map_range_fit_rmse_mean_m": 1.6639053872015452,
+    "aacopf_late_map_range_fit_rmse_median_m": 0.18617988327972562,
+    "pf_final_position_spread_median_m": 3.1032275050005987e-13,
+    "pf_final_yaw_resultant_median": 1.0,
+    "aacopf_final_position_spread_median_m": 0.16239990509306235,
+    "aacopf_final_yaw_resultant_median": 0.9999669186889527,
+    "aacopf_catastrophic_collapse_fraction": 0.2,
+    "aacopf_dominant_clone_fraction": 0.9,
+    "failed_pf_late_map_range_fit_rmse_median_m": 0.05187047444421199,
+    "failed_pf_late_position_rmse_mean_m": 34.48640627582435,
+    "failed_pf_late_yaw_rmse_mean_deg": 89.94135163894535
+  },
+  "constant_bearing": {
+    "pf_pose_success_count": 5,
+    "pf_pose_success_fraction": 0.25,
+    "aacopf_pose_success_count": 0,
+    "aacopf_pose_success_fraction": 0.0,
+    "pf_late_position_rmse_mean_m": 6.588186570100499,
+    "aacopf_late_position_rmse_mean_m": 11.039743649685782,
+    "pf_late_yaw_rmse_mean_deg": 3.7430138666553128,
+    "aacopf_late_yaw_rmse_mean_deg": 13.256267208991014,
+    "pf_late_map_range_fit_rmse_mean_m": 1.4706710352650967,
+    "aacopf_late_map_range_fit_rmse_mean_m": 2.006436090386743,
+    "pf_final_position_spread_median_m": 1.881925395932502e-13,
+    "pf_final_yaw_resultant_median": 1.0,
+    "aacopf_final_position_spread_median_m": 1.258831939920877e-13,
+    "aacopf_final_yaw_resultant_median": 1.0,
+    "aacopf_catastrophic_collapse_fraction": 0.2,
+    "aacopf_dominant_clone_fraction": 0.85
+  },
+  "decision": "P1F-E passes its negative-control purpose: frozen AACOPF shows 0/20 strict full-pose recovery in both locally rank-deficient geometries. Stationary geometry additionally demonstrates the exact symmetry failure mode: conventional PF can fit ranges and become highly concentrated while remaining globally wrong. Constant-bearing PF succeeds in 5/20 runs, which is compatible with the stated claim boundary because the SVD result is only a local first-order diagnostic and does not rule out higher-order nonlinear information."
+}

@@ -2,7 +2,12 @@ import numpy as np
 
 from mt_ag.geometry import wrap_angle
 from mt_ag.imu import mechanize_planar, simulate_imu_measurements
-from mt_ag.observability import observability_history_planar_imu, relative_geometry_metrics
+from mt_ag.observability import (
+    observability_history_paper_state,
+    observability_history_planar_imu,
+    relative_geometry_metrics,
+)
+from mt_ag.paper_pf import generate_paper_trajectory
 from mt_ag.particle_filter import systematic_resample
 from mt_ag.sensors import generate_uwb_ranges
 from mt_ag.simulation import auxiliary_trajectory, generate_curved_trajectory
@@ -73,3 +78,36 @@ def test_moving_geometry_is_better_conditioned_than_constant_bearing():
         trajectory.dt,
     )
     assert informative["sigma_ratio"][-1] > degenerate["sigma_ratio"][-1]
+
+
+def test_paper_state_negative_controls_are_rank_deficient():
+    trajectory = generate_paper_trajectory(dt=0.1, duration=20.0)
+    stationary = auxiliary_trajectory(trajectory.t, "stationary")
+    constant_bearing = auxiliary_trajectory(
+        trajectory.t,
+        "constant_bearing",
+        target_positions=trajectory.state[:, :2],
+    )
+    moving = auxiliary_trajectory(trajectory.t, "moving")
+
+    stationary_obs = observability_history_paper_state(
+        trajectory.state,
+        trajectory.increments,
+        stationary,
+    )
+    constant_obs = observability_history_paper_state(
+        trajectory.state,
+        trajectory.increments,
+        constant_bearing,
+    )
+    moving_obs = observability_history_paper_state(
+        trajectory.state,
+        trajectory.increments,
+        moving,
+    )
+
+    assert stationary_obs["rank"][-1] < 3
+    assert constant_obs["rank"][-1] < 3
+    assert moving_obs["rank"][-1] == 3
+    assert moving_obs["sigma_ratio"][-1] > stationary_obs["sigma_ratio"][-1]
+    assert moving_obs["sigma_ratio"][-1] > constant_obs["sigma_ratio"][-1]

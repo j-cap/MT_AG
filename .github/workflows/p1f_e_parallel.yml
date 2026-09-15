@@ -1,0 +1,59 @@
+name: P1F-E Parallel Experiment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  shard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        geometry: [stationary, constant_bearing]
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Run shard
+        run: |
+          START=$(( ${{ matrix.shard }} * 5 ))
+          python experiments/run_phase1f_e_shard.py \
+            --geometry ${{ matrix.geometry }} \
+            --seed-start ${START} \
+            --n-seeds 5
+      - name: Upload shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1f-e-shard-${{ matrix.geometry }}-${{ matrix.shard }}
+          path: results/phase1/p1f_e/shards/*.json
+
+  aggregate:
+    needs: shard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Download shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: p1f-e-shard-*
+          path: results/phase1/p1f_e/shards
+          merge-multiple: true
+      - name: Aggregate
+        run: python experiments/aggregate_phase1f_e.py
+      - name: Upload aggregate results
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1f-e-results-parallel
+          path: |
+            results/phase1/p1f_e/summary.json
+            results/phase1/p1f_e/raw_results.json

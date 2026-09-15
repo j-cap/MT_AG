@@ -1,0 +1,146 @@
+\section{Experiment P1F-E: rank-deficient geometry negative controls}
+\subsection{Purpose and claim boundary}
+P1F-E is a deliberately negative-control experiment. P1D showed that auxiliary motion can determine whether the five-state IMU-driven localization problem is locally observable. P1F-E asks the corresponding question for the separate three-state paper-level model used in P1F-A--P1F-D: does the frozen literal AACOPF appear to recover a unique global pose when the UWB geometry is locally rank deficient?
+
+The frozen AACOPF parameters remain
+\begin{equation}
+    \alpha=0.5,\qquad \beta=0,\qquad c_\lambda=2,
+\end{equation}
+and are not retuned. The negative-control criterion is therefore not low estimation error. Rather, AACOPF should not show systematic full-pose recovery in a geometry whose available range information does not uniquely constrain the global pose. Apparent robust recovery would require an observability or metric audit rather than being interpreted immediately as an algorithm overcoming missing information.
+
+\subsection{Three-state paper-model observability diagnostic}
+Because P1D analyzed the different five-state IMU model, its rank result is not transferred by assumption. For the paper state
+\begin{equation}
+    \bm x_k=[x_k,y_k,\phi_k]^\top,
+\end{equation}
+with Equation~(3) pre-turn propagation,
+\begin{align}
+    x_{k+1} &= x_k+\Delta L_k\cos\phi_k,\\
+    y_{k+1} &= y_k+\Delta L_k\sin\phi_k,\\
+    \phi_{k+1} &= \phi_k+\Delta\phi_k,
+\end{align}
+the local transition Jacobian is
+\begin{equation}
+    F_k=
+    \begin{bmatrix}
+        1 & 0 & -\Delta L_k\sin\phi_k\\
+        0 & 1 &  \Delta L_k\cos\phi_k\\
+        0 & 0 & 1
+    \end{bmatrix}.
+\end{equation}
+For the scalar range measurement
+\begin{equation}
+    h_k(\bm x_k)=\lVert\bm p_k-\bm p_{A,k}\rVert_2,
+\end{equation}
+the local measurement Jacobian is
+\begin{equation}
+    H_k=
+    \begin{bmatrix}
+        (\bm p_k-\bm p_{A,k})^\top/d_k & 0
+    \end{bmatrix}.
+\end{equation}
+The cumulative finite-horizon matrix is
+\begin{equation}
+    \mathcal O_{0:K}=\begin{bmatrix}
+        H_0\\
+        H_1\Phi_{1,0}\\
+        \vdots\\
+        H_K\Phi_{K,0}
+    \end{bmatrix},
+\end{equation}
+and is evaluated by direct SVD.
+
+The two negative controls have different theoretical strength. For one fixed auxiliary at \(\bm p_A\), the transformation
+\begin{align}
+    \bm p'_k &= \bm p_A+R(\vartheta)(\bm p_k-\bm p_A),\\
+    \phi'_k &= \phi_k+\vartheta
+\end{align}
+leaves every target--auxiliary range unchanged and is also compatible with the same body-referenced displacement and yaw increments. The stationary case therefore has an exact one-parameter global rotational gauge. By contrast, the constant-bearing construction is diagnosed here by a rank-deficient local linearization; this does not exclude all higher-order nonlinear information.
+
+At the end of the \SI{60}{s} horizon the stationary paper-state observability matrix has singular values approximately
+\begin{equation}
+    (175.95,\;10.13,\;1.05\times 10^{-14}),
+\end{equation}
+while a representative constant-bearing evaluation gives
+\begin{equation}
+    (380.17,\;10.28,\;5.42\times 10^{-14}).
+\end{equation}
+Both therefore have numerical rank two. The informative moving reference has rank three. The tiny runner-to-runner variation in the smallest constant-bearing singular value is floating-point SVD roundoff and does not affect the numerical rank.
+
+\subsection{Negative-control geometries and matched protocol}
+Two geometries are evaluated:
+\begin{enumerate}
+    \item \textbf{stationary auxiliary:} the globally known auxiliary remains fixed at $[8,-4]^\top$~m;
+    \item \textbf{constant-bearing auxiliary:} the auxiliary follows the target such that the line-of-sight direction remains fixed while range changes.
+\end{enumerate}
+The informative moving geometry is retained only as the full-rank observability reference in this experiment because its matched PF--AACOPF filtering behavior is already covered by P1F-D.
+
+The filter protocol otherwise matches the primary P1F-D setting: \SI{60}{s} deterministic paper-state motion, exact $[\Delta L,\Delta\phi]$ increments, Gaussian UWB noise with $\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$, random first-range annulus plus random yaw, $N_p=1200$, and 20 seeds. Within each seed, conventional PF and AACOPF receive the same initial cloud. The same additive UWB-noise sequence and initial cloud are also reused across the two negative-control geometries; all geometries share the same auxiliary position and true range at $t=0$.
+
+The initial cloud contains only 2.7 particles in the diagnostic correct region on average, with positive support in 19/20 seeds. Thus P1F-E intentionally remains in the sparse-support regime identified in P1F-D rather than returning to the well-populated controlled modes used for P1F-C tuning.
+
+Full-pose convergence uses the same strict criterion as P1F-D: position error below \SI{1}{m} and wrapped yaw error below $10^\circ$ continuously to the end, with at least \SI{5}{s} remaining. Late-window RMSE uses the final \SI{20}{s}.
+
+\subsection{Negative-control filtering results}
+Table~\ref{tab:p1fe_main} summarizes the matched filtering results. Frozen AACOPF achieves no strict full-pose recovery in either negative-control geometry. Conventional PF succeeds once in the stationary case and in five constant-bearing runs.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-E negative-control results at $N_p=1200$ over 20 matched seeds per geometry.}
+    \label{tab:p1fe_main}
+    \begin{tabular}{llrrr}
+        \toprule
+        Geometry & Method & Pose success & Late position RMSE & Late yaw RMSE\\
+        \midrule
+        Stationary & PF & $1/20$ & \SI{32.77}{m} & $85.46^\circ$\\
+        Stationary & AACOPF & $0/20$ & \SI{37.08}{m} & $109.12^\circ$\\
+        Constant bearing & PF & $5/20$ & \SI{6.59}{m} & $3.74^\circ$\\
+        Constant bearing & AACOPF & $0/20$ & \SI{11.04}{m} & $13.26^\circ$\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The single stationary PF success does not contradict the gauge freedom. A finite random cloud can happen to contain and select the true member of the rotationally equivalent family; the ranges themselves do not make that orientation uniquely preferable. The low success frequency is consistent with this interpretation.
+
+The constant-bearing result requires a narrower statement. Conventional PF succeeds in 5/20 runs despite the rank-two local observability matrix. This is not a contradiction because the SVD is a first-order finite-horizon diagnostic rather than a complete nonlinear observability theorem. The nonlinear range function can contain higher-order information over a long trajectory. The constant-bearing case should therefore be described as \emph{locally degenerate or weakly informative}, not as globally impossible.
+
+\subsection{Measurement fit and false posterior confidence}
+The stationary geometry gives a particularly clear demonstration that measurement fit and particle concentration are insufficient correctness diagnostics. Across the 19 stationary PF runs that do not converge to the true pose, the mean late position RMSE is \SI{34.49}{m} and the mean late yaw RMSE is $89.94^\circ$. Nevertheless, the median late MAP range-fit RMSE is only \SI{0.052}{m}. This is below the simulated UWB standard deviation of \SI{0.12}{m}.
+
+At the same time, the median final PF position spread is approximately $3.1\times10^{-13}$~m and the median yaw resultant is one. The filter can therefore become essentially point-concentrated on a globally wrong pose while fitting the scalar ranges very accurately. Empirically,
+\begin{equation}
+    \text{range consistency} + \text{posterior concentration}
+    \;\not\Rightarrow\;
+    \text{correct global pose}.
+\end{equation}
+This behavior is exactly what is expected when the measurement model admits an unresolved global symmetry.
+
+The constant-bearing PF shows a related overconfidence symptom: its median final position spread is approximately $1.9\times10^{-13}$~m and its yaw resultant is one, although its mean late position RMSE remains \SI{6.59}{m}. Thus even when yaw is often accurate, collapse of the particle cloud is not proof that global position has been resolved correctly.
+
+\subsection{AACOPF ancestry behavior}
+Table~\ref{tab:p1fe_ancestry} shows that the frozen ACO rule continues to produce strong cloning in the negative controls. The diagnostic correct-mode mass and post-transition correct-mode fraction are zero at the final sample in all AACOPF runs for both geometries.
+
+\begin{table}[htbp]
+    \centering
+    \caption{P1F-E AACOPF ancestry diagnostics.}
+    \label{tab:p1fe_ancestry}
+    \begin{tabular}{lrr}
+        \toprule
+        Geometry & Catastrophic ancestry collapse & Dominant-clone event\\
+        \midrule
+        Stationary & $4/20$ ($20\%$) & $18/20$ ($90\%$)\\
+        Constant bearing & $4/20$ ($20\%$) & $17/20$ ($85\%$)\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Consequently, AACOPF can become concentrated through copying without acquiring the missing or weak geometric information. P1F-E therefore reinforces the earlier conclusion that particle concentration and effective sample size cannot be used as stand-alone localization-validity indicators.
+
+\subsection{P1F-E decision}
+P1F-E passes its intended negative-control test. The frozen AACOPF tuple from P1F-C yields $0/20$ strict full-pose recoveries in both locally rank-deficient geometries and therefore does not appear to manufacture robust global-pose information. The stationary case additionally provides a direct example of an exact global gauge: conventional PF can fit the measurements and collapse to a highly confident posterior while remaining tens of metres and roughly $90^\circ$ wrong.
+
+The constant-bearing result also refines the observability language used in the project. A rank-deficient local linearization identifies a weak geometry, but does not by itself establish nonlinear global non-observability; the 5/20 conventional-PF recoveries demonstrate why that distinction matters.
+
+The next experiment is P1F-F, which returns to the informative moving geometry and tests the robustness motivation of AACOPF under non-Gaussian UWB corruption and outliers. P1F-E does not motivate any parameter retuning.
+
+The matched 40-run-per-method campaign was executed in eight five-seed GitHub Actions shards from workflow run \texttt{34964754324}. All eight filtering shards completed successfully. A first aggregation attempt rejected tiny cross-runner SVD roundoff differences because observability payloads were compared by exact floating-point equality; the aggregation logic has since been corrected to recompute the deterministic observability diagnostic centrally. Aggregate scientific evidence is version controlled in \texttt{results/phase1/p1f\_e/summary.json} and \texttt{summary.md}.
