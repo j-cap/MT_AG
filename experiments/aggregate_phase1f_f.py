@@ -90,21 +90,27 @@ def compact(aggregate):
 
 
 def make_markdown(summary, cfg):
+    intro = (
+        "Both methods keep the nominal Gaussian likelihood with "
+        f"sigma={cfg['uwb']['assumed_likelihood_sigma_m']:.2f} m. Only the measurement "
+        "process changes, so this is not a robust-likelihood comparison."
+    )
     lines = [
         "# P1F-F summary — non-Gaussian / outlier UWB stress",
         "",
-        "Both methods keep the nominal Gaussian likelihood with "
-        f"sigma={cfg['uwb']['assumed_likelihood_sigma_m']:.2f} m. Only the measurement "
-        "process changes, so this is not a robust-likelihood comparison.",
+        intro,
         "",
     ]
     for scenario in cfg["initial_mode_scenarios"]:
+        header = (
+            "| condition | PF lock | AACOPF lock | PF wrong | AACOPF wrong | "
+            "PF pos RMSE [m] | AACOPF pos RMSE [m] | AACOPF collapse |"
+        )
         lines.extend(
             [
                 f"## Initial cloud: {scenario}",
                 "",
-                "| condition | PF lock | AACOPF lock | PF wrong | AACOPF wrong | "
-                "PF pos RMSE [m] | AACOPF pos RMSE [m] | AACOPF collapse |",
+                header,
                 "|---|---:|---:|---:|---:|---:|---:|---:|",
             ]
         )
@@ -136,18 +142,14 @@ def make_markdown(summary, cfg):
                 f"{value['aacopf']['clean_correct_locks_lost']} |"
             )
         lines.append("")
-    lines.extend(
-        [
-            "## Interpretation guardrail",
-            "",
-            "P1F-F tests whether the frozen particle-management rules are inherently tolerant "
-            "to corrupted ranges. Any robustness advantage must be visible without changing the "
-            "Gaussian likelihood, gating measurements, or retuning AACOPF parameters. If both "
-            "methods degrade strongly, the correct conclusion is that explicit robust measurement "
-            "handling is needed rather than that AACOPF is a robust-ranging method.",
-            "",
-        ]
+    guardrail = (
+        "P1F-F tests whether the frozen particle-management rules are inherently tolerant "
+        "to corrupted ranges. Any robustness advantage must be visible without changing the "
+        "Gaussian likelihood, gating measurements, or retuning AACOPF parameters. If both "
+        "methods degrade strongly, the correct conclusion is that explicit robust measurement "
+        "handling is needed rather than that AACOPF is a robust-ranging method."
     )
+    lines.extend(["## Interpretation guardrail", "", guardrail, ""])
     return "\n".join(lines)
 
 
