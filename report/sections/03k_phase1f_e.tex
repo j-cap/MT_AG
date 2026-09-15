@@ -1,0 +1,72 @@
+\section{Experiment P1F-E: rank-deficient geometry negative controls}
+\subsection{Purpose and claim boundary}
+P1F-E is a deliberately negative-control experiment. P1D showed that auxiliary motion can determine whether the five-state IMU-driven localization problem is locally observable. P1F-E asks the corresponding question for the separate three-state paper-level model used in P1F-A--P1F-D: does the frozen literal AACOPF appear to recover a unique global pose when the UWB geometry itself remains rank deficient?
+
+The frozen AACOPF parameters remain
+\begin{equation}
+    \alpha=0.5,\qquad \beta=0,\qquad c_\lambda=2,
+\end{equation}
+and are not retuned. A successful negative control is therefore \emph{not} low estimation error. The desired outcome is that neither conventional PF nor AACOPF exhibits systematic full-pose recovery in geometries whose three-state finite-horizon range-observability matrix is rank deficient. Apparent systematic recovery would trigger an implementation or metric audit rather than be interpreted as an algorithm overcoming missing information.
+
+\subsection{Three-state paper-model observability diagnostic}
+Because P1D analyzed the different five-state IMU model, its rank result is not transferred by assumption. For the paper state
+\begin{equation}
+    \bm x_k=[x_k,y_k,\phi_k]^\top,
+\end{equation}
+with Equation~(3) pre-turn propagation,
+\begin{align}
+    x_{k+1} &= x_k+\Delta L_k\cos\phi_k,\\
+    y_{k+1} &= y_k+\Delta L_k\sin\phi_k,\\
+    \phi_{k+1} &= \phi_k+\Delta\phi_k,
+\end{align}
+the local transition Jacobian is
+\begin{equation}
+    F_k=
+    \begin{bmatrix}
+        1 & 0 & -\Delta L_k\sin\phi_k\\
+        0 & 1 &  \Delta L_k\cos\phi_k\\
+        0 & 0 & 1
+    \end{bmatrix}.
+\end{equation}
+For the scalar range measurement
+\begin{equation}
+    h_k(\bm x_k)=\lVert\bm p_k-\bm p_{A,k}\rVert_2,
+\end{equation}
+the local measurement Jacobian is
+\begin{equation}
+    H_k=
+    \begin{bmatrix}
+        (\bm p_k-\bm p_{A,k})^\top/d_k & 0
+    \end{bmatrix}.
+\end{equation}
+The cumulative finite-horizon matrix is formed as in the earlier observability study,
+\begin{equation}
+    \mathcal O_{0:K}=\begin{bmatrix}
+        H_0\\
+        H_1\Phi_{1,0}\\
+        \vdots\\
+        H_K\Phi_{K,0}
+    \end{bmatrix},
+\end{equation}
+and evaluated by direct SVD. This is a local finite-horizon diagnostic rather than a general nonlinear observability theorem.
+
+\subsection{Negative-control geometries and matched protocol}
+Two geometries are evaluated:
+\begin{enumerate}
+    \item \textbf{stationary auxiliary:} the globally known auxiliary remains fixed at $[8,-4]^\top$~m;
+    \item \textbf{constant-bearing auxiliary:} the auxiliary follows the target such that the line-of-sight direction remains fixed while range changes.
+\end{enumerate}
+The informative moving geometry is evaluated only as an observability reference in this experiment because its matched PF--AACOPF filtering behavior is already covered by P1F-D.
+
+The filter protocol otherwise matches the primary P1F-D setting: \SI{60}{s} deterministic paper-state motion, exact $[\Delta L,\Delta\phi]$ increments, Gaussian UWB noise with $\sigma_{\mathrm{UWB}}=\SI{0.12}{m}$, random first-range annulus plus random yaw, $N_p=1200$, and 20 seeds. Within each seed, conventional PF and AACOPF receive the same initial cloud. The same additive UWB-noise sequence and the same initial cloud are also reused across the two negative-control geometries; all geometries share the same auxiliary position and true range at $t=0$.
+
+Full-pose convergence uses the same strict criterion as P1F-D: position error below \SI{1}{m} and wrapped yaw error below $10^\circ$ continuously to the end, with at least \SI{5}{s} remaining. Late-window RMSE uses the final \SI{20}{s}.
+
+\subsection{Measurement fit versus global-pose correctness}
+P1F-E additionally records the range-fit RMSE of the MAP state trajectory. This diagnostic separates measurement consistency from global-pose correctness. In a rank-deficient problem, an estimator may fit the available UWB measurements closely while remaining wrong in an unobservable global direction. Consequently,
+\begin{equation}
+    \text{small range residual}\;\not\Rightarrow\;\text{correct global pose}.
+\end{equation}
+Posterior position spread, yaw resultant, conventional-PF resampling diversity, and the AACOPF unique-parent/cloning diagnostics are retained to distinguish unresolved symmetry from algorithmic collapse to one arbitrary compatible mode.
+
+% P1F-E numerical results and decision are inserted after the Actions campaign completes.
