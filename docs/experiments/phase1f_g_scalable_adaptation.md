@@ -11,7 +11,7 @@ The goal is therefore **not** to claim a new reproduction of Han et al. The P1F-
 
 ## Adapted transition
 
-For each source particle, P1F-G considers only a global pool of the `K` highest-weight particles. Strictly higher-weight members of that pool remain eligible destinations and retain the audited score
+For each source particle, P1F-G scores only a global pool of the `K` highest-weight particles. Strictly higher-weight members of that pool remain eligible destinations and retain the audited score
 
 `(w_j - w_i + eps_w)^alpha * (1 / (d_ij + eps_d))^beta`.
 
@@ -20,6 +20,8 @@ The P1F-C tuple remains frozen:
 `(alpha, beta, c_lambda) = (0.5, 0, 2)`.
 
 Because `beta=0`, the selected frozen transition is weight-driven; the bounded pool therefore targets the highest-weight destinations directly. Candidate scoring is `O(N K)` instead of `O(N^2)`.
+
+The movement threshold deliberately preserves the literal normalization `lambda_i = c_lambda / K_i`, where `K_i` is the **total** number of strictly higher-weight particles in the full cloud, not the truncated candidate-pool size. `K_i` is obtained from the sorted weights in `O(N log N)`. This detail matters: using only the bounded candidate count would inflate the threshold and can suppress the ACO transition almost completely. The first implementation smoke campaign exposed exactly that failure mode, and the production P1F-G experiment therefore keeps the original threshold scale while truncating only destination scoring.
 
 Two support/diversity guards are added after the score-threshold test:
 
@@ -36,7 +38,7 @@ A compact development sweep uses the same controlled two-mode benchmark as P1F-C
 - max move fraction in `{0.10,0.25,0.50}`;
 - destination-capacity fraction in `{0.01,0.025,0.05}`.
 
-The selected configuration must first meet a 90% correct-lock floor and at most 5% wrong-lock rate across balanced and minority-correct clouds. Among eligible settings the selection is safety-first: minimize catastrophic ancestry collapse, then dominant cloning, then candidate count and guard sizes. Global random-annulus seeds are not used for tuning.
+The selected configuration must first meet a 90% correct-lock floor and at most 5% wrong-lock rate across balanced and minority-correct clouds. Among eligible settings the selection is safety-first: minimize catastrophic ancestry collapse, then dominant cloning, then candidate count and guard sizes. The workflow fails explicitly if no setting meets these predefined development criteria. Global random-annulus seeds are not used for tuning.
 
 ## Held-out controlled ablation
 
