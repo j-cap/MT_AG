@@ -1,0 +1,77 @@
+simulation:
+  dt: 0.1
+  duration: 8.0
+
+uwb:
+  sigma_range_m: 0.12
+
+paper_model:
+  propagation_convention: pre_turn
+  sigma_delta_l_m: 0.0
+  sigma_delta_phi_rad: 0.0
+
+frozen_aacopf:
+  alpha: 0.5
+  beta: 0.0
+  c_lambda: 2.0
+  epsilon_distance: 1.0e-12
+  epsilon_weight: 1.0e-15
+  source: P1F-C frozen tuple
+
+controlled_cloud:
+  n_particles: 400
+  position_std_m: 0.25
+  yaw_std_deg: 5.0
+  wrong_bearing_offset_deg: 90.0
+  wrong_yaw_offset_deg: 90.0
+  correct_mode_position_threshold_m: 1.0
+  correct_mode_yaw_threshold_deg: 10.0
+  concentration_fraction: 0.9
+  wrong_lock_fraction: 0.1
+  hold_time_s: 1.0
+  catastrophic_unique_parent_fraction: 0.1
+  dominant_clone_fraction: 0.5
+
+controlled_scenarios:
+  balanced:
+    correct_fraction: 0.5
+  minority_correct:
+    correct_fraction: 0.2
+
+development:
+  seed_start: 400
+  n_seeds: 8
+  candidate_counts: [8, 16, 32]
+  max_move_fractions: [0.10, 0.25, 0.50]
+  destination_capacity_fractions: [0.01, 0.025, 0.05]
+  success_floor: 0.90
+  wrong_lock_ceiling: 0.05
+  selection_policy: "Among settings meeting the correct-lock floor and wrong-lock ceiling, minimize catastrophic collapse, then dominant cloning, then candidate count, then max-move fraction, then destination capacity. If none are eligible, maximize correct lock first and report the miss."
+
+controlled_validation:
+  seed_start: 500
+  n_seeds: 20
+
+random_annulus_validation:
+  duration: 60.0
+  seed_start: 600
+  n_seeds: 20
+  particle_budgets: [1200, 5000, 10000]
+  primary_particle_budget: 10000
+  initialization_delta_d_sigma_factor: 3.0
+  convergence_position_threshold_m: 1.0
+  convergence_yaw_threshold_deg: 10.0
+  convergence_hold_time_s: 5.0
+  late_window_s: 20.0
+  pf_resample_fraction: 0.5
+  candidate_only_at_budget: 1200
+
+runtime_scaling:
+  particle_budgets: [400, 1200, 5000, 10000, 40000]
+  repeats: 5
+  literal_reference_budgets: [100, 200, 400, 800, 1200]
+
+randomness:
+  range_seed_offset: 610000
+  initializer_seed_offset: 620000
+  pf_seed_offset: 630000
