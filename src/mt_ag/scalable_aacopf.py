@@ -25,19 +25,24 @@ def bounded_candidate_aco_transition(
 ):
     """Apply the P1F-G bounded-candidate AACOPF adaptation.
 
-    Each source particle considers only a global pool of the ``candidate_count``
-    highest-weight particles and retains only strictly higher-weight candidates.
-    The audited AACOPF score is then evaluated on this bounded set. Two explicit
-    diversity guards are applied after the score/threshold test:
+    Each source particle scores only a global pool of the ``candidate_count``
+    highest-weight particles and retains strictly higher-weight members of that
+    pool as possible destinations. The movement threshold keeps the literal
+    normalization ``c_lambda / K_i`` with ``K_i`` equal to the total number of
+    strictly higher-weight particles in the full cloud. That count is obtained
+    from sorted weights in O(N log N) without constructing a dense pair matrix.
+    This avoids the unintended threshold inflation that would occur if K_i were
+    replaced by the truncated candidate-pool size.
+
+    Two explicit diversity guards are applied after the score/threshold test:
 
     1. at most ``max_move_fraction`` of the cloud may move in one transition;
     2. one destination may receive at most ``destination_capacity_fraction`` of
        the cloud as incoming copies.
 
-    Candidate and guard decisions are made from the immutable pre-transition
-    cloud. The implementation cost is O(N K) in candidate scoring, plus sorting
-    the N weights to form the global candidate pool. This is a repository
-    adaptation, not a literal claim about Han et al.'s implementation.
+    Candidate and guard decisions use the immutable pre-transition cloud. The
+    candidate scoring cost is O(N K), plus O(N log N) sorting. This is a
+    repository adaptation, not a literal claim about Han et al.'s implementation.
     """
     start = perf_counter()
     particles = np.asarray(particles, dtype=float)
@@ -107,9 +112,13 @@ def bounded_candidate_aco_transition(
     best_destination = elite_index[best_column]
     max_probability = probabilities[np.arange(n_particles), best_column]
 
+    sorted_weights = np.sort(normalized_weights)
+    full_candidate_counts = n_particles - np.searchsorted(
+        sorted_weights, normalized_weights, side="right"
+    )
     thresholds = np.full(n_particles, np.inf, dtype=float)
-    has_candidates = candidate_counts > 0
-    thresholds[has_candidates] = c_lambda / candidate_counts[has_candidates]
+    has_candidates = (candidate_counts > 0) & (full_candidate_counts > 0)
+    thresholds[has_candidates] = c_lambda / full_candidate_counts[has_candidates]
     eligible = has_candidates & (max_probability > thresholds)
     margin = max_probability - thresholds
     margin[~eligible] = -np.inf
