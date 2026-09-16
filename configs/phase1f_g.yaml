@@ -7,6 +7,8 @@ uwb:
 
 paper_model:
   propagation_convention: pre_turn
+  sigma_delta_l_m: 0.0
+  sigma_delta_phi_rad: 0.0
 
 frozen_aacopf:
   alpha: 0.5
