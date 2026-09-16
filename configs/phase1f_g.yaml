@@ -39,7 +39,7 @@ controlled_scenarios:
 development:
   seed_start: 400
   n_seeds: 8
-  candidate_counts: [8, 16, 32, 64]
+  candidate_counts: [8, 16, 32]
   max_move_fractions: [0.10, 0.25, 0.50]
   destination_capacity_fractions: [0.01, 0.025, 0.05]
   success_floor: 0.90
