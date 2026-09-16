@@ -25,6 +25,18 @@ jobs:
         run: pytest -q tests/test_scalable_aacopf.py
       - name: Run P1F-G
         run: python experiments/run_phase1f_g.py
+      - name: Require eligible development setting
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("results/phase1/p1f_g/summary.json").read_text())
+          assert data["development"]["selected"]["eligible"], (
+              "P1F-G development sweep produced no setting meeting the predefined "
+              "success/wrong-lock acceptance criteria"
+          )
+          PY
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
