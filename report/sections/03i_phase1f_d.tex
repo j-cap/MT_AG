@@ -146,3 +146,13 @@ P1F-D is therefore considered complete with the following conclusions:
 The next experiment is P1F-E. It retains the stationary and constant-bearing rank-deficient geometries as negative controls and uses the frozen AACOPF settings unchanged. The purpose is not to optimize performance but to verify that the particle-transition mechanism does not appear to overcome missing observability. P1F-F then studies non-Gaussian/outlier ranging, while P1F-G must address both the quadratic computational burden and the sparse-support/diversity problem identified here.
 
 The reproducible result provenance for P1F-D is GitHub Actions workflow run \texttt{33881931650}, artifact \texttt{p1f-d-results} (artifact ID \texttt{9941206807}). Aggregate evidence is version controlled in \texttt{results/phase1/p1f\_d/}.
+
+
+\subsection{P1F-D result visualization}
+Figure~\ref{fig:p1fd_result} shows the held-out matched error comparison at the primary $N_p=1200$ budget. AACOPF often yields lower late position/yaw error, but strict pose success remains worse than conventional PF. The figure therefore supports the limited error-shaping claim rather than a convergence claim.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1fd_matched_pf_aacopf.pdf}
+    \caption{P1F-D matched PF--AACOPF comparison at $N_p=1200$. Points below the dashed equality line correspond to seeds for which AACOPF has lower late error.}
+    \label{fig:p1fd_result}
+\end{figure}
