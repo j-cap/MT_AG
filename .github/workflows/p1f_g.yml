@@ -1,13 +1,10 @@
 name: P1F-G Scalable AACOPF
 
 on:
-  push:
-    branches:
-      - phase1/p1f-g
-    paths:
-      - .github/workflows/p1f_g.yml
   workflow_dispatch:
 
+# P1F-G is complete. The workflow is retained for explicit reproducibility
+# reruns only and does not execute automatically on future branch/main updates.
 jobs:
   experiment:
     runs-on: ubuntu-latest
