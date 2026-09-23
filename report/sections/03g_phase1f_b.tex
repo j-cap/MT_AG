@@ -182,3 +182,13 @@ P1F-B is complete as a mechanism-validation experiment. The deterministic tests 
 The correct next experiment is therefore P1F-C, not the headline PF--AACOPF comparison. P1F-C must study $\alpha$, $\beta$, and especially $c_\lambda$ on development seeds. Parameter selection must penalize wrong-mode lock and catastrophic ancestry collapse in addition to localization error. Only after this study is a setting frozen for P1F-D.
 
 The reproducible result provenance for P1F-B is GitHub Actions workflow run \texttt{33751243293}, artifact \texttt{9891624402}; the aggregate result files are stored in \texttt{results/phase1/p1f\_b/}.
+
+
+\subsection{P1F-B result visualization}
+Figure~\ref{fig:p1fb_result} summarizes the two defining properties of the literal all-pairs mechanism: approximately quadratic computational growth and episodically aggressive ancestry replacement. The representative wrong-lock event demonstrates that a large fraction of the cloud can be replaced while very few parents remain represented.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1fb_literal_mechanism.pdf}
+    \caption{P1F-B literal AACOPF mechanism. (a) Median all-pairs transition runtime versus particle count. (b) Moved and unique-parent fractions for representative correct-lock and wrong-lock transition events.}
+    \label{fig:p1fb_result}
+\end{figure}
