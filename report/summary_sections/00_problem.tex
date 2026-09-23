@@ -1,0 +1,12 @@
+\section{Problem and thesis objective}
+
+The thesis studies collaborative localization of mobile assets using inertial measurements and ultra-wideband (UWB) ranging. An IMU is available at high rate and requires no external infrastructure, but dead reckoning drifts. UWB ranges can correct that drift, but every range exchange consumes communication time and energy and may be degraded by geometry, packet loss, or non-line-of-sight propagation.
+
+The long-term research question is therefore:
+\begin{quote}
+How much UWB communication and collaboration is actually necessary to retain acceptable localization accuracy?
+\end{quote}
+
+The intended system consists of multiple mobile nodes equipped with IMUs and UWB radios. Nodes may range to one another rather than relying on a dense fixed-anchor infrastructure. This motivates two related questions: \emph{when} should a node request a range, and \emph{which peer} should it range to? The final thesis contribution is expected to connect localization accuracy with communication load and, after hardware characterization, energy consumption.
+
+Before communication can be reduced intelligently, the localization problem itself must be understood. Phase~1 therefore establishes the estimator baseline, the geometric conditions required for global localization, and the practical limitations of particle-based global-pose acquisition. The full research report contains all implementation choices, negative results, sweeps, and reproduction details. This condensed document retains only the evidence needed to understand the current scientific story.
