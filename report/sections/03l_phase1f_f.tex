@@ -114,3 +114,13 @@ No retuning of $(\alpha,\beta,c_\lambda)$ is performed in response to P1F-F. The
 The moderate/severe mixture cells are not strictly monotone in every empirical metric; for example, balanced PF correct-lock fraction is $0.90$ for the moderate case and $0.95$ for the severe case. With 20 seeds this cell-level ordering remains stochastic and is not interpreted as a benefit of larger outliers. The robust conclusion is based on the paired algorithm comparison across all stress cells.
 
 The reproducible campaign is GitHub Actions workflow run \texttt{35000315361}. The aggregate artifact is \texttt{p1f-f-results}, artifact ID \texttt{10409367838}. Compact aggregate evidence is version controlled in \texttt{results/phase1/p1f\_f/}; full per-run evidence remains in the workflow artifact.
+
+
+\subsection{P1F-F result visualization}
+Figure~\ref{fig:p1ff_result} condenses the ranging-stress campaign across the balanced and minority-correct clouds. Conventional PF retains a higher correct-lock fraction and a lower wrong-lock fraction for every corruption family, so literal AACOPF cannot be credited with inherent outlier/NLOS robustness under the unchanged Gaussian likelihood.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1ff_ranging_stress.pdf}
+    \caption{P1F-F UWB ranging stress. Fractions are averaged over the balanced and minority-correct controlled clouds. (a) Correct-mode lock fraction and (b) wrong-mode lock fraction for clean, impulse, mixture, and NLOS-burst conditions.}
+    \label{fig:p1ff_result}
+\end{figure}

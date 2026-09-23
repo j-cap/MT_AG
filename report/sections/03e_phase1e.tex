@@ -155,3 +155,12 @@ The comparison must record not only position and azimuth error but also converge
 
 \subsection{P1E decision}
 P1E is complete. The paper's AACOPF description is sufficiently detailed for a transparent, assumption-labelled qualitative reproduction, but not for an exact numerical replication. The committed machine-readable interpretation file \texttt{configs/phase1e\_aacopf\_interpretation.yaml} is the implementation contract for P1F. Any deviation from it during implementation must be documented as an explicit design change.
+
+\subsection{P1E audit visualization}
+Figure~\ref{fig:p1e_result} summarizes the role of P1E in the research chain. The source paper is first separated into source-specified behavior and underspecified choices; the latter are fixed in an explicit repository contract before literal-small evaluation, tuning, negative controls, stress tests, and the later scalable adaptation.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1e_reproduction_architecture.pdf}
+    \caption{P1E reproduction architecture: source formulation, identified ambiguities, repository interpretation contract, and the resulting evaluation sequence.}
+    \label{fig:p1e_result}
+\end{figure}

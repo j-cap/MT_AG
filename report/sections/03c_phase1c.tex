@@ -209,3 +209,13 @@ This result rules out two overly simple explanations. First, the experiment does
 The sharp degradation between the known-yaw control and the unknown-yaw case identifies global yaw ambiguity as the dominant difficulty in the current setup. The velocity-prior study additionally shows that the IMU-driven formulation introduces an initialization requirement that is absent from the higher-level $\Delta L,\Delta\psi$ interface used in the reference paper.
 
 P1C is therefore considered complete as a \emph{diagnostic phase}. Its outcome is not a robust global-localization baseline; rather, it defines the failure mode that the subsequent work must explain. The next experiment, P1D, keeps the aligned fixed-speed prior and explicitly varies auxiliary/target geometry to relate global convergence behavior to observability and particle-cloud evolution. P1C is also retained as motivation for the later AACOPF audit and matched PF--AACOPF comparison.
+
+
+\subsection{P1C result visualization}
+Figure~\ref{fig:p1c_result} shows why P1C is interpreted as a global-mode-selection problem rather than a single poor hyperparameter choice. Neither increasing the particle population nor changing the conventional resampling threshold produces a monotonic transition to reliable pose recovery.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1c_global_search_sensitivity.pdf}
+    \caption{P1C unknown-pose bootstrap-PF sensitivity. (a) Late position RMSE and terminal pose-success fraction versus particle count. (b) The same quantities versus resampling threshold $\gamma$.}
+    \label{fig:p1c_result}
+\end{figure}

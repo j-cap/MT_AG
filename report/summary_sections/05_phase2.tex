@@ -1,0 +1,17 @@
+\section{Phase-2 direction: communication versus localization quality}
+
+Phase~2 now addresses the actual thesis question rather than further AACOPF reproduction. The baseline estimator and geometry lessons from Phase~1 are held fixed while UWB communication is reduced or degraded in a controlled way.
+
+The planned sequence is:
+\begin{enumerate}
+    \item \textbf{UWB update-rate sweep:} reduce the ranging frequency and measure localization degradation and UWB transactions;
+    \item \textbf{peer-count and geometry sweep:} vary how many collaborative nodes are available and separate additional measurement count from improved geometry;
+    \item \textbf{packet loss and outages:} study independent losses, burst outages, and recovery;
+    \item \textbf{LOS/NLOS reliability:} introduce controlled corrupted ranges together with an explicit reliability-aware measurement mechanism;
+    \item \textbf{IMU-quality sensitivity:} determine how communication requirements change with inertial quality, using measured hardware values when available;
+    \item \textbf{communication--accuracy frontier:} summarize position/yaw error against UWB transactions per second and, after radio characterization, against energy.
+\end{enumerate}
+
+The fixed-rate/all-peer strategy remains the reference. Phase~2 is intended to establish an empirical frontier, not yet to optimize the schedule. That frontier then provides the evidence needed for Phase~3, where adaptive policies can decide when and whom to range using estimator uncertainty, geometry/information gain, measurement reliability, and communication or energy cost.
+
+In that sense, Phase~1 answers \emph{what makes the localization problem work or fail}; Phase~2 measures \emph{how much communication is needed}; and Phase~3 will use that knowledge to reduce communication intelligently.

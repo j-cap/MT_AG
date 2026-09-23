@@ -112,3 +112,13 @@ P1F-C is considered complete. The principal result is the frozen repository sett
 which passes the held-out controlled validation with 100\% correct-mode terminal lock and no wrong locks. These values are not attributed to Han et al. The next experiment, P1F-D, compares conventional PF and AACOPF under matched informative geometry using this tuple unchanged.
 
 The reproducible experiment provenance is GitHub Actions workflow run \texttt{33803059007}; the full generated result is stored in artifact \texttt{p1f-c-results} (artifact ID \texttt{9912216810}), while aggregate results are version controlled in \texttt{results/phase1/p1f\_c/}.
+
+
+\subsection{P1F-C result visualization}
+Figure~\ref{fig:p1fc_result} visualizes why the parameter freeze is safety-aware rather than based only on correct-mode concentration. The selected tuple $(\alpha,\beta,c_\lambda)=(0.5,0,2)$ lies in the high-correct-lock, low-wrong-lock region while limiting catastrophic ancestry collapse sufficiently to pass the predefined freeze rule.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1fc_tuning_tradeoff.pdf}
+    \caption{P1F-C development sweep. Correct-mode lock is shown against (a) catastrophic ancestry-collapse fraction and (b) wrong-mode-lock fraction. The star denotes the frozen tuple $(0.5,0,2)$.}
+    \label{fig:p1fc_result}
+\end{figure}

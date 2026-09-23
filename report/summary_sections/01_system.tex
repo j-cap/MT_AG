@@ -1,0 +1,36 @@
+\section{System and estimator}
+
+\subsection{Hardware-oriented state and measurements}
+The thesis estimator uses the planar state
+\begin{equation}
+    \bm{x}_k=
+    \begin{bmatrix}
+        p_{x,k} & p_{y,k} & v_{x,k} & v_{y,k} & \psi_k
+    \end{bmatrix}^{\top},
+\end{equation}
+with body-frame accelerometer measurements, yaw rate, and UWB range as sensor inputs. The inertial mechanization rotates horizontal body-frame acceleration into the navigation frame and integrates velocity, position, and yaw:
+\begin{align}
+    \psi_{k+1} &= \mathrm{wrap}\!\left(\psi_k+\omega_{z,k}\Delta t\right),\\
+    \bm{v}_{k+1} &= \bm{v}_k+\bm{a}^{n}_k\Delta t,\\
+    \bm{p}_{k+1} &= \bm{p}_k+\bm{v}_k\Delta t+\tfrac12\bm{a}^{n}_k\Delta t^2.
+\end{align}
+
+For an auxiliary node at known position $\bm{p}_{A,k}$, the UWB model is
+\begin{equation}
+    z_k=\lVert\bm{p}_k-\bm{p}_{A,k}\rVert_2+\nu_k.
+\end{equation}
+A bootstrap particle filter propagates candidate states using the IMU and reweights them with the range likelihood.
+
+\subsection{Why global pose is difficult}
+If the initial pose is approximately known, the filter operates locally and UWB mainly corrects inertial position drift. If initial position and yaw are unknown, one range measurement describes an annulus rather than a unique point. Over time, target and peer motion can remove that ambiguity, but only if the relative geometry contains enough information.
+
+Pairwise mobile ranges and inertial increments also do not automatically define an absolute world frame: global translation/rotation gauge freedoms remain unless a reference convention, known initial condition, or globally known node trajectory is supplied. Phase~1 therefore uses controlled globally known auxiliary trajectories to separate geometric observability from particle-filter approximation effects.
+
+\subsection{Paper-level reproduction branch}
+To understand the AACOPF mechanism proposed by Han et al.~\cite{han2020cooperative}, a separate paper-level model is also used:
+\begin{equation}
+    \bm{x}^{\mathrm{paper}}=[x,y,\phi]^\top,
+    \qquad
+    \bm{u}^{\mathrm{paper}}=[\Delta L,\Delta\phi]^\top.
+\end{equation}
+This branch is intentionally separated from the raw-IMU hardware-oriented estimator. It allows the particle-management mechanism to be evaluated without conflating it with additional velocity-state initialization issues.

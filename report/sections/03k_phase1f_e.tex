@@ -144,3 +144,13 @@ The constant-bearing result also refines the observability language used in the 
 The next experiment is P1F-F, which returns to the informative moving geometry and tests the robustness motivation of AACOPF under non-Gaussian UWB corruption and outliers. P1F-E does not motivate any parameter retuning.
 
 The matched 40-run-per-method campaign was executed in eight five-seed GitHub Actions shards from workflow run \texttt{34964754324}. All eight filtering shards completed successfully. A first aggregation attempt rejected tiny cross-runner SVD roundoff differences because observability payloads were compared by exact floating-point equality; the aggregation logic has since been corrected to recompute the deterministic observability diagnostic centrally. Aggregate scientific evidence is version controlled in \texttt{results/phase1/p1f\_e/summary.json} and \texttt{summary.md}.
+
+
+\subsection{P1F-E result visualization}
+Figure~\ref{fig:p1fe_result} summarizes the negative-control evidence. Frozen AACOPF achieves no strict full-pose recovery in either locally rank-deficient geometry. The stationary case additionally demonstrates false confidence: conventional PF can fit the measured range closely and collapse to an almost point-like posterior while remaining globally far from the true pose.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1fe_negative_controls.pdf}
+    \caption{P1F-E rank-deficient negative controls. (a) Strict pose-success fractions for conventional PF and frozen AACOPF. (b) Mean late position RMSE, with the stationary PF false-confidence diagnostic highlighted.}
+    \label{fig:p1fe_result}
+\end{figure}

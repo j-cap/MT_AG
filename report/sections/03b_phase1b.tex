@@ -156,3 +156,13 @@ P1B supports the following conclusions for the current controlled known-pose pro
 
 \subsection{Treatment of the P1A limitations}
 The limitations listed at the end of P1A are not all prerequisites that must be removed before Phase~1 is complete. They are controlled assumptions whose treatment is intentionally distributed across the research plan. P1B addresses the single-seed limitation and investigates sensitivity to initial state, IMU quality, bias, particle count, and process noise. P1C removes the approximately-known-initial-pose assumption. P1E--P1F address the AACOPF reproduction. Reduced UWB update rate, packet loss, NLOS effects, and communication timing belong primarily to Phase~2 or Phase~3, while three-dimensional/gravity-compensation validity, real sensor statistics, embedded timing, and energy characterization belong primarily to Phase~4. This staged treatment prevents several sources of uncertainty from being changed simultaneously.
+
+
+\subsection{P1B result visualization}
+Figure~\ref{fig:p1b_result} condenses the two most important robustness results: the boundary of the approximately known-pose assumption and the particle-count/runtime trade-off. The local PF remains effective for small-to-moderate initialization errors, while large prior errors can produce wrong-mode failures; increasing particle count beyond a few thousand gives diminishing RMSE improvement while runtime continues to increase.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1b_known_pose_robustness.pdf}
+    \caption{P1B known-pose robustness. (a) Mean position RMSE versus increasing initial-state uncertainty for dead reckoning and PF+UWB. (b) PF position RMSE and runtime versus particle count.}
+    \label{fig:p1b_result}
+\end{figure}

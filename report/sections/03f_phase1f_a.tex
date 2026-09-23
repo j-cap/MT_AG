@@ -307,3 +307,13 @@ P1F-A is therefore complete. The next task is P1F-B: implement and verify the li
 
 \subsection{Known limitations of P1F-A}
 The result is intentionally narrow. The DR increments are exact, only one deterministic truth trajectory and one informative auxiliary trajectory are used, the UWB error is Gaussian, and the auxiliary position is globally known. The diagnostic correct-mode mass depends on simulation truth and is unavailable in deployment. The structured control is one particular finite grid rather than an optimized deterministic sampler. Particle populations in the particle-count sweep are not nested. Finally, the measured runtime is produced by the GitHub Actions software environment and is not representative of the target ESP32 hardware. These limitations are acceptable because P1F-A exists to establish a controlled conventional-PF reference before the AACOPF transition is introduced.
+
+
+\subsection{P1F-A result visualization}
+Figure~\ref{fig:p1fa_result} emphasizes the main P1F-A boundary. Increasing the global particle population improves the aggregate result at high populations but remains stochastic and non-monotonic, while all tested initial clouds contain diagnostic correct-region support. Presence of useful particles is therefore not sufficient; their survival and selection matter.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1fa_global_pf_scaling.pdf}
+    \caption{P1F-A conventional paper-state PF. (a) Late position RMSE and strict pose-success fraction versus global particle count. (b) Initial-support presence versus final strict pose success at $N_p=10{,}000$.}
+    \label{fig:p1fa_result}
+\end{figure}

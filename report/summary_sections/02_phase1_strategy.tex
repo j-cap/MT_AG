@@ -1,0 +1,29 @@
+\section{Phase-1 strategy}
+
+Phase~1 follows a staged argument rather than one large end-to-end experiment. The steps and their role are summarized in Table~\ref{tab:summary_chain}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Scientific chain established in Phase~1.}
+    \label{tab:summary_chain}
+    \begin{tabular}{p{0.17\textwidth}p{0.35\textwidth}p{0.39\textwidth}}
+        \toprule
+        Step & Question & Main conclusion\\
+        \midrule
+        P1A--P1B & Can UWB correct IMU drift in a local/known-pose setting? & Yes. Position drift is reduced reliably across stochastic seeds; large initial errors and persistent bias define the boundary.\\
+        P1C--P1D & Can the unknown global pose be recovered, and when is it observable? & Informative relative motion is required, but full local observability does not guarantee reliable finite-particle acquisition.\\
+        P1E--P1F-D & Does literal AACOPF solve the global mode-selection problem? & No. It is a strong mode-amplification operator and does not improve strict held-out global convergence under sparse support.\\
+        P1F-E--P1F-F & Does AACOPF overcome missing geometry or bad ranges? & No. It cannot create missing information and is less robust than PF under the tested corrupted-range conditions.\\
+        P1F-G & Can the useful redistribution idea be made scalable and safe? & Yes for computation and genealogy; no improvement in strict global acquisition is demonstrated.\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The important distinction is between four different issues:
+\begin{enumerate}
+    \item \textbf{observability}: whether the measurement/motion geometry contains sufficient state information;
+    \item \textbf{support}: whether the finite particle cloud actually represents the useful global mode;
+    \item \textbf{measurement reliability}: whether the likelihood model is trustworthy;
+    \item \textbf{particle management}: how represented hypotheses are retained, copied, or removed.
+\end{enumerate}
+Phase~1 shows that these issues cannot be inferred from one another. A concentrated particle cloud can still be globally wrong; a locally observable trajectory can still be difficult for a finite global particle search; and aggressive redistribution can amplify a bad likelihood just as easily as a good one.

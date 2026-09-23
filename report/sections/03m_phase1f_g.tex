@@ -110,3 +110,13 @@ P1F-G supports two claims and rejects a third:
 The appropriate Phase-1 interpretation is therefore that guarded weight-directed redistribution can be made computationally practical and genealogically safe, and can reduce late estimation error when useful hypotheses survive. It does not remove the fundamental finite-support and global-mode-selection difficulty of unknown-pose localization.
 
 The final corrected campaign is GitHub Actions run \texttt{35068506066}, artifact \texttt{p1f-g-results}, artifact ID \texttt{10435397349}. Compact final evidence is version controlled in \texttt{results/phase1/p1f\_g/}; full per-run evidence remains in the workflow artifact.
+
+
+\subsection{P1F-G result visualization}
+Figure~\ref{fig:p1fg_result} combines the three claims that must remain separate. Candidate truncation alone is unsafe, the diversity guards restore controlled mode selection, bounded/guarded AACOPF lowers late global error without improving strict acquisition, and the bounded transition materially changes computational scaling.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.99\textwidth]{figures/phase1/p1fg_scalable_guarded.pdf}
+    \caption{P1F-G scalable guarded adaptation. (a) Held-out controlled correct/wrong lock fractions across the PF/AACOPF ablation. (b) Mean late position RMSE in the global random-annulus validation. (c) Empirical runtime-scaling slopes for literal and bounded transitions.}
+    \label{fig:p1fg_result}
+\end{figure}
