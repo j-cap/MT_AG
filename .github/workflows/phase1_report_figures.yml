@@ -3,14 +3,10 @@ name: Phase 1 report figures
 on:
   push:
     branches:
-      - report/phase1-figures
+      - report/summary-v2
     paths:
       - experiments/generate_report_figures.py
-      - results/phase1/trajectory_report.csv
-      - results/phase1/p1c/summary.json
-      - results/phase1/p1d/diagnostics_report.csv
-      - results/phase1/p1f_c/tuning_report.csv
-      - results/phase1/p1f_d/paired_report_1200.csv
+      - results/phase1/**
       - .github/workflows/phase1_report_figures.yml
   workflow_dispatch:
 
@@ -27,6 +23,8 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: pip install -e ".[dev]" pandas
+      - name: Lint figure generator
+        run: ruff check experiments/generate_report_figures.py
       - name: Generate figures
         run: python experiments/generate_report_figures.py
       - name: Commit generated PDFs
@@ -38,5 +36,5 @@ jobs:
             echo "No figure changes to commit."
             exit 0
           fi
-          git commit -m "Generate Phase 1 report figures"
+          git commit -m "Generate complete Phase 1 report figure set"
           git push
