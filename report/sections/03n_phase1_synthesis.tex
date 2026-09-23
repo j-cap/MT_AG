@@ -1,0 +1,56 @@
+\section{Phase 1 synthesis and handoff to Phase 2}
+\subsection{What Phase 1 established}
+Phase 1 was designed to separate four questions that are easy to conflate in cooperative UWB--inertial localization: whether inertial drift can be corrected by ranging, whether the global pose is observable from the available relative geometry, whether a finite particle approximation can retain the correct global mode, and whether the AACOPF particle-transition mechanism improves that approximation.
+
+The first question has a clear positive answer. In the known-pose setting, the conventional particle filter reliably combines inertial propagation and UWB ranging and substantially reduces position drift relative to dead reckoning. The multi-seed P1B study confirms that this result is not a single-seed artifact. The remaining known-pose weaknesses are dominated by large initial uncertainty and persistent inertial bias rather than by the basic fusion architecture.
+
+The second question is primarily geometric. P1D shows that a stationary single auxiliary and the constructed constant-bearing case are locally rank deficient for the five-state IMU model, while the informative moving geometry is locally full rank. P1F-E adds an important caution for the paper-level three-state model: a fixed auxiliary has an exact rotational gauge, whereas a rank-deficient local SVD for constant-bearing motion is not by itself a nonlinear impossibility theorem. Geometry must therefore be analysed before interpreting filter confidence or particle concentration.
+
+The third question is the central practical difficulty. In the unknown-pose problem, full-rank/informative geometry does not guarantee reliable bootstrap-PF acquisition. P1C and P1F-A show that useful hypotheses can be present initially and still be eliminated or fail to dominate. P1F-D makes the finite-support mechanism explicit: at manageable global particle counts, the diagnostic correct region may contain only a handful of particles. Increasing particle count improves support statistically but does not make acquisition monotone or reliable.
+
+The fourth question is answered more narrowly than the source paper's motivation might suggest. The audited literal AACOPF transition is a strong mode-amplification operator. P1F-B shows that it can quickly concentrate a useful mode but can also catastrophically clone a wrong one. P1F-C finds a safer frozen parameterization for a well-populated controlled two-mode problem, but P1F-D shows that this success does not transfer into a strict global-convergence improvement under sparse random-annulus support. P1F-F further shows that literal AACOPF is not inherently robust to corrupted UWB measurements: when the Gaussian likelihood is wrong, aggressive copying can amplify the wrong evidence.
+
+P1F-G separates the useful engineering ideas from these limitations. Bounded candidate scoring removes the dense quadratic bottleneck, and explicit diversity guards eliminate catastrophic cloning in the held-out controlled benchmark. The guarded method also reduces mean late position and yaw error in the global random-annulus study. However, it does not improve strict global-pose acquisition over conventional PF. The unresolved problem is therefore not simply transition cost or ancestry collapse; it is the broader combination of finite global support, mode survival, and ambiguous/weak information during acquisition.
+
+\subsection{Phase-1 conclusion}
+The compact Phase-1 conclusion is:
+\begin{quote}
+Known-pose cooperative ranging provides effective inertial-drift correction. Global-pose localization can become observable under informative relative motion, but practical particle filtering remains limited by finite support and global-mode survival. Literal AACOPF does not reliably solve this problem and can amplify incorrect modes, particularly under corrupted ranging. A bounded, diversity-guarded adaptation removes the quadratic computational bottleneck and prevents catastrophic cloning while often reducing late estimation error, but it does not eliminate the sparse-support global-acquisition problem.
+\end{quote}
+
+This conclusion deliberately separates \emph{observability}, \emph{particle representation}, \emph{measurement robustness}, and \emph{computational scalability}. None of these properties should be inferred from the others.
+
+\subsection{Mechanisms retained for later phases}
+The following elements are retained as useful design principles:
+\begin{itemize}
+    \item explicit geometry/observability diagnostics when interpreting cooperative-ranging performance;
+    \item conventional PF as the transparent baseline for localization and communication studies;
+    \item particle-support and genealogy diagnostics in any experiment involving global or multimodal uncertainty;
+    \item bounded/guarded particle redistribution as an optional computational mechanism, but not as a claimed global-acquisition solution;
+    \item explicit separation of robust measurement handling from particle-management logic.
+\end{itemize}
+
+The following Phase-1 ideas are \emph{not} carried forward as headline assumptions:
+\begin{itemize}
+    \item posterior concentration is not treated as evidence of globally correct localization;
+    \item literal AACOPF is not treated as an NLOS/outlier-robust estimator;
+    \item local full rank is not treated as sufficient for reliable finite-particle acquisition;
+    \item higher particle count alone is not treated as a complete solution to unknown-pose initialization.
+\end{itemize}
+
+\subsection{Open questions intentionally deferred}
+Three issues remain open but do not block Phase-1 closure. First, persistent IMU bias must be characterized from real hardware before deciding whether bias states should be estimated explicitly. Second, robust UWB/NLOS treatment requires its own identifiable mechanism, for example robust likelihoods, innovation gating, reliability models, or reliability-aware node selection. Third, if reliable infrastructure-free global acquisition from very broad priors becomes a deployment requirement, explicit support creation or rejuvenation may be needed; P1F-G shows that safe redistribution alone cannot create hypotheses that are absent or insufficiently represented.
+
+These are later design choices, not unfinished AACOPF-reproduction tasks.
+
+\subsection{Handoff to the thesis research question}
+Phase 2 therefore shifts away from reproducing particle-transition mechanisms and toward the actual thesis question:
+\begin{quote}
+How much UWB communication and collaboration is necessary to retain acceptable localization accuracy?
+\end{quote}
+
+The next experiments will vary UWB update rate, number of available peers, geometry, packet loss/outages, LOS/NLOS degradation, and IMU quality. The primary outputs should no longer be estimator error alone. Each condition should report localization quality together with communication load and, once hardware measurements are available, energy cost.
+
+Phase 1 also changes how those sweeps must be interpreted. A low update rate may hurt not only through fewer measurements but also through weaker geometry accumulation and poorer global-mode survival. A high posterior confidence may still be wrong under unresolved gauge freedoms. A corrupted range should not automatically be exploited more strongly merely because it creates a peaked likelihood. These findings motivate the Phase-3 goal of information- and reliability-aware ranging: deciding \emph{when} to range and \emph{which peer} to range based on expected information gain, geometry, estimator uncertainty, measurement reliability, and communication/energy cost.
+
+With P1F-G completed and documented, Phase 1 is considered scientifically closed.
