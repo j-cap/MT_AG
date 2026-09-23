@@ -235,3 +235,13 @@ The following limitations are retained deliberately:
     \item realistic moving-case failures combine sensor uncertainty, particle approximation, and process-model uncertainty after geometry has made the state locally observable;
     \item the aligned fixed-speed prior from P1C remains in place so that initial-velocity ambiguity is not confounded with geometry.
 \end{itemize}
+
+
+\subsection{P1D result visualization}
+Figure~\ref{fig:p1d_result} connects the finite-horizon observability diagnostic directly to the filtering behavior. The stationary and constant-bearing cases remain effectively singular, while only the informative moving auxiliary accumulates nonzero conditioning and supports full-pose recovery.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1d_geometry_observability.pdf}
+    \caption{P1D geometry and observability. (a) Normalized finite-horizon observability conditioning for stationary, constant-bearing, and moving auxiliary trajectories. (b) Mean position-error histories for the corresponding realistic global-pose PF campaigns.}
+    \label{fig:p1d_result}
+\end{figure}
