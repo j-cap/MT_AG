@@ -191,3 +191,13 @@ The following limitations are deliberate and must be removed or investigated bef
     \item the AACOPF particle-transition mechanism has not yet been implemented;
     \item no sensor-noise or energy parameters have yet been measured on the final ESP32/IMU/DW3000 hardware.
 \end{itemize}
+
+
+\section{P1A result visualization}
+Figure~\ref{fig:p1a_result} complements the numerical verification table with the representative trajectory and position-error history. It is the same version-controlled figure reused by the condensed report; no separate summary-only copy is maintained.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase1/p1a_baseline_trajectory.pdf}
+    \caption{P1A known-pose baseline. (a) Ground truth, noisy IMU dead reckoning, and PF+UWB estimate for the committed seed-42 result. (b) Corresponding position-error histories.}
+    \label{fig:p1a_result}
+\end{figure}
