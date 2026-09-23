@@ -1,63 +1,63 @@
 \chapter{Research Backlog}
-\section{Phase 1 completion criteria}
-Phase 1 is complete only after the following sequence is documented and reproducible.
+
+\section{Phase 1 status: closed}
+Phase 1 is scientifically complete. The implemented sequence now covers the full planned baseline/reproduction path:
 \begin{enumerate}
-    \item \textbf{P1A -- IMU baseline:} deterministic planar IMU mechanization, noisy inertial drift, Gaussian UWB measurement, and conventional PF correction. Current status: \textbf{completed}. The implementation is verified and the result is supported by the P1B multi-seed study.
-    \item \textbf{P1B -- robustness of the known-pose baseline:} multi-seed study; sensitivity to initial position/velocity/yaw uncertainty; particle count; IMU noise and bias levels; PF process-noise sensitivity. Current status: \textbf{completed and documented}. The known-pose PF improves position RMSE in all 20 baseline seeds, while large initialization errors and persistent IMU bias have been identified as explicit boundaries for later work.
-    \item \textbf{P1C -- unknown initial pose:} introduce the global-localization problem using a first-range-conditioned position ring and globally distributed yaw hypotheses. Make the initial velocity prior explicit for the IMU-driven state. Current status: \textbf{completed as a diagnostic phase}. The known-yaw control is largely recoverable, whereas the realistic unknown-position/yaw bootstrap PF converges in only 2/20 core runs. Increasing particle count or disabling resampling does not resolve the failure. An idealized 40000-particle check with exact IMU/UWB information converges in 3/3 runs, showing that the selected moving-auxiliary scenario can resolve the ambiguity under ideal information.
-    \item \textbf{P1D -- geometry/observability:} compare stationary, degenerate constant-bearing, and informative moving auxiliary trajectories; report convergence, particle-cloud behaviour, and finite-horizon observability singular values. Current status: \textbf{completed and documented}. The stationary single auxiliary has numerical rank four, the constant-bearing construction rank three, and only the informative moving auxiliary reaches full rank five. The two rank-deficient cases achieve no full-pose convergence in either realistic or idealized filtering, while the moving case is the only geometry with successful recovery. Realistic moving-case success is nevertheless only 5/20, showing that full local observability is necessary but not sufficient for robust bootstrap-PF global localization.
-    \item \textbf{P1E -- paper reproduction audit:} document each equation and algorithmic step of Han et al.; list every underspecified AACOPF parameter and the chosen interpretation. Distinguish the paper's $\Delta L,\Delta\psi$ DR interface from the thesis IMU-driven mechanization. Current status: \textbf{completed and documented}. The audit identifies the main source ambiguities, including propagation timing, first-range sampling, the printed likelihood expression, $\alpha/\beta/\lambda$, the weight-difference definition, candidate selection, the undefined particle-rejection condition, adaptive-node thresholds, and the output ordering after uniform weight reset. A machine-readable interpretation contract fixes the P1F implementation choices.
-    \item \textbf{P1F -- AACOPF implementation and evaluation:} implement the audited transition mechanism and compare conventional PF and AACOPF under matched conditions. Current status: \textbf{in progress; P1F-A through P1F-F completed; P1F-G next}. P1F-A establishes the paper-state conventional-PF reference. P1F-B verifies the literal-small all-pairs ACO mechanism and exposes aggressive cloning and quadratic scaling. P1F-C performs a 60-setting safety-aware sweep and freezes $(\alpha,\beta,c_\lambda)=(0.5,0,2)$. P1F-D finds no strict-convergence advantage for frozen AACOPF under sparse random-annulus support, although late position/yaw error is reduced. P1F-E verifies that the copying mechanism does not manufacture robust full-pose information in rank-deficient geometries. P1F-F then shows that frozen AACOPF is less robust than conventional PF under non-Gaussian and NLOS-like range corruption when both retain the nominal Gaussian likelihood. The remaining experiment is P1F-G scalable bounded-candidate adaptation with explicit support/diversity preservation.
+    \item P1A--P1B: known-pose IMU--UWB particle-filter baseline and robustness checks;
+    \item P1C: unknown-position/yaw global initialization;
+    \item P1D: geometry and finite-horizon observability diagnostics;
+    \item P1E: Han et al. reproduction audit and explicit implementation contract;
+    \item P1F-A--P1F-D: paper-state PF baseline, literal AACOPF mechanism, tuning/freeze, and matched comparison;
+    \item P1F-E: rank-deficient geometry negative controls;
+    \item P1F-F: non-Gaussian/outlier UWB stress;
+    \item P1F-G: scalable bounded-candidate adaptation with explicit diversity guards.
+\end{enumerate}
+The Phase-1 synthesis is documented in the preceding section and defines the handoff to Phase 2.
+
+\section{Retained Phase-1 decisions}
+The following decisions are considered settled for the next phase unless later hardware evidence requires revision.
+
+\paragraph{Known-pose fusion baseline.}
+Conventional PF remains the transparent baseline for studying communication-rate and peer-selection effects. The known-pose experiments establish that UWB ranging can correct inertial drift effectively when initialization is sufficiently informative.
+
+\paragraph{Geometry before confidence.}
+Auxiliary/peer geometry and unresolved gauge freedoms must be considered before interpreting estimator confidence. Particle concentration, effective sample size, or low range residuals are not sufficient evidence of globally correct localization.
+
+\paragraph{Global acquisition.}
+Unknown-pose localization remains a finite-support and mode-survival problem even under informative motion. Larger particle populations increase useful support statistically but do not guarantee monotone or reliable acquisition.
+
+\paragraph{AACOPF interpretation.}
+Literal AACOPF is retained only as a reproduced mechanism/reference. It is not treated as a reliable global-acquisition or NLOS-robust solution. P1F-G shows that a bounded and diversity-guarded redistribution can be made scalable and genealogy-safe, and can reduce late error, but it does not improve strict global-pose acquisition over PF.
+
+\paragraph{Measurement robustness.}
+Robust UWB treatment is a separate estimator-design axis. If required, it should be introduced explicitly through a robust likelihood, gating, an NLOS/reliability model, or reliability-aware peer/measurement selection rather than through stronger particle copying.
+
+\section{Open questions carried forward}
+The following questions remain genuinely open and should not be confused with unfinished Phase-1 work:
+\begin{itemize}
+    \item \textbf{Real IMU bias/noise:} persistent accelerometer and gyroscope bias can dominate the estimate, but bias-state augmentation should be decided after hardware characterization.
+    \item \textbf{Reliable global acquisition:} if broad-prior infrastructure-free global initialization becomes a hard deployment requirement, explicit support creation/rejuvenation may be necessary in addition to safe redistribution.
+    \item \textbf{NLOS/outlier handling:} the reliability model and robust measurement mechanism remain to be selected and evaluated.
+    \item \textbf{Absolute reference/gauge choice:} infrastructure-free collaboration still requires an explicit reference convention or prior if a globally absolute frame is required.
+\end{itemize}
+
+\section{Immediate Phase-2 backlog}
+Phase 2 addresses the thesis research question: how much UWB communication and collaboration are required to maintain acceptable localization accuracy? The recommended experiment order is:
+\begin{enumerate}
+    \item \textbf{P2A -- UWB update-rate sweep:} vary ranging frequency while keeping geometry and peer count controlled. Report localization error, acquisition failures, support/confidence diagnostics, and number of UWB transactions.
+    \item \textbf{P2B -- peer-count and geometry sweep:} vary the number of available collaborative nodes and their relative trajectories. Separate the value of additional ranges from the value of improved geometry.
+    \item \textbf{P2C -- packet loss and outages:} introduce independent loss, burst outages, and delayed recovery. Measure how quickly uncertainty/error grows and how much communication is required to recover.
+    \item \textbf{P2D -- LOS/NLOS and measurement reliability:} introduce controlled NLOS/outlier processes and evaluate an explicit reliability-aware measurement model or gate. Keep this mechanism separate from particle-management adaptations.
+    \item \textbf{P2E -- IMU-quality sensitivity:} vary inertial noise/bias using measured hardware values when available; determine whether communication requirements shift with sensor quality.
+    \item \textbf{P2F -- communication--accuracy frontier:} combine the Phase-2 sweeps into a common trade-off representation such as position/yaw error versus UWB transactions per second. Once measured radio-energy values exist, extend this to error versus energy.
 \end{enumerate}
 
-\section{Current Phase-1 parameter and architecture decisions after P1F-F}
-For the local known-pose experiments, the P1B conclusion remains valid: $N_p=5000$ particles is a conservative default, and $N_p=2500$ is acceptable for exploratory sweeps. The P1A PF process-noise values are retained because P1B shows similar performance for the baseline and a $2\times$ scaling, whereas substantially smaller process noise causes under-dispersion and occasional failures.
+A fixed-rate/all-peer strategy should be retained as the reference throughout Phase 2. The purpose is not yet to optimize the schedule, but to establish the empirical information/communication frontier that Phase 3 will exploit.
 
-The IMU-driven global-pose problem requires a different interpretation of particle count. A structured $100\times100$ position/yaw grid ($N_p=10000$) remains the practical global-search baseline for realistic matched diagnostic experiments. P1C showed that increasing this grid to $150\times150$ did not make convergence reliable. The idealized $200\times200$ ($N_p=40000$) configurations are therefore diagnostic tests of representability/identifiability rather than practical defaults.
+\section{Phase 3 and Phase 4 outlook}
+Phase 3 will develop adaptive ranging and peer selection. Candidate policies should use estimator uncertainty, relative geometry/information gain, measurement reliability, and communication/energy cost to decide \emph{when} to range and \emph{which peer} to range. Comparisons must remain against the fixed-rate/all-peer Phase-2 baselines.
 
-P1D establishes that geometry must be treated before particle-algorithm tuning. For the five-state IMU model, the stationary single-auxiliary and constant-bearing cases are locally rank deficient, while the informative moving case is full rank. P1F-E confirms the corresponding distinction must be made carefully for the separate three-state paper model: the stationary case has an exact global rotational gauge, whereas the constant-bearing case is rank deficient only in the local first-order diagnostic and still permits occasional nonlinear recovery. Local rank deficiency must therefore not be over-stated as a general nonlinear impossibility result.
+Phase 4 will move the selected estimator and communication policy onto the ESP32/DW3000/IMU hardware. It will characterize real UWB and IMU noise, measure energy per ranging transaction, validate timing and embedded computational load, and compare hardware logs with the simulation predictions.
 
-P1E fixes a separate paper-level baseline. Han et al. are reproduced first with the three-state $[x,y,\phi]$ model and higher-level $\Delta L,\Delta\phi$ inputs. The primary propagation convention follows their formal Equation~(3), while the Algorithm~1 post-turn convention is retained as a sensitivity variant. Random first-range annular initialization is used for the paper-level reproduction; the annulus width $\Delta d=3\sigma_{\mathrm{UWB}}$ is an explicit repository choice because the paper does not report $\Delta d$.
-
-P1F-A fixes the practical conventional-PF reference at $N_p=10000$, with $N_p=40000$ retained as an upper-population reference. Correct-region hypotheses are present initially even in many failing runs, so the key difficulty is survival and selection of the useful mode under sequential likelihood weighting and particle replacement.
-
-The primary AACOPF interpretation uses a Gaussian range likelihood, strictly higher-weight destination candidates, weight difference $w_j-w_i$, synchronous movement from the pre-transition cloud, pre-ACO posterior output, and a uniform post-transition weight reset. P1F-B initially evaluated $(\alpha,\beta,c_\lambda)=(1,1,0.5)$ as a mechanism-check point and showed that this configuration is too aggressive for reliable use.
-
-P1F-C freezes the literal-small comparison tuple
-\begin{equation}
-    (\alpha,\beta,c_\lambda)=(0.5,0,2).
-\end{equation}
-The tuple is selected from 60 candidates using 16 matched development runs and then evaluated on 40 held-out controlled bimodal runs. Held-out correct-mode lock is 40/40 and wrong-mode lock is 0/40. Catastrophic ancestry collapse still occurs in 9/40 runs and a dominant-clone event in 34/40 runs. Therefore this setting is accepted only as a frozen parameterization for held-out comparison; it is not considered diversity-safe or deployment-ready.
-
-P1F-D demonstrates the limits of transferring this controlled tuning to the complete random-annulus global problem. At $N_p=1200$, the random initial cloud contains only 2.35 particles in the diagnostic correct region on average, compared with 80 or 200 correct-mode particles in the P1F-C tuning scenarios. Under this sparse-support condition, conventional PF succeeds in $2/20$ runs and AACOPF in $1/20$, so the primary convergence-improvement hypothesis is not supported. At the same time, AACOPF reduces mean late position RMSE from \SI{19.945}{m} to \SI{12.782}{m} and mean late yaw RMSE from $66.95^\circ$ to $33.99^\circ$. This is retained as a secondary error-shaping effect rather than a global-convergence claim.
-
-The P1F-D result adds an important algorithmic boundary: an ACO copying operator can amplify a useful mode only if that mode has adequate particle support. It cannot create absent hypotheses, and a mode represented by only one or two particles remains easy to eliminate. Retuning the frozen parameters on the P1F-D seeds is explicitly disallowed; any mechanism intended to improve sparse-mode survival belongs to a new experiment.
-
-P1F-E adds the complementary geometry boundary. For the paper-state model, both stationary and constant-bearing finite-horizon observability matrices have numerical rank two. Frozen AACOPF achieves $0/20$ strict full-pose recoveries in each case. Conventional PF succeeds in $1/20$ stationary runs and $5/20$ constant-bearing runs. The stationary success is compatible with the exact rotational symmetry because a finite cloud can happen to select the true representative of an indistinguishable family. The constant-bearing successes show why the rank-two local SVD must be interpreted only as a first-order diagnostic: higher-order nonlinear range information may still distinguish hypotheses over the full trajectory.
-
-The strongest P1F-E diagnostic is false confidence in the stationary case. Among the 19 conventional-PF failures, median late MAP range-fit RMSE is only \SI{0.052}{m}, while mean late global position and yaw errors are \SI{34.49}{m} and $89.94^\circ$, respectively. The posterior is typically almost point-concentrated. Range consistency, particle concentration and high effective sample size must therefore never be treated as sufficient evidence of globally correct localization.
-
-P1F-F establishes a separate measurement-robustness boundary. The experiment retains the nominal Gaussian likelihood for both methods and corrupts only the range process. Across 200 stressed controlled-mode runs, conventional PF achieves $172/200=86.0\%$ correct-mode locks and $27/200=13.5\%$ wrong locks, while frozen AACOPF achieves only $141/200=70.5\%$ correct locks and $51/200=25.5\%$ wrong locks. AACOPF has a lower correct-lock fraction in every stressed comparison cell. Catastrophic AACOPF ancestry collapse occurs in $111/200$ stressed runs and is associated descriptively with a substantially higher wrong-lock rate. Therefore the ACO transition must not be credited with inherent NLOS/outlier robustness.
-
-The transfer decision from P1F-F is to keep robust measurement handling conceptually separate from particle transition. If later thesis phases require NLOS/outlier tolerance, that property should be introduced explicitly through a robust likelihood, innovation gating, an NLOS/reliability model, or reliability-aware measurement/node selection. Retuning $(\alpha,\beta,c_\lambda)$ to measurement corruption is not adopted as the solution because it would mix particle-management and measurement-model design and would not address the underlying likelihood mismatch.
-
-The computational distinction between literal reproduction and later deployment remains unchanged. Han et al. recommend $N=M=400$, corresponding to $160000$ particles. A literal dense interpretation contains $2.56\times10^{10}$ pair entries; one \texttt{float64} pair matrix alone requires approximately \SI{204.8}{GB}. At $N_p=1200$, the literal AACOPF remains roughly two orders of magnitude slower than conventional PF. The literal implementation is therefore restricted to mechanism validation and manageable populations.
-
-Persistent accelerometer/gyroscope bias remains an open estimator-design question rather than an immediately added state. The P1B stress test shows that unestimated bias can dominate the remaining error, but the selected stress levels are synthetic. The decision to augment the state with bias variables should therefore be made after real IMU bias/noise characteristics are available.
-
-The initial velocity assumption also remains explicit in the IMU-driven branch. P1C shows that free initial velocity substantially worsens the global search. The aligned fixed-speed prior is therefore retained through the five-state Phase-1 diagnostic studies so that the separate initial-velocity problem is not confounded with observability and particle management. The paper-level three-state P1F branch does not introduce velocity states because Han et al. absorb motion into $\Delta L$ and $\Delta\phi$.
-
-\section{Immediate P1F sequence after P1F-F}
-The next and final planned Phase-1 AACOPF experiment is \textbf{P1F-G}. It replaces the dense all-pairs destination set by a bounded/scalable candidate mechanism and must quantify the accuracy--diversity--runtime trade-off while addressing the sparse-support problem exposed by P1F-D. Candidate reduction alone is not sufficient if it preserves the same aggressive elimination of rare hypotheses. P1F-G should therefore compare at least one bounded-candidate transition with an explicit support-preservation or rejuvenation mechanism, while keeping the original literal AACOPF as a small-population reference.
-
-P1F-F also fixes the claim boundary for P1F-G: the scalable particle-transition experiment should use clean Gaussian ranges for its primary mechanism comparison. Robust measurement handling is a distinct later design axis and should not be mixed into the scalable-transition experiment unless presented as a separate ablation.
-
-After P1F-G, Phase 1 should be closed with a synthesis section that states clearly which mechanisms are retained for later thesis phases: geometry/observability diagnostics, explicit support/diversity monitoring, scalable particle management only if it proves useful, and a separate reliability-aware treatment of corrupted UWB measurements.
-
-\section{Paper-reproduction architecture after P1F-F}
-The earlier Option-A/Option-B decision remains resolved in favor of \textbf{two baselines}. The paper-level reproduction uses $[x,y,\phi]$ with $\Delta L,\Delta\phi$ so that the AACOPF mechanism can be assessed without the additional initialization problem introduced by velocity states. The hardware-oriented thesis estimator remains $[p_x,p_y,v_x,v_y,\psi]$ with raw IMU mechanization. Only after the paper-level AACOPF and its scalable adaptation are understood will a selected particle-management concept be transferred to the IMU-driven estimator.
-
-The P1E audit fixes the claim boundary. Exact numerical replication of Han et al. is not required because raw trajectories, ranging data, random seeds, update frequency, complete noise distributions, and several AACOPF tuning parameters are unavailable. Phase 1 instead requires a transparent qualitative reproduction of the problem structure, observability behavior, and audited particle-management mechanism under fully documented assumptions. P1F-C--P1F-F strengthen this boundary: repository-selected parameters remain frozen for held-out tests, negative results are retained, local observability diagnostics are not promoted to stronger nonlinear claims than they support, and robustness is not attributed to a particle-copying operator when the matched stress test does not support that claim.
-
-\section{Phase 2--4 outlook}
-Phase 2 will vary UWB update rate, node count, geometry, outages, LOS/NLOS degradation, and IMU quality. P1D/P1F-E establish that range count and posterior confidence alone are not sufficient measures of localization information; geometry and unresolved gauge freedoms must be retained explicitly in the analysis. P1F-D shows that particle support and mode preservation must be tracked when communication conditions change. P1F-F adds that corrupted ranges require an explicit reliability/measurement-model treatment rather than stronger exploitation of current particle weights. These findings directly motivate Phase 3, where uncertainty/information-aware UWB scheduling and reliability-aware node selection can decide not only when and whom to range, but also how strongly a suspect measurement should influence the estimator. Phase 4 will characterize the actual hardware, replace simulated sensor parameters with measured ones, measure energy per UWB transaction, port the selected estimator to C/C++, and compare simulation and hardware.
+\section{Next concrete milestone}
+The next milestone is therefore \textbf{P2A: the controlled UWB update-rate sweep}. No further AACOPF reproduction experiments are planned before that transition.
