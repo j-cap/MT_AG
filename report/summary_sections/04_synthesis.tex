@@ -1,0 +1,18 @@
+\section{Phase-1 synthesis}
+
+The Phase-1 result can be stated compactly:
+
+\begin{quote}
+Known-pose cooperative ranging provides effective inertial-drift correction. Global-pose localization can become observable under informative relative motion, but practical particle filtering remains limited by finite support and global-mode survival. Literal AACOPF does not reliably solve this problem and can amplify incorrect modes, particularly under corrupted ranging. A bounded, diversity-guarded adaptation removes the quadratic computational bottleneck and prevents catastrophic cloning while often reducing late estimation error, but it does not eliminate the sparse-support global-acquisition problem.
+\end{quote}
+
+This leads to five working principles for the rest of the thesis:
+\begin{enumerate}
+    \item geometry and observability must be considered explicitly when interpreting collaborative-ranging performance;
+    \item conventional PF remains the transparent reference estimator for communication studies;
+    \item particle support and mode survival matter whenever uncertainty is global or multimodal;
+    \item robust UWB handling must be introduced as a separate mechanism rather than attributed to particle copying;
+    \item the guarded bounded redistribution is available as an optional scalable mechanism, but is not assumed to solve global initialization.
+\end{enumerate}
+
+Three questions remain open without blocking Phase-1 closure. First, real IMU bias/noise must be measured before deciding whether bias states are needed. Second, a robust NLOS/reliability model still has to be selected. Third, if broad-prior infrastructure-free global acquisition becomes a hard deployment requirement, explicit support creation or rejuvenation may be necessary.
