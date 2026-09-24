@@ -1,63 +1,257 @@
-\chapter{Research Backlog}
+\chapter{Research Plan and Backlog}
 
-\section{Phase 1 status: closed}
-Phase 1 is scientifically complete. The implemented sequence now covers the full planned baseline/reproduction path:
+\section{Revised thesis objective and fixed assumptions}
+The project objective is now stated as
+\begin{quote}
+\textbf{obtain the best possible localization accuracy with the least UWB communication effort.}
+\end{quote}
+Two system assumptions are fixed and should be treated as design requirements rather than experimental variables:
 \begin{enumerate}
-    \item P1A--P1B: known-pose IMU--UWB particle-filter baseline and robustness checks;
-    \item P1C: unknown-position/yaw global initialization;
-    \item P1D: geometry and finite-horizon observability diagnostics;
-    \item P1E: Han et al. reproduction audit and explicit implementation contract;
-    \item P1F-A--P1F-D: paper-state PF baseline, literal AACOPF mechanism, tuning/freeze, and matched comparison;
-    \item P1F-E: rank-deficient geometry negative controls;
-    \item P1F-F: non-Gaussian/outlier UWB stress;
-    \item P1F-G: scalable bounded-candidate adaptation with explicit diversity guards.
+    \item \textbf{Known initial pose:} the initial position and yaw of every mobile node are known. Broad-prior/global-pose acquisition is therefore not part of the main thesis problem.
+    \item \textbf{Symmetric mobile nodes:} every node carries an IMU and a UWB transceiver. Every node propagates its own inertial state and may participate as sender or receiver in pairwise UWB ranging. There is no privileged perfectly known mobile auxiliary in the final benchmark.
 \end{enumerate}
-The Phase-1 synthesis is documented in the preceding section and defines the handoff to Phase 2.
 
-\section{Retained Phase-1 decisions}
-The following decisions are considered settled for the next phase unless later hardware evidence requires revision.
+The resulting core problem is a communication-constrained cooperative state-estimation problem. For node \(i\),
+\begin{equation}
+    \bm{x}_{i,k}
+    =
+    \begin{bmatrix}
+        p_{x,i,k} & p_{y,i,k} & v_{x,i,k} & v_{y,i,k} & \psi_{i,k}
+    \end{bmatrix}^{\top},
+\end{equation}
+and an activated UWB link between nodes \(i\) and \(j\) yields
+\begin{equation}
+    z_{ij,k}
+    =
+    \left\|\bm{p}_{i,k}-\bm{p}_{j,k}\right\|_2+\nu_{ij,k}.
+\end{equation}
+Both endpoints are uncertain estimator states. This replaces the earlier target-versus-perfectly-known-auxiliary abstraction for the main thesis benchmark.
 
-\paragraph{Known-pose fusion baseline.}
-Conventional PF remains the transparent baseline for studying communication-rate and peer-selection effects. The known-pose experiments establish that UWB ranging can correct inertial drift effectively when initialization is sufficiently informative.
+\section{Consolidation of Phase-1 work}
+Phase~1 remains part of the detailed research record, but its role in the thesis is narrowed now that the system assumptions are fixed.
 
-\paragraph{Geometry before confidence.}
-Auxiliary/peer geometry and unresolved gauge freedoms must be considered before interpreting estimator confidence. Particle concentration, effective sample size, or low range residuals are not sufficient evidence of globally correct localization.
+\paragraph{Directly retained.}
+P1A--P1B remain directly relevant because they establish the known-pose IMU--UWB fusion baseline and identify IMU noise, bias, initialization, and computational sensitivity. These results motivate the lower-communication studies.
 
-\paragraph{Global acquisition.}
-Unknown-pose localization remains a finite-support and mode-survival problem even under informative motion. Larger particle populations increase useful support statistically but do not guarantee monotone or reliable acquisition.
+\paragraph{Retained as a design principle.}
+The geometry lesson from P1D/P1F-E remains important, but its role changes. Geometry is no longer primarily used to decide whether a broad unknown pose is globally observable. Instead, it determines the \emph{information value} of a candidate pairwise range and is therefore a key input to later peer/link scheduling.
 
-\paragraph{AACOPF interpretation.}
-Literal AACOPF is retained only as a reproduced mechanism/reference. It is not treated as a reliable global-acquisition or NLOS-robust solution. P1F-G shows that a bounded and diversity-guarded redistribution can be made scalable and genealogy-safe, and can reduce late error, but it does not improve strict global-pose acquisition over PF.
+The corrupted-ranging lesson from P1F-F also remains relevant. UWB outliers/NLOS must be treated as a separate measurement-reliability problem because a communication budget should not be spent on low-value or misleading measurements.
 
-\paragraph{Measurement robustness.}
-Robust UWB treatment is a separate estimator-design axis. If required, it should be introduced explicitly through a robust likelihood, gating, an NLOS/reliability model, or reliability-aware peer/measurement selection rather than through stronger particle copying.
+\paragraph{Exploratory/background branch.}
+P1C and most of P1E--P1F-G study broad-prior global acquisition, sparse particle support, literal AACOPF mode selection, and scalable particle redistribution. These experiments remain valid and documented, but they are no longer the main thesis path because the initial pose is known. AACOPF is therefore retained as exploratory/background work rather than as the default estimator-development direction.
 
-\section{Open questions carried forward}
-The following questions remain genuinely open and should not be confused with unfinished Phase-1 work:
+\section{Primary multi-node simulation benchmark}
+The main simulation benchmark uses \textbf{four mobile nodes}. Four nodes provide six possible undirected UWB links,
+\begin{equation}
+    |\mathcal{E}|=\binom{4}{2}=6,
+\end{equation}
+which is large enough for meaningful peer/link selection while remaining easy to visualize and debug. Three- and five-node fleets are reserved for later sensitivity checks.
+
+The initial benchmark configuration is:
 \begin{itemize}
-    \item \textbf{Real IMU bias/noise:} persistent accelerometer and gyroscope bias can dominate the estimate, but bias-state augmentation should be decided after hardware characterization.
-    \item \textbf{Reliable global acquisition:} if broad-prior infrastructure-free global initialization becomes a hard deployment requirement, explicit support creation/rejuvenation may be necessary in addition to safe redistribution.
-    \item \textbf{NLOS/outlier handling:} the reliability model and robust measurement mechanism remain to be selected and evaluated.
-    \item \textbf{Absolute reference/gauge choice:} infrastructure-free collaboration still requires an explicit reference convention or prior if a globally absolute frame is required.
+    \item primary fleet size \(N=4\);
+    \item sensitivity fleets \(N\in\{3,5\}\);
+    \item duration approximately \(\SI{60}{s}\);
+    \item IMU simulation rate \(\SI{100}{Hz}\);
+    \item maximum UWB opportunity rate \(\SI{10}{Hz}\);
+    \item known initial pose for every node;
+    \item independent IMU noise/bias realization for every node;
+    \item all pairwise UWB links available unless a communication policy disables them.
 \end{itemize}
 
-\section{Immediate Phase-2 backlog}
-Phase 2 addresses the thesis research question: how much UWB communication and collaboration are required to maintain acceptable localization accuracy? The recommended experiment order is:
+The fully connected UWB graph for \(N=4\) is
+\begin{equation}
+    \mathcal{E}
+    =
+    \{(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)\}.
+\end{equation}
+
+\section{Trajectory-first simulation design}
+The simulator should no longer define the ground-truth motion by first prescribing IMU measurements and then integrating them. Instead, smooth global trajectories are the primary truth objects:
+\begin{equation}
+    \bm{p}_i(t)
+    =
+    \begin{bmatrix}
+        x_i(t) & y_i(t)
+    \end{bmatrix}^{\top}.
+\end{equation}
+Each path should be at least twice continuously differentiable so that physically meaningful velocity and acceleration can be obtained,
+\begin{equation}
+    \bm{v}_i(t)=\dot{\bm{p}}_i(t),
+    \qquad
+    \bm{a}_i^n(t)=\ddot{\bm{p}}_i(t).
+\end{equation}
+If the node heading follows the velocity direction,
+\begin{equation}
+    \psi_i(t)=\operatorname{atan2}(\dot y_i(t),\dot x_i(t)),
+    \qquad
+    \omega_{z,i}(t)=\dot\psi_i(t).
+\end{equation}
+The ideal planar body-frame accelerometer signal is then synthesized from the global acceleration,
+\begin{equation}
+    \bm{a}_i^b(t)
+    =
+    R_n^b(\psi_i(t))\,\bm{a}_i^n(t),
+\end{equation}
+before adding sensor bias and noise:
+\begin{align}
+    \bm{a}_{m,i}^b &= \bm{a}_i^b+\bm{b}_{a,i}+\bm{n}_{a,i},\\
+    \omega_{m,i} &= \omega_{z,i}+b_{\omega,i}+n_{\omega,i}.
+\end{align}
+
+The primary four-node path set should be intentionally easy to inspect visually while producing time-varying relative geometry. A suitable first design is:
+\begin{itemize}
+    \item node 1: broad clockwise ellipse;
+    \item node 2: offset counter-clockwise ellipse;
+    \item node 3: smooth figure-eight;
+    \item node 4: slower rounded diagonal/sinusoidal loop.
+\end{itemize}
+All paths must satisfy configured limits on speed, acceleration, and yaw rate, and should avoid sustained rigid-formation motion. The objective is to create natural intervals in which different UWB links have different information value.
+
+\section{Estimator architecture gate}
+The final benchmark should use a symmetric fleet estimator rather than one uncertain target and one exact auxiliary. Define the joint fleet state
+\begin{equation}
+    \bm{X}_k
+    =
+    \begin{bmatrix}
+        \bm{x}_{1,k}^{\top} &
+        \cdots &
+        \bm{x}_{N,k}^{\top}
+    \end{bmatrix}^{\top}.
+\end{equation}
+For four five-state nodes, this is a 20-state problem and remains computationally modest.
+
+Because all initial poses are known and the expected posterior is predominantly local/unimodal, a joint EKF is the preferred primary candidate for the new benchmark. It also provides the covariance required for later information-aware scheduling. A pairwise measurement \(z_{ij}\) updates both node states through a joint measurement Jacobian.
+
+Before communication experiments begin, perform a small estimator-selection sanity check:
 \begin{enumerate}
-    \item \textbf{P2A -- UWB update-rate sweep:} vary ranging frequency while keeping geometry and peer count controlled. Report localization error, acquisition failures, support/confidence diagnostics, and number of UWB transactions.
-    \item \textbf{P2B -- peer-count and geometry sweep:} vary the number of available collaborative nodes and their relative trajectories. Separate the value of additional ranges from the value of improved geometry.
-    \item \textbf{P2C -- packet loss and outages:} introduce independent loss, burst outages, and delayed recovery. Measure how quickly uncertainty/error grows and how much communication is required to recover.
-    \item \textbf{P2D -- LOS/NLOS and measurement reliability:} introduce controlled NLOS/outlier processes and evaluate an explicit reliability-aware measurement model or gate. Keep this mechanism separate from particle-management adaptations.
-    \item \textbf{P2E -- IMU-quality sensitivity:} vary inertial noise/bias using measured hardware values when available; determine whether communication requirements shift with sensor quality.
-    \item \textbf{P2F -- communication--accuracy frontier:} combine the Phase-2 sweeps into a common trade-off representation such as position/yaw error versus UWB transactions per second. Once measured radio-energy values exist, extend this to error versus energy.
+    \item IMU-only propagation;
+    \item full-communication joint EKF;
+    \item optional comparison to the existing PF implementation on the same known-pose benchmark.
+\end{enumerate}
+The purpose is not to start another estimator-development branch. It is to confirm that the chosen local estimator reproduces the expected full-communication localization behavior and is suitable for covariance-based scheduling.
+
+\section{Communication and localization metrics}
+Let
+\begin{equation}
+    a_{ij,k}\in\{0,1\}
+\end{equation}
+denote whether pair \((i,j)\) performs a UWB exchange at opportunity \(k\). The basic communication count is
+\begin{equation}
+    C_{\mathrm{comm}}
+    =
+    \sum_k\sum_{i<j}a_{ij,k}.
+\end{equation}
+A normalized communication ratio is
+\begin{equation}
+    \rho_{\mathrm{comm}}
+    =
+    \frac{\sum_{k,i<j}a_{ij,k}}
+         {K\binom{N}{2}},
+\end{equation}
+where \(\rho_{\mathrm{comm}}=1\) denotes the full-rate/all-pairs reference.
+
+For localization, report at least the fleet position RMSE
+\begin{equation}
+    \mathrm{RMSE}_{\mathrm{fleet}}
+    =
+    \sqrt{
+        \frac{1}{NK}
+        \sum_{i=1}^{N}\sum_k
+        \left\|\hat{\bm{p}}_{i,k}-\bm{p}_{i,k}\right\|_2^2
+    },
+\end{equation}
+and the worst-node RMSE
+\begin{equation}
+    \mathrm{RMSE}_{\max}
+    =
+    \max_i \mathrm{RMSE}_i.
+\end{equation}
+Yaw error, estimator consistency, and covariance may be retained as secondary diagnostics.
+
+Once hardware energy measurements are available, replace or augment communication count with
+\begin{equation}
+    C_{\mathrm{energy}}
+    =
+    \sum_{k,i<j}a_{ij,k}E_{ij}^{\mathrm{range}}.
+\end{equation}
+
+The main thesis output is therefore an accuracy--communication Pareto frontier:
+\begin{equation}
+    \boxed{
+    \mathrm{RMSE}_{\mathrm{fleet}}
+    \quad\text{versus}\quad
+    \rho_{\mathrm{comm}}
+    }.
+\end{equation}
+
+\section{Revised Phase-2 experiment sequence}
+The new Phase-2 sequence is designed around the four-node benchmark.
+
+\begin{enumerate}
+    \item \textbf{P2A -- multi-node benchmark and full-communication reference.}
+    Implement the trajectory-first four-node simulator, pairwise UWB graph, known initial poses, independent IMUs, and joint estimator. Validate IMU-only and all-pairs/\SI{10}{Hz} UWB bounds. Produce the standard fleet-trajectory and per-node error visualizations.
+
+    \item \textbf{P2B -- uniform communication-rate sweep.}
+    Activate all six links uniformly at decreasing rates, for example \(10,5,2,1,0.5\) Hz. This establishes the first empirical localization--communication frontier without intelligent scheduling.
+
+    \item \textbf{P2C -- fixed-budget peer/link selection.}
+    At matched communication budgets compare simple selection policies such as round-robin, random link, nearest peer, and geometry-aware/information-aware selection. The question is whether the same number of UWB exchanges can be spent more effectively.
+
+    \item \textbf{P2D -- reliability and outage robustness.}
+    Stress the selected strategies with packet loss, burst outages, sparse gross range errors, and NLOS-like positive bias. Introduce explicit measurement reliability/gating if required; keep this separate from link scheduling in the first ablation.
+
+    \item \textbf{P2E -- IMU-quality sensitivity.}
+    Repeat representative communication budgets with different inertial noise/bias levels. This determines how the required UWB communication changes with IMU quality and prepares the transition to measured hardware parameters.
+
+    \item \textbf{P2F -- consolidated communication--accuracy frontier.}
+    Combine the benchmark into fleet RMSE and worst-node RMSE versus normalized UWB communication. After hardware characterization, add energy per transaction and convert the frontier to localization error versus energy.
 \end{enumerate}
 
-A fixed-rate/all-peer strategy should be retained as the reference throughout Phase 2. The purpose is not yet to optimize the schedule, but to establish the empirical information/communication frontier that Phase 3 will exploit.
+\section{Phase-3 adaptive communication}
+Only after the fixed-budget Phase-2 frontier is established should the project optimize communication dynamically. Candidate policies may use:
+\begin{itemize}
+    \item predicted estimator uncertainty;
+    \item pairwise geometry;
+    \item expected covariance/information reduction;
+    \item range reliability/NLOS probability;
+    \item communication or measured energy cost.
+\end{itemize}
 
-\section{Phase 3 and Phase 4 outlook}
-Phase 3 will develop adaptive ranging and peer selection. Candidate policies should use estimator uncertainty, relative geometry/information gain, measurement reliability, and communication/energy cost to decide \emph{when} to range and \emph{which peer} to range. Comparisons must remain against the fixed-rate/all-peer Phase-2 baselines.
+For a joint Gaussian estimator, a candidate link \((i,j)\) can be scored before communication through its predicted covariance update,
+\begin{equation}
+    P^+_{ij}
+    =
+    P^-
+    -
+    P^-H_{ij}^{\top}
+    \left(H_{ij}P^-H_{ij}^{\top}+R_{ij}\right)^{-1}
+    H_{ij}P^-.
+\end{equation}
+A first information score can therefore use the predicted reduction in a fleet uncertainty metric, for example
+\begin{equation}
+    \Delta J_{ij}
+    =
+    \operatorname{tr}(P^-)-\operatorname{tr}(P^+_{ij}),
+\end{equation}
+possibly normalized by communication/energy cost.
 
-Phase 4 will move the selected estimator and communication policy onto the ESP32/DW3000/IMU hardware. It will characterize real UWB and IMU noise, measure energy per ranging transaction, validate timing and embedded computational load, and compare hardware logs with the simulation predictions.
+This naturally separates the two final scheduling questions:
+\begin{quote}
+\textbf{When should the fleet communicate, and which pair should communicate?}
+\end{quote}
+
+\section{Standard benchmark visualizations}
+The four-node benchmark should use a small fixed visualization set throughout the project:
+\begin{enumerate}
+    \item global \(x\)-\(y\) trajectories of all four nodes with start points and sparse heading markers;
+    \item per-node and fleet localization error versus time;
+    \item six-row link-activation raster for \((1,2),(1,3),(1,4),(2,3),(2,4),(3,4)\);
+    \item headline fleet RMSE versus normalized communication effort;
+    \item worst-node RMSE versus normalized communication effort.
+\end{enumerate}
+Using the same benchmark and visual language across all scheduling policies is preferred over adding many unrelated scenarios.
 
 \section{Next concrete milestone}
-The next milestone is therefore \textbf{P2A: the controlled UWB update-rate sweep}. No further AACOPF reproduction experiments are planned before that transition.
+The immediate next step is \textbf{P2A: implement the trajectory-first four-node benchmark and full-communication reference}. No further unknown-pose/AACOPF experiments are required for the main thesis path before this benchmark is established.
