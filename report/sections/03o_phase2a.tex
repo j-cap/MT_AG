@@ -1,5 +1,20 @@
 \chapter{Phase 2: Communication-Efficient Multi-Node Localization}
 
+\section{Phase-2 experiment roadmap}\label{sec:phase2_plan}
+The experiments build on one four-node, trajectory-first benchmark with known initial poses. P2A--P2F form the main infrastructure-free sequence: all mobile nodes remain uncertain, and UWB measures only inter-node distances. P2G is a separate extension with a continuing global position reference. Its letter follows the six main steps; it is not the next experiment to run.
+
+\begin{itemize}
+    \item \textbf{P2A -- benchmark (completed):} Establish the four-node simulation, IMU-only baseline, and all-six-link \SI{10}{Hz} UWB reference over 20 matched seeds. Decompose absolute position error into fleet-centroid drift and relative-shape error.
+    \item \textbf{P2B -- uniform rate sweep (next):} Reduce the update rate of all six links together, for example from \SI{10}{Hz} to \(5,2,1,0.5\) Hz, to measure the first error-versus-communication curve.
+    \item \textbf{P2C -- link selection:} At equal numbers of UWB exchanges, compare uniform or random scheduling with geometry- and information-aware choices of which pair to range.
+    \item \textbf{P2D -- reliability:} Test packet loss, burst outages, range outliers, and NLOS-like positive bias. Evaluate measurement reliability separately from the initial scheduling comparison.
+    \item \textbf{P2E -- IMU sensitivity:} Vary inertial noise and bias at representative communication budgets to see how sensor quality changes the required ranging rate.
+    \item \textbf{P2F -- consolidated frontier:} Combine accuracy, worst-node error, and UWB exchange count across the infrastructure-free conditions; incorporate measured transaction energy when available.
+    \item \textbf{P2G -- global-reference extension (optional, later):} Give one moving node a position known throughout the run, first exactly and then through noisy or intermittent reports, to assess how a global reference changes the frontier.
+\end{itemize}
+
+For the first P2G comparison, one of the existing four moving nodes becomes the known-position reference while trajectories, the other nodes' IMU realizations, seeds, six UWB links, and exchange schedule stay matched to P2A. Both conditions must be scored on the same three non-reference nodes so that a zero-error reference does not mechanically reduce fleet RMSE. The ideal-reference case bounds the value of global position information; later noisy-reference and outage cases must propagate its uncertainty and report reference-update costs separately from pairwise UWB exchanges. A position known only initially is already part of P2A and is not a new reference condition.
+
 \section{Experiment P2A: four-node trajectory-first benchmark}
 \subsection{Purpose}
 P2A establishes the canonical simulation benchmark for the remainder of the thesis. Unlike the exploratory global-localization branch in Phase~1, the benchmark now follows the fixed application assumptions: the initial position and yaw of every node are known, every node carries an IMU and UWB transceiver, and all UWB measurements are pairwise between uncertain mobile nodes.
