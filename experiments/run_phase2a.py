@@ -132,16 +132,16 @@ def main():
             size=(n_nodes, 2),
         )
 
-        ekf_args = dict(
-            imu_measurements=measured_imu,
-            pairwise_ranges=ranges,
-            initial_state=initial,
-            initial_covariance=p0,
-            dt=fleet.dt,
-            sigma_range_m=float(uwb_cfg["sigma_range_m"]),
-            sigma_accel_process_mps2=float(ekf_cfg["sigma_accel_process_mps2"]),
-            sigma_gyro_process_rps=float(ekf_cfg["sigma_gyro_process_rps"]),
-        )
+        ekf_args = {
+            "imu_measurements": measured_imu,
+            "pairwise_ranges": ranges,
+            "initial_state": initial,
+            "initial_covariance": p0,
+            "dt": fleet.dt,
+            "sigma_range_m": float(uwb_cfg["sigma_range_m"]),
+            "sigma_accel_process_mps2": float(ekf_cfg["sigma_accel_process_mps2"]),
+            "sigma_gyro_process_rps": float(ekf_cfg["sigma_gyro_process_rps"]),
+        }
 
         start = time.perf_counter()
         imu_only = run_joint_ekf(range_mask=no_mask, **ekf_args)
