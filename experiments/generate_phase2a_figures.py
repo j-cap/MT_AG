@@ -178,6 +178,37 @@ def figure_aggregate(profile, seeds):
     plt.close(fig)
 
 
+def figure_error_decomposition(profile):
+    t = np.array([row["time_s"] for row in profile])
+    imu_centroid = np.array([row["imu_mean_centroid_error_m"] for row in profile])
+    full_centroid = np.array([row["full_mean_centroid_error_m"] for row in profile])
+    imu_shape = np.array([row["imu_mean_relative_shape_error_m"] for row in profile])
+    full_shape = np.array([row["full_mean_relative_shape_error_m"] for row in profile])
+
+    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.9))
+    ax = axes[0]
+    ax.plot(t, imu_centroid, linestyle="--", linewidth=1.1, label="IMU only")
+    ax.plot(t, full_centroid, linewidth=1.2, label="All-pair UWB")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Mean centroid error [m]")
+    ax.grid(True, alpha=0.25)
+    ax.legend(loc="upper left")
+    _panel(ax, "(a)")
+
+    ax = axes[1]
+    ax.plot(t, imu_shape, linestyle="--", linewidth=1.1, label="IMU only")
+    ax.plot(t, full_shape, linewidth=1.2, label="All-pair UWB")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Mean relative-shape RMS error [m]")
+    ax.grid(True, alpha=0.25)
+    ax.legend(loc="upper left")
+    _panel(ax, "(b)")
+
+    fig.tight_layout(w_pad=1.4)
+    fig.savefig(OUT / "p2a_error_decomposition.pdf")
+    plt.close(fig)
+
+
 def figure_consistency(rows):
     by_node = defaultdict(list)
     for row in rows:
@@ -219,6 +250,7 @@ def main():
     figure_imu_truth(fleet)
     figure_representative_errors(representative)
     figure_aggregate(profile, seeds)
+    figure_error_decomposition(profile)
     figure_consistency(representative)
 
     summary = json.loads((result_dir / "summary.json").read_text())
