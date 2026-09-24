@@ -207,7 +207,15 @@ The new Phase-2 sequence is designed around the four-node benchmark.
 
     \item \textbf{P2F -- consolidated communication--accuracy frontier.}
     Combine the benchmark into fleet RMSE and worst-node RMSE versus normalized UWB communication. After hardware characterization, add energy per transaction and convert the frontier to localization error versus energy.
+
+    \item \textbf{P2G -- optional global-reference extension.}
+    Once the infrastructure-free frontier is established, repeat selected conditions with one mobile node whose position is available in the global frame throughout the run. First use its true trajectory as an ideal-reference bound; then replace truth with noisy, possibly intermittent position reports. This is a comparison with Han et al.'s accurately localized auxiliary setting, not a replacement for the symmetric main benchmark.
 \end{enumerate}
+
+\subsection{P2G comparison protocol}
+The first P2G test promotes one of the existing four moving nodes to a known-position reference without changing any truth trajectory. Retain the other three nodes' IMU realizations, the six-link UWB graph, the \SI{10}{Hz} opportunity schedule, and the P2A seeds. Compare no reference with an ideal continuously known reference under the same UWB exchanges. Score \emph{the same three non-reference nodes} in both conditions; including an error-free reference in the fleet RMSE would create a mechanical improvement. Report their absolute position and worst-node RMSE, their centroid and centered relative-shape errors, and yaw error. Repeat with each possible reference node if the pilot indicates substantial geometry dependence.
+
+The follow-up uses noisy position observations of that reference and then reference outages, with uncertainty propagated rather than treating noisy reports as exact. Selected P2B rates and P2C link budgets can be repeated to determine whether a global reference changes the communication--accuracy frontier or the preferred links. The position reference's update rate, uncertainty, and any associated communication or energy cost must be reported separately from the pairwise UWB exchange count. A position known only at the start is not a new condition, since P2A already assumes known initial poses. The ideal-reference case tests a performance bound; it does not establish real-world GPS performance or guarantee heading observability from a single range.
 
 \section{Phase-3 adaptive communication}
 Only after the fixed-budget Phase-2 frontier is established should the project optimize communication dynamically. Candidate policies may use:
