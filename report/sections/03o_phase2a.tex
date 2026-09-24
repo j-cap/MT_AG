@@ -92,6 +92,16 @@ Figure~\ref{fig:p2a_rep_errors} shows one matched realization. Without ranging, 
     \label{fig:p2a_rep_errors}
 \end{figure}
 
+The individual curves need not improve at every instant. For each node, its absolute position error is the sum of the fleet-centroid error and its error relative to that centroid:
+\begin{equation}
+    \hat{\bm p}_{i,k}-\bm p_{i,k}
+    =
+    \bar{\bm e}_k+\tilde{\bm e}_{i,k}.
+\end{equation}
+Pairwise ranges mainly reduce the second term; they provide no direct measurement of a common translation of the fleet. In the IMU-only realization, a node's relative error can partly cancel the centroid error, making its absolute error temporarily small. Correcting that relative error can remove this favorable cancellation, so the cooperative trace for that node can lie above its IMU-only trace even as the fleet geometry improves. This explains the intervals for Node~1 in Fig.~\ref{fig:p2a_rep_errors}; it does not imply that ranging is systematically harmful to Node~1.
+
+The plot shows one matched stochastic realization, and cooperation carries no guarantee of a smaller absolute error for every node at every time. The aggregate comparison below establishes the improvement in fleet RMSE across all 20 seeds. The centroid and relative-shape decomposition then identifies which error component the UWB measurements actually reduce.
+
 \subsection{Aggregate 20-seed localization result}
 Table~\ref{tab:p2a_aggregate} gives the compact numerical result. Full all-pairs UWB improves absolute fleet position RMSE in all 20 matched seeds and reduces the mean fleet RMSE from \SI{2.322}{m} to \SI{1.058}{m}, a reduction of approximately \(54.5\%\). The mean worst-node RMSE decreases from \SI{3.238}{m} to \SI{1.071}{m}, a reduction of approximately \(66.9\%\).
 
