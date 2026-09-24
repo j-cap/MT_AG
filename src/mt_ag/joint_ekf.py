@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from .fleet_simulation import all_pairs
-from .geometry import rotation_2d, wrap_angle
+from .geometry import wrap_angle
 
 
 @dataclass(frozen=True)
