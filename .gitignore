@@ -23,3 +23,5 @@ report/main.pdf
 !results/phase2/p2a/seed_metrics.csv
 !results/phase2/p2a/representative.csv
 !results/phase2/p2a/time_profile.csv
+!results/phase2/p2b/seed_metrics.csv
+!results/phase2/p2b/time_profile.csv

@@ -5,8 +5,8 @@ The experiments build on one four-node, trajectory-first benchmark with known in
 
 \begin{itemize}
     \item \textbf{P2A -- benchmark (completed):} Establish the four-node simulation, IMU-only baseline, and all-six-link \SI{10}{Hz} UWB reference over 20 matched seeds. Decompose absolute position error into fleet-centroid drift and relative-shape error.
-    \item \textbf{P2B -- uniform rate sweep (next):} Reduce the update rate of all six links together, for example from \SI{10}{Hz} to \(5,2,1,0.5\) Hz, to measure the first error-versus-communication curve.
-    \item \textbf{P2C -- link selection:} At equal numbers of UWB exchanges, compare uniform or random scheduling with geometry- and information-aware choices of which pair to range.
+    \item \textbf{P2B -- uniform rate sweep (completed):} Reduce the update rate of all six links together from \SI{10}{Hz} through \(5,2,1,0.5\) Hz and the zero-UWB baseline to measure the first error-versus-communication curve.
+    \item \textbf{P2C -- link selection (next):} At equal numbers of UWB exchanges, compare uniform or random scheduling with geometry- and information-aware choices of which pair to range.
     \item \textbf{P2D -- reliability:} Test packet loss, burst outages, range outliers, and NLOS-like positive bias. Evaluate measurement reliability separately from the initial scheduling comparison.
     \item \textbf{P2E -- IMU sensitivity:} Vary inertial noise and bias at representative communication budgets to see how sensor quality changes the required ranging rate.
     \item \textbf{P2F -- consolidated frontier:} Combine accuracy, worst-node error, and UWB exchange count across the infrastructure-free conditions; incorporate measured transaction energy when available.

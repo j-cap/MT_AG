@@ -43,6 +43,17 @@ The infrastructure-free error decomposition is more important than the aggregate
     \caption{P2A error decomposition: pairwise UWB strongly constrains relative fleet geometry while the common global-translation mode remains.}
 \end{figure}
 
-P2B will now reduce the all-pairs UWB rate on exactly the same benchmark to obtain the first localization--communication frontier.
+\subsection{P2B uniform-rate result}
+On the frozen P2A benchmark, the all-six-link rate was swept across \(0,0.5,1,2,5,10\)~Hz with identical sensor draws in each of the 20 matched seeds. These rates cost respectively 0, 180, 360, 720, 1800, and 3600 individual pairwise range exchanges over \SI{60}{s}. Both endpoint conditions reproduce the P2A per-seed results.
+
+Already at \SI{0.5}{Hz}, 180 exchanges (5\% of full communication) lower mean fleet RMSE from the IMU-only \SI{2.322}{m} to \SI{1.064}{m}; the \SI{10}{Hz} reference gives \SI{1.058}{m}. All positive rates improve fleet RMSE against IMU only in all 20 paired runs. This apparent plateau reflects the unobservable common translation: centroid RMSE remains near \SI{1.056}{m}, while relative-shape RMSE continues falling from \SI{0.114}{m} at \SI{0.5}{Hz} to \SI{0.046}{m} at \SI{10}{Hz}. Worst-node RMSE also improves from \SI{1.097}{m} to \SI{1.071}{m} over these rates.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/phase2/p2b_rate_sweep.pdf}
+    \caption{P2B uniform-rate reference: mean whole-run error and one across-seed sample standard deviation versus the number of individual pairwise UWB exchanges. Absolute fleet RMSE flattens earlier than relative-shape error.}
+\end{figure}
+
+P2C is the next experiment. It will hold these individual-exchange budgets fixed while selecting links and times differently, and compare both absolute fleet and relative-shape accuracy. The P2B curve is an empirical reference for this one scheduling family; lower rates, alternative scheduling policies, and radio energy are not yet measured.
 
 After the infrastructure-free Phase-2 frontier is established, a separate P2G extension will test the value of a global reference. One of the existing four mobile nodes will first supply its true position throughout a matched run, followed by noisy and intermittent position reports. Comparisons will score the same three non-reference nodes and retain matched UWB budgets. This bounds how much a globally localized auxiliary can reduce common drift without changing the symmetric, unanchored main benchmark.

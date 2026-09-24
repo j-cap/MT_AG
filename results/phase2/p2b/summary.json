@@ -1,0 +1,226 @@
+{
+  "design": {
+    "base_config": "configs/phase2a.yaml",
+    "rates_hz": [
+      0.0,
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0
+    ],
+    "n_seeds": 20,
+    "duration_s": 60.0,
+    "n_nodes": 4,
+    "n_links": 6,
+    "full_communication_count": 3600,
+    "endpoints_reproduce_p2a": true
+  },
+  "rates": [
+    {
+      "rate_hz": 0.0,
+      "uwb_exchanges": 0,
+      "communication_ratio": 0.0,
+      "paired_fleet_improvement_fraction": 0.0,
+      "mean_fleet_reduction_vs_imu_fraction": 0.0,
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 2.3222193229828947,
+          "std": 0.6050424848445517,
+          "p95": 3.2236719994717
+        },
+        "worst_node_rmse_m": {
+          "mean": 3.237522489426065,
+          "std": 0.8225619509109601,
+          "p95": 4.423518247223349
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0566150007272628,
+          "std": 0.4518108417920843,
+          "p95": 1.640382676719768
+        },
+        "relative_shape_rmse_m": {
+          "mean": 2.0272749470034976,
+          "std": 0.5806256304928177,
+          "p95": 2.816979341308192
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.04687637686726421,
+          "std": 0.016903751298606575,
+          "p95": 0.0778552916832125
+        }
+      }
+    },
+    {
+      "rate_hz": 0.5,
+      "uwb_exchanges": 180,
+      "communication_ratio": 0.05,
+      "paired_fleet_improvement_fraction": 1.0,
+      "mean_fleet_reduction_vs_imu_fraction": 0.541736023331273,
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0641894616471002,
+          "std": 0.44727959731476535,
+          "p95": 1.6474205963428907
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0966476620254118,
+          "std": 0.4434291877330173,
+          "p95": 1.6723912255474191
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0560921263161585,
+          "std": 0.45174858122067596,
+          "p95": 1.6429270280005757
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.11379179002383119,
+          "std": 0.020601589083792348,
+          "p95": 0.14150308494000613
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05946098106835793,
+          "std": 0.021372058584689567,
+          "p95": 0.08840254417340423
+        }
+      }
+    },
+    {
+      "rate_hz": 1.0,
+      "uwb_exchanges": 360,
+      "communication_ratio": 0.1,
+      "paired_fleet_improvement_fraction": 1.0,
+      "mean_fleet_reduction_vs_imu_fraction": 0.5431349726869756,
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0609407944214133,
+          "std": 0.4495869280079405,
+          "p95": 1.6437021795510016
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0850388024141153,
+          "std": 0.4496747493202468,
+          "p95": 1.6810380923508899
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0563047471977247,
+          "std": 0.4521491282021801,
+          "p95": 1.6413157029803138
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.08582232675232415,
+          "std": 0.016392285170392627,
+          "p95": 0.10353154616052845
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05968993146352049,
+          "std": 0.022233721639389664,
+          "p95": 0.09557878532884968
+        }
+      }
+    },
+    {
+      "rate_hz": 2.0,
+      "uwb_exchanges": 720,
+      "communication_ratio": 0.2,
+      "paired_fleet_improvement_fraction": 1.0,
+      "mean_fleet_reduction_vs_imu_fraction": 0.543875445828427,
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0592212533841852,
+          "std": 0.44943346707425924,
+          "p95": 1.639006764728183
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0776915944692798,
+          "std": 0.45256121378026737,
+          "p95": 1.6652518916979013
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0565340506981435,
+          "std": 0.45064599046122183,
+          "p95": 1.6373907543307509
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.06694574281294426,
+          "std": 0.013255856008501479,
+          "p95": 0.0894470571632707
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.0595925772671157,
+          "std": 0.020789704872200807,
+          "p95": 0.09366602288277182
+        }
+      }
+    },
+    {
+      "rate_hz": 5.0,
+      "uwb_exchanges": 1800,
+      "communication_ratio": 0.5,
+      "paired_fleet_improvement_fraction": 1.0,
+      "mean_fleet_reduction_vs_imu_fraction": 0.5445384728962508,
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0576815591156237,
+          "std": 0.4514626329879368,
+          "p95": 1.6416933721437303
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0732708633763741,
+          "std": 0.45199947625148107,
+          "p95": 1.6684976708991213
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0558874609378885,
+          "std": 0.45234380791809214,
+          "p95": 1.6402300647021233
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.054314944538496855,
+          "std": 0.009472738091769135,
+          "p95": 0.06989926970474694
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.056376697145087654,
+          "std": 0.01732385921352666,
+          "p95": 0.08898408226199725
+        }
+      }
+    },
+    {
+      "rate_hz": 10.0,
+      "uwb_exchanges": 3600,
+      "communication_ratio": 1.0,
+      "paired_fleet_improvement_fraction": 1.0,
+      "mean_fleet_reduction_vs_imu_fraction": 0.5445604031574499,
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0576306322393092,
+          "std": 0.45145745545516663,
+          "p95": 1.6414587670285374
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0705585000125486,
+          "std": 0.4513494727577444,
+          "p95": 1.663965189113559
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0563567907038116,
+          "std": 0.45207821754834265,
+          "p95": 1.6404647072759806
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.0455911404437308,
+          "std": 0.00926204689511307,
+          "p95": 0.057836910234358836
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05728202123428226,
+          "std": 0.01524406023552446,
+          "p95": 0.0797563835252662
+        }
+      }
+    }
+  ],
+  "campaign_runtime_s": 305.88648702900537
+}

@@ -1,0 +1,6 @@
+# P2B changes only the uniform all-pairs UWB rate of the frozen P2A benchmark.
+# All trajectories, seeds, sensor models, initialization, and EKF settings
+# are loaded from configs/phase2a.yaml.
+base_config: configs/phase2a.yaml
+uwb_rates_hz: [0.0, 0.5, 1.0, 2.0, 5.0, 10.0]
+profile_sample_rate_hz: 10.0
