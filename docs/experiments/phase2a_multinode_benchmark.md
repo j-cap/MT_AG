@@ -96,9 +96,10 @@ P2A deliberately produces a richer figure set than a single result table:
 1. four global truth trajectories + all six true pairwise distances;
 2. speed, body-acceleration magnitude and yaw-rate histories;
 3. representative per-node position-error histories for IMU-only and all-pair UWB;
-4. aggregate fleet error history + paired seed-level RMSE comparison;
-5. centroid/common-mode versus relative-shape error decomposition;
-6. representative EKF position error versus covariance-based uncertainty scale.
+4. per-node pointwise mean position error and sample-standard-deviation bands across 20 seeds;
+5. aggregate fleet error history + paired seed-level RMSE comparison;
+6. centroid/common-mode versus relative-shape error decomposition;
+7. representative EKF position error versus covariance-based uncertainty scale.
 
 These figures are the main evidence in the detailed report; the summary table is retained only for exact numerical reference.
 

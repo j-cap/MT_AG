@@ -139,6 +139,33 @@ def figure_representative_errors(rows):
     plt.close(fig)
 
 
+def figure_node_error_spread(profile):
+    """Pointwise mean and sample standard deviation of error magnitude over seeds."""
+    t = np.array([row["time_s"] for row in profile])
+    fig, axes = plt.subplots(2, 2, figsize=(6.8, 4.8), sharex=True, sharey=True)
+    for node, ax in enumerate(axes.flat, start=1):
+        for name, label, color, style in (
+            ("imu", "IMU only", "tab:blue", "--"),
+            ("full", "All-pair UWB", "tab:orange", "-"),
+        ):
+            mean = np.array([row[f"{name}_node{node}_mean_error_m"] for row in profile])
+            std = np.array([row[f"{name}_node{node}_std_error_m"] for row in profile])
+            ax.fill_between(t, np.maximum(0.0, mean - std), mean + std,
+                            color=color, alpha=0.16, linewidth=0)
+            ax.plot(t, mean, color=color, linestyle=style, linewidth=1.2, label=label)
+        ax.set_title(f"Node {node}")
+        ax.grid(True, alpha=0.25)
+        _panel(ax, f"({chr(96 + node)})")
+    axes[1, 0].set_xlabel("Time [s]")
+    axes[1, 1].set_xlabel("Time [s]")
+    axes[0, 0].set_ylabel("Position error [m]")
+    axes[1, 0].set_ylabel("Position error [m]")
+    axes[0, 0].legend(loc="upper right")
+    fig.tight_layout()
+    fig.savefig(OUT / "p2a_node_error_spread.pdf")
+    plt.close(fig)
+
+
 def figure_aggregate(profile, seeds):
     t = np.array([row["time_s"] for row in profile])
     imu_mean = np.array([row["imu_mean_fleet_error_m"] for row in profile])
@@ -249,6 +276,7 @@ def main():
     figure_truth_and_geometry(fleet)
     figure_imu_truth(fleet)
     figure_representative_errors(representative)
+    figure_node_error_spread(profile)
     figure_aggregate(profile, seeds)
     figure_error_decomposition(profile)
     figure_consistency(representative)

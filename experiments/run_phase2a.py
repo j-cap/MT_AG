@@ -104,6 +104,8 @@ def main():
     representative_rows = []
     time_imu = []
     time_full = []
+    time_imu_nodes = []
+    time_full_nodes = []
     time_imu_centroid = []
     time_full_centroid = []
     time_imu_shape = []
@@ -169,6 +171,8 @@ def main():
         full_metrics = _fleet_metrics(full.state, fleet.state)
         imu_error = np.linalg.norm(imu_only.state[:, :, :2] - fleet.state[:, :, :2], axis=2)
         full_error = np.linalg.norm(full.state[:, :, :2] - fleet.state[:, :, :2], axis=2)
+        time_imu_nodes.append(imu_error)
+        time_full_nodes.append(full_error)
         time_imu.append(np.sqrt(np.mean(imu_error**2, axis=1)))
         time_full.append(np.sqrt(np.mean(full_error**2, axis=1)))
 
@@ -237,6 +241,8 @@ def main():
 
     time_imu = np.asarray(time_imu)
     time_full = np.asarray(time_full)
+    time_imu_nodes = np.asarray(time_imu_nodes)
+    time_full_nodes = np.asarray(time_full_nodes)
     time_imu_centroid = np.asarray(time_imu_centroid)
     time_full_centroid = np.asarray(time_full_centroid)
     time_imu_shape = np.asarray(time_imu_shape)
@@ -244,19 +250,23 @@ def main():
     sample_indices = np.arange(0, n_time, report_stride)
     profile_rows = []
     for k in sample_indices:
-        profile_rows.append(
-            {
-                "time_s": fleet.t[k],
-                "imu_mean_fleet_error_m": float(np.mean(time_imu[:, k])),
-                "imu_p95_fleet_error_m": float(np.quantile(time_imu[:, k], 0.95)),
-                "full_mean_fleet_error_m": float(np.mean(time_full[:, k])),
-                "full_p95_fleet_error_m": float(np.quantile(time_full[:, k], 0.95)),
-                "imu_mean_centroid_error_m": float(np.mean(time_imu_centroid[:, k])),
-                "full_mean_centroid_error_m": float(np.mean(time_full_centroid[:, k])),
-                "imu_mean_relative_shape_error_m": float(np.mean(time_imu_shape[:, k])),
-                "full_mean_relative_shape_error_m": float(np.mean(time_full_shape[:, k])),
-            }
-        )
+        row = {
+            "time_s": fleet.t[k],
+            "imu_mean_fleet_error_m": float(np.mean(time_imu[:, k])),
+            "imu_p95_fleet_error_m": float(np.quantile(time_imu[:, k], 0.95)),
+            "full_mean_fleet_error_m": float(np.mean(time_full[:, k])),
+            "full_p95_fleet_error_m": float(np.quantile(time_full[:, k], 0.95)),
+            "imu_mean_centroid_error_m": float(np.mean(time_imu_centroid[:, k])),
+            "full_mean_centroid_error_m": float(np.mean(time_full_centroid[:, k])),
+            "imu_mean_relative_shape_error_m": float(np.mean(time_imu_shape[:, k])),
+            "full_mean_relative_shape_error_m": float(np.mean(time_full_shape[:, k])),
+        }
+        for node in range(n_nodes):
+            for name, errors in (("imu", time_imu_nodes), ("full", time_full_nodes)):
+                samples = errors[:, k, node]
+                row[f"{name}_node{node + 1}_mean_error_m"] = float(np.mean(samples))
+                row[f"{name}_node{node + 1}_std_error_m"] = float(np.std(samples, ddof=1))
+        profile_rows.append(row)
 
     distances = pairwise_distances(fleet.state[:, :, :2])
     speed = np.linalg.norm(fleet.state[:, :, 2:4], axis=2)

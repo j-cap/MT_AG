@@ -132,6 +132,15 @@ Figure~\ref{fig:p2a_aggregate_perf} provides the more detailed time-domain and p
     \label{fig:p2a_aggregate_perf}
 \end{figure}
 
+Figure~\ref{fig:p2a_node_spread} resolves this comparison by node. At each time instant, the solid or dashed curve is the mean position-error magnitude over the same 20 seeds, and the shaded area spans one sample standard deviation on either side, truncated at zero because error magnitude cannot be negative. The band describes variation between stochastic sensor and initial-velocity realizations; it is neither a confidence interval for the mean nor a bound on individual runs. In particular, the single realization in Fig.~\ref{fig:p2a_rep_errors} can locally favor IMU-only for Node~1 even when cooperation reduces its typical error across seeds. The paired fleet-level result remains the appropriate basis for the overall performance claim.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/phase2/p2a_node_error_spread.pdf}
+    \caption{P2A per-node position-error histories across 20 matched stochastic seeds. Curves show pointwise mean error magnitude; shading shows mean \(\pm\) one sample standard deviation (lower edge clipped at zero). The true trajectories and UWB schedule are fixed across seeds.}
+    \label{fig:p2a_node_spread}
+\end{figure}
+
 UWB does not materially improve yaw in this benchmark: the mean fleet yaw RMSE is about \(0.047^\circ\) for IMU-only propagation and \(0.057^\circ\) for full communication. This is expected because the scalar pairwise ranges directly constrain position, while yaw is influenced only indirectly through state cross-covariances and motion.
 
 \subsection{What pairwise UWB can and cannot correct}
