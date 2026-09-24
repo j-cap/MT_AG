@@ -1,17 +1,32 @@
-\section{Phase-2 direction: communication versus localization quality}
+\section{Phase-2 direction: multi-node communication-efficient localization}
 
-Phase~2 now addresses the actual thesis question rather than further AACOPF reproduction. The baseline estimator and geometry lessons from Phase~1 are held fixed while UWB communication is reduced or degraded in a controlled way.
+The thesis objective is now fixed as obtaining the best fleet localization accuracy with the least UWB communication effort. Two assumptions are treated as given: every node starts from a known initial pose, and every node carries both an IMU and a UWB transceiver and may participate in pairwise ranging.
 
-The planned sequence is:
+The primary benchmark will use four symmetric mobile nodes, giving six possible UWB links. Three- and five-node fleets will be retained only as sensitivity cases. Unlike the earlier debugging simulations, ground-truth motion will be defined first through smooth global paths. Ideal velocity, acceleration, yaw, yaw rate, and body-frame IMU signals will then be derived from those paths before sensor noise and bias are added. Pairwise UWB measurements take the form
+\begin{equation}
+    z_{ij,k}=\|\bm p_{i,k}-\bm p_{j,k}\|_2+\nu_{ij,k},
+\end{equation}
+so both endpoints are uncertain mobile states.
+
+The new Phase-2 sequence is:
 \begin{enumerate}
-    \item \textbf{UWB update-rate sweep:} reduce the ranging frequency and measure localization degradation and UWB transactions;
-    \item \textbf{peer-count and geometry sweep:} vary how many collaborative nodes are available and separate additional measurement count from improved geometry;
-    \item \textbf{packet loss and outages:} study independent losses, burst outages, and recovery;
-    \item \textbf{LOS/NLOS reliability:} introduce controlled corrupted ranges together with an explicit reliability-aware measurement mechanism;
-    \item \textbf{IMU-quality sensitivity:} determine how communication requirements change with inertial quality, using measured hardware values when available;
-    \item \textbf{communication--accuracy frontier:} summarize position/yaw error against UWB transactions per second and, after radio characterization, against energy.
+    \item \textbf{multi-node/full-communication benchmark:} four smooth mobile trajectories, known initial poses, independent IMUs, all six pairwise links available, IMU-only and all-pairs/\SI{10}{Hz} reference cases;
+    \item \textbf{uniform rate sweep:} reduce all-pairs UWB rate to establish the basic localization--communication frontier;
+    \item \textbf{fixed-budget link selection:} compare round-robin, random, proximity-based, geometry-aware, and information-aware peer/link choices at equal numbers of UWB exchanges;
+    \item \textbf{reliability/outage stress:} packet loss, burst outages, and NLOS/outlier processes with an explicit measurement-reliability treatment where required;
+    \item \textbf{IMU-quality sensitivity:} determine how the necessary communication budget changes with inertial noise and bias;
+    \item \textbf{consolidated frontier:} fleet and worst-node RMSE versus normalized UWB exchanges, later extended to measured energy.
 \end{enumerate}
 
-The fixed-rate/all-peer strategy remains the reference. Phase~2 is intended to establish an empirical frontier, not yet to optimize the schedule. That frontier then provides the evidence needed for Phase~3, where adaptive policies can decide when and whom to range using estimator uncertainty, geometry/information gain, measurement reliability, and communication or energy cost.
+Because the initial pose is known and the new problem is predominantly local/unimodal, a joint fleet EKF is the preferred primary estimator candidate. A short full-communication sanity comparison to the existing PF can be retained, but broad-prior global particle acquisition and AACOPF are no longer the main thesis path.
 
-In that sense, Phase~1 answers \emph{what makes the localization problem work or fail}; Phase~2 measures \emph{how much communication is needed}; and Phase~3 will use that knowledge to reduce communication intelligently.
+For \(N\) nodes define the communication ratio
+\begin{equation}
+    \rho_{\mathrm{comm}}
+    =
+    \frac{\sum_{k,i<j}a_{ij,k}}
+         {K\binom{N}{2}},
+\end{equation}
+and use fleet position RMSE together with worst-node RMSE as the primary localization metrics. The central Phase-2 result should therefore be an empirical Pareto frontier between localization quality and communication effort.
+
+Phase~3 will use this frontier to develop adaptive policies for \emph{when} to range and \emph{which pair} to range, using uncertainty, geometry/information gain, measurement reliability, and eventually measured energy cost.
