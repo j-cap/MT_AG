@@ -8,12 +8,18 @@ How much UWB communication and collaboration is necessary to bound the localizat
 \section{Relation to the reference work}
 The initial cooperative-localization baseline is motivated by Han et al.~\cite{han2020cooperative}. Their algorithm combines a DR system with UWB ranges and studies localization with as few as one auxiliary node. The cooperative filter receives displacement and azimuth increments from an underlying dead-reckoning/inertial-navigation-system (INS) subsystem. In their vehicle experiment, the displacement increment is obtained using odometry and INS; the paper therefore does \emph{not} directly propagate the cooperative particle filter from raw accelerometer samples.
 
+Han et al. evaluate the method in two field experiments. In the car-to-trolley experiment, a car with odometer, INS, and UWB is the target whose initial global position and azimuth must be recovered. A GPS-localized trolley supplies its own position and a UWB range to the car; the car's GPS is used as an evaluation reference rather than as a localization input. The car drives a closed loop over a site of approximately \(100\times100\,\mathrm{m}^2\). With the trolley stationary, the target trajectory and initial azimuth do not converge; with an appropriately moving trolley, they do. The authors also vary the initial particle and azimuth counts and compare their AACOPF against a conventional particle filter and an extended Kalman filter~\cite{han2020cooperative}.
+
+In their second experiment, a pedestrian wears a foot-mounted IMU, whose measurements are processed by a separate inertial-navigation and zero-velocity-update chain. A GPS-equipped car and trolley act as two auxiliary nodes, while GPS carried by the pedestrian provides an evaluation reference. Over an approximately \(30\times15\,\mathrm{m}^2\) site, the authors introduce a peak-shift error on one auxiliary range and non-Gaussian or excessive error on the other. They compare conventional PF and AACOPF and report, for the illustrated run, pedestrian position and azimuth errors of approximately \SI{0.66}{m} and \(0.23^\circ\), respectively, with AACOPF~\cite{han2020cooperative}.
+
 The present thesis uses Han et al. as a conceptual and algorithmic reference, but the intended embedded hardware provides an IMU. For that reason, the project explicitly implements the inertial mechanization that precedes the cooperative localization layer. This creates two related but distinct goals:
 \begin{enumerate}
     \item reproduce the qualitative cooperative-localization and observability behavior of Han et al.;
     \item develop an IMU-driven implementation that is physically consistent with the intended ESP32 microcontroller and DW3000 UWB transceiver hardware platform.
 \end{enumerate}
 Exact numerical reproduction is not required where the paper does not specify all implementation details.
+
+The field experiments also clarify the limits of comparison with Phase~2 of this report. Han et al. estimate the target using at least one auxiliary position known in the global frame. In P2A, all four mobile nodes are uncertain after their known initial poses and only inter-node ranges are available. Han et al.'s convergence with a moving GPS-localized auxiliary therefore does not imply that pairwise ranging in P2A can correct the fleet's common global translation drift.
 
 \section{Research phases}
 The work is organized into four phases.
