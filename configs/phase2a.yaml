@@ -1,0 +1,33 @@
+# Canonical P2A four-node trajectory-first benchmark
+simulation:
+  dt_s: 0.01
+  duration_s: 60.0
+  n_nodes: 4
+
+imu:
+  rate_hz: 100.0
+  sigma_accel_mps2: 0.02
+  sigma_gyro_rps: 0.001
+  sigma_accel_bias_rw_mps2_sqrt_s: 5.0e-5
+  sigma_gyro_bias_rw_rps_sqrt_s: 5.0e-6
+
+uwb:
+  max_rate_hz: 10.0
+  sigma_range_m: 0.12
+
+initialization:
+  known_position_yaw: true
+  velocity_error_std_mps: 0.05
+  covariance_position_std_m: 0.01
+  covariance_velocity_std_mps: 0.05
+  covariance_yaw_std_deg: 0.2
+
+ekf:
+  sigma_accel_process_mps2: 0.03
+  sigma_gyro_process_rps: 0.0015
+
+campaign:
+  n_seeds: 20
+  representative_seed: 0
+  seed_offset: 700000
+  report_sample_rate_hz: 10.0

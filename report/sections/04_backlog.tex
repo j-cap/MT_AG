@@ -190,8 +190,8 @@ The main thesis output is therefore an accuracy--communication Pareto frontier:
 The new Phase-2 sequence is designed around the four-node benchmark.
 
 \begin{enumerate}
-    \item \textbf{P2A -- multi-node benchmark and full-communication reference.}
-    Implement the trajectory-first four-node simulator, pairwise UWB graph, known initial poses, independent IMUs, and joint estimator. Validate IMU-only and all-pairs/\SI{10}{Hz} UWB bounds. Produce the standard fleet-trajectory and per-node error visualizations.
+    \item \textbf{P2A -- multi-node benchmark and full-communication reference (completed).}
+    The trajectory-first four-node simulator, symmetric pairwise UWB graph, and joint EKF are implemented and validated over 20 matched seeds. Full all-pairs/\SI{10}{Hz} UWB reduces mean fleet RMSE from \SI{2.322}{m} to \SI{1.058}{m}. The key structural result is the decomposition: centroid RMSE is essentially unchanged (\SI{1.057}{m} to \SI{1.056}{m}), while relative-shape RMSE falls from \SI{2.027}{m} to \SI{0.046}{m}. Thus pairwise communication strongly corrects differential fleet error but cannot directly observe common global translation.
 
     \item \textbf{P2B -- uniform communication-rate sweep.}
     Activate all six links uniformly at decreasing rates, for example \(10,5,2,1,0.5\) Hz. This establishes the first empirical localization--communication frontier without intelligent scheduling.
@@ -254,4 +254,4 @@ The four-node benchmark should use a small fixed visualization set throughout th
 Using the same benchmark and visual language across all scheduling policies is preferred over adding many unrelated scenarios.
 
 \section{Next concrete milestone}
-The immediate next step is \textbf{P2A: implement the trajectory-first four-node benchmark and full-communication reference}. No further unknown-pose/AACOPF experiments are required for the main thesis path before this benchmark is established.
+The immediate next step is \textbf{P2B: uniformly reduce the all-pairs UWB rate on the frozen P2A benchmark}. The P2A trajectories, seeds, estimator, error decomposition, and \SI{10}{Hz} full-communication reference should remain unchanged so that the first localization--communication frontier is a clean rate-only comparison.

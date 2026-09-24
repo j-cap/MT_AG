@@ -30,3 +30,17 @@ For \(N\) nodes define the communication ratio
 and use fleet position RMSE together with worst-node RMSE as the primary localization metrics. The central Phase-2 result should therefore be an empirical Pareto frontier between localization quality and communication effort.
 
 Phase~3 will use this frontier to develop adaptive policies for \emph{when} to range and \emph{which pair} to range, using uncertainty, geometry/information gain, measurement reliability, and eventually measured energy cost.
+
+
+\subsection{P2A benchmark result}
+The four-node trajectory-first benchmark is now implemented. Across 20 matched seeds, IMU-only propagation gives mean fleet position RMSE \(2.322\pm0.605\)~m, while the maximum-communication reference using all six pairwise UWB links at \SI{10}{Hz} gives \(1.058\pm0.451\)~m. Full communication improves fleet RMSE in all 20 seeds.
+
+The infrastructure-free error decomposition is more important than the aggregate reduction. The fleet-centroid RMSE is essentially unchanged (\SI{1.057}{m} versus \SI{1.056}{m}), while the centered relative-shape RMSE drops from \SI{2.027}{m} to \SI{0.046}{m}. Pairwise UWB therefore removes almost all differential fleet deformation but cannot directly observe a common translation of the complete fleet.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/phase2/p2a_error_decomposition.pdf}
+    \caption{P2A error decomposition: pairwise UWB strongly constrains relative fleet geometry while the common global-translation mode remains.}
+\end{figure}
+
+P2B will now reduce the all-pairs UWB rate on exactly the same benchmark to obtain the first localization--communication frontier.
