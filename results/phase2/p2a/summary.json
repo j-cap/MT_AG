@@ -24,18 +24,24 @@
     "fleet_rmse_mean_m": 2.322219322982895,
     "fleet_rmse_std_m": 0.6050424848445517,
     "fleet_rmse_p95_m": 3.2236719994717,
-    "worst_node_rmse_mean_m": 3.237522489426065
+    "worst_node_rmse_mean_m": 3.237522489426065,
+    "centroid_rmse_mean_m": 1.056615000727263,
+    "relative_shape_rmse_mean_m": 2.0272749470034976
   },
   "full_communication": {
     "fleet_rmse_mean_m": 1.0576306322393307,
     "fleet_rmse_std_m": 0.45145745545512866,
     "fleet_rmse_p95_m": 1.6414587670285237,
     "worst_node_rmse_mean_m": 1.070558500012579,
+    "centroid_rmse_mean_m": 1.0563567907038331,
+    "relative_shape_rmse_mean_m": 0.045591140443735086,
     "better_than_imu_fraction": 1.0
   },
   "improvement": {
     "mean_fleet_rmse_reduction_fraction": 0.5445604031574407,
-    "mean_worst_node_rmse_reduction_fraction": 0.6693278568692311
+    "mean_worst_node_rmse_reduction_fraction": 0.6693278568692311,
+    "mean_centroid_rmse_reduction_fraction": 0.0002443747469533797,
+    "mean_relative_shape_rmse_reduction_fraction": 0.9775111212659521
   },
-  "campaign_runtime_s": 51.858845852
+  "campaign_runtime_s": 59.812548293999996
 }
