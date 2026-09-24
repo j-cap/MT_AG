@@ -105,3 +105,30 @@ These figures are the main evidence in the detailed report; the summary table is
 ## Handoff
 
 If P2A confirms a meaningful gap between IMU-only and full communication, P2B will uniformly reduce the all-pairs UWB rate to trace the first communication--accuracy frontier. P2C will then hold communication count fixed and change which links are selected.
+
+
+## Final P2A result
+
+Across 20 matched seeds:
+
+- IMU-only fleet RMSE: 2.322 +/- 0.605 m;
+- all-pairs 10 Hz UWB fleet RMSE: 1.058 +/- 0.451 m;
+- full communication is better in 20/20 seeds;
+- mean worst-node RMSE: 3.238 m -> 1.071 m;
+- centroid/common-translation RMSE: 1.0566 m -> 1.0564 m;
+- relative-shape RMSE: 2.027 m -> 0.0456 m.
+
+Thus full pairwise UWB reduces absolute fleet RMSE by about 54.5% and relative-shape RMSE by about 97.8%, while leaving the common translation mode essentially unchanged.
+
+This is the central P2A structural result: pairwise infrastructure-free communication is highly effective at maintaining the relative fleet geometry, but it does not provide an absolute position reference for common-mode drift.
+
+Canonical campaign:
+
+- GitHub Actions run: 36020999903
+- full communication count: 3600 pairwise exchanges per 60 s run
+- compact evidence: results/phase2/p2a/
+- detailed figures: report/figures/phase2/p2a_*.pdf
+
+## P2A decision
+
+Freeze the P2A trajectories, sensor model, seeds, joint EKF, and error decomposition for P2B. P2B should change only the uniform all-pairs UWB rate so that the first communication--accuracy frontier is not confounded by a new benchmark or estimator.
