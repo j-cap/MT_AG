@@ -17,13 +17,23 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _fleet_metrics(estimate: np.ndarray, truth: np.ndarray) -> dict:
-    position_error = np.linalg.norm(estimate[:, :, :2] - truth[:, :, :2], axis=2)
+    position_error_vector = estimate[:, :, :2] - truth[:, :, :2]
+    position_error = np.linalg.norm(position_error_vector, axis=2)
     yaw_error = (estimate[:, :, 4] - truth[:, :, 4] + np.pi) % (2.0 * np.pi) - np.pi
     node_rmse = np.sqrt(np.mean(position_error**2, axis=0))
+
+    centroid_error_vector = np.mean(position_error_vector, axis=1)
+    centroid_error = np.linalg.norm(centroid_error_vector, axis=1)
+    estimate_centered = estimate[:, :, :2] - np.mean(estimate[:, :, :2], axis=1, keepdims=True)
+    truth_centered = truth[:, :, :2] - np.mean(truth[:, :, :2], axis=1, keepdims=True)
+    shape_error = np.linalg.norm(estimate_centered - truth_centered, axis=2)
+
     return {
         "fleet_position_rmse_m": float(np.sqrt(np.mean(position_error**2))),
         "fleet_position_p95_m": float(np.quantile(position_error, 0.95)),
         "worst_node_position_rmse_m": float(np.max(node_rmse)),
+        "centroid_position_rmse_m": float(np.sqrt(np.mean(centroid_error**2))),
+        "relative_shape_rmse_m": float(np.sqrt(np.mean(shape_error**2))),
         "fleet_yaw_rmse_deg": float(np.rad2deg(np.sqrt(np.mean(yaw_error**2)))),
         "node_position_rmse_m": [float(value) for value in node_rmse],
     }
@@ -94,6 +104,10 @@ def main():
     representative_rows = []
     time_imu = []
     time_full = []
+    time_imu_centroid = []
+    time_full_centroid = []
+    time_imu_shape = []
+    time_full_shape = []
     representative_seed = int(campaign["representative_seed"])
     base_seed = int(campaign["seed_offset"])
     start_campaign = time.perf_counter()
@@ -158,12 +172,37 @@ def main():
         time_imu.append(np.sqrt(np.mean(imu_error**2, axis=1)))
         time_full.append(np.sqrt(np.mean(full_error**2, axis=1)))
 
+        imu_error_vector = imu_only.state[:, :, :2] - fleet.state[:, :, :2]
+        full_error_vector = full.state[:, :, :2] - fleet.state[:, :, :2]
+        time_imu_centroid.append(np.linalg.norm(np.mean(imu_error_vector, axis=1), axis=1))
+        time_full_centroid.append(np.linalg.norm(np.mean(full_error_vector, axis=1), axis=1))
+
+        truth_centered = fleet.state[:, :, :2] - np.mean(
+            fleet.state[:, :, :2], axis=1, keepdims=True
+        )
+        imu_centered = imu_only.state[:, :, :2] - np.mean(
+            imu_only.state[:, :, :2], axis=1, keepdims=True
+        )
+        full_centered = full.state[:, :, :2] - np.mean(
+            full.state[:, :, :2], axis=1, keepdims=True
+        )
+        time_imu_shape.append(
+            np.sqrt(np.mean(np.linalg.norm(imu_centered - truth_centered, axis=2) ** 2, axis=1))
+        )
+        time_full_shape.append(
+            np.sqrt(np.mean(np.linalg.norm(full_centered - truth_centered, axis=2) ** 2, axis=1))
+        )
+
         row = {
             "seed": seed,
             "imu_fleet_rmse_m": imu_metrics["fleet_position_rmse_m"],
             "full_fleet_rmse_m": full_metrics["fleet_position_rmse_m"],
             "imu_worst_node_rmse_m": imu_metrics["worst_node_position_rmse_m"],
             "full_worst_node_rmse_m": full_metrics["worst_node_position_rmse_m"],
+            "imu_centroid_rmse_m": imu_metrics["centroid_position_rmse_m"],
+            "full_centroid_rmse_m": full_metrics["centroid_position_rmse_m"],
+            "imu_relative_shape_rmse_m": imu_metrics["relative_shape_rmse_m"],
+            "full_relative_shape_rmse_m": full_metrics["relative_shape_rmse_m"],
             "imu_yaw_rmse_deg": imu_metrics["fleet_yaw_rmse_deg"],
             "full_yaw_rmse_deg": full_metrics["fleet_yaw_rmse_deg"],
             "imu_runtime_s": imu_runtime,
@@ -198,6 +237,10 @@ def main():
 
     time_imu = np.asarray(time_imu)
     time_full = np.asarray(time_full)
+    time_imu_centroid = np.asarray(time_imu_centroid)
+    time_full_centroid = np.asarray(time_full_centroid)
+    time_imu_shape = np.asarray(time_imu_shape)
+    time_full_shape = np.asarray(time_full_shape)
     sample_indices = np.arange(0, n_time, report_stride)
     profile_rows = []
     for k in sample_indices:
@@ -208,6 +251,10 @@ def main():
                 "imu_p95_fleet_error_m": float(np.quantile(time_imu[:, k], 0.95)),
                 "full_mean_fleet_error_m": float(np.mean(time_full[:, k])),
                 "full_p95_fleet_error_m": float(np.quantile(time_full[:, k], 0.95)),
+                "imu_mean_centroid_error_m": float(np.mean(time_imu_centroid[:, k])),
+                "full_mean_centroid_error_m": float(np.mean(time_full_centroid[:, k])),
+                "imu_mean_relative_shape_error_m": float(np.mean(time_imu_shape[:, k])),
+                "full_mean_relative_shape_error_m": float(np.mean(time_full_shape[:, k])),
             }
         )
 
@@ -220,6 +267,10 @@ def main():
     full_rmse = np.array([row["full_fleet_rmse_m"] for row in seed_rows])
     imu_worst = np.array([row["imu_worst_node_rmse_m"] for row in seed_rows])
     full_worst = np.array([row["full_worst_node_rmse_m"] for row in seed_rows])
+    imu_centroid = np.array([row["imu_centroid_rmse_m"] for row in seed_rows])
+    full_centroid = np.array([row["full_centroid_rmse_m"] for row in seed_rows])
+    imu_shape = np.array([row["imu_relative_shape_rmse_m"] for row in seed_rows])
+    full_shape = np.array([row["full_relative_shape_rmse_m"] for row in seed_rows])
     n_opportunities = (n_time - 1) // uwb_stride
     full_communications = n_opportunities * len(all_pairs(n_nodes))
 
@@ -254,12 +305,16 @@ def main():
             "fleet_rmse_std_m": float(np.std(imu_rmse, ddof=1)),
             "fleet_rmse_p95_m": float(np.quantile(imu_rmse, 0.95)),
             "worst_node_rmse_mean_m": float(np.mean(imu_worst)),
+            "centroid_rmse_mean_m": float(np.mean(imu_centroid)),
+            "relative_shape_rmse_mean_m": float(np.mean(imu_shape)),
         },
         "full_communication": {
             "fleet_rmse_mean_m": float(np.mean(full_rmse)),
             "fleet_rmse_std_m": float(np.std(full_rmse, ddof=1)),
             "fleet_rmse_p95_m": float(np.quantile(full_rmse, 0.95)),
             "worst_node_rmse_mean_m": float(np.mean(full_worst)),
+            "centroid_rmse_mean_m": float(np.mean(full_centroid)),
+            "relative_shape_rmse_mean_m": float(np.mean(full_shape)),
             "better_than_imu_fraction": float(np.mean(full_rmse < imu_rmse)),
         },
         "improvement": {
@@ -268,6 +323,12 @@ def main():
             ),
             "mean_worst_node_rmse_reduction_fraction": float(
                 1.0 - np.mean(full_worst) / np.mean(imu_worst)
+            ),
+            "mean_centroid_rmse_reduction_fraction": float(
+                1.0 - np.mean(full_centroid) / np.mean(imu_centroid)
+            ),
+            "mean_relative_shape_rmse_reduction_fraction": float(
+                1.0 - np.mean(full_shape) / np.mean(imu_shape)
             ),
         },
         "campaign_runtime_s": float(time.perf_counter() - start_campaign),
