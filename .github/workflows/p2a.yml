@@ -12,6 +12,7 @@ on:
       - experiments/generate_phase2a_figures.py
       - tests/test_phase2a.py
       - .github/workflows/p2a.yml
+      - .gitignore
   workflow_dispatch:
 
 permissions:
