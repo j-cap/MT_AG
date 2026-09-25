@@ -12,7 +12,7 @@ The new Phase-2 sequence is:
 \begin{enumerate}
     \item \textbf{multi-node/full-communication benchmark:} four smooth mobile trajectories, known initial poses, independent IMUs, all six pairwise links available, IMU-only and all-pairs/\SI{10}{Hz} reference cases;
     \item \textbf{uniform rate sweep:} reduce all-pairs UWB rate to establish the basic localization--communication frontier;
-    \item \textbf{fixed-budget link selection:} compare round-robin, random, proximity-based, geometry-aware, and information-aware peer/link choices at equal numbers of UWB exchanges;
+    \item \textbf{fixed-budget link selection:} compare cyclic, random, geometry-aware, and information-aware peer/link choices at equal numbers of UWB exchanges and identical per-tick capacities;
     \item \textbf{reliability/outage stress:} packet loss, burst outages, and NLOS/outlier processes with an explicit measurement-reliability treatment where required;
     \item \textbf{IMU-quality sensitivity:} determine how the necessary communication budget changes with inertial noise and bias;
     \item \textbf{consolidated frontier:} fleet and worst-node RMSE versus normalized UWB exchanges, later extended to measured energy.
@@ -54,6 +54,17 @@ Already at \SI{0.5}{Hz}, 180 exchanges (5\% of full communication) lower mean fl
     \caption{P2B uniform-rate reference: mean whole-run error and one across-seed sample standard deviation versus the number of individual pairwise UWB exchanges. Absolute fleet RMSE flattens earlier than relative-shape error.}
 \end{figure}
 
-P2C is the next experiment. It will hold these individual-exchange budgets fixed while selecting links and times differently, and compare both absolute fleet and relative-shape accuracy. The P2B curve is an empirical reference for this one scheduling family; lower rates, alternative scheduling policies, and radio energy are not yet measured.
+\subsection{P2C matched-budget link selection}
+P2C compared cyclic rotation, random choice, rolling geometric diversity, and EKF predicted relative-information gain at 180, 360, and 720 exchanges on the same 20 seeds. All four policies used identical exchange counts \emph{at every 10 Hz opportunity}, isolating pair choice within P2C. P2B's all-six-link rounds have different timing and serve only as an equal-count contextual reference.
+
+At 360 exchanges, the information policy obtained \SI{0.0789}{m} mean relative-shape RMSE versus \SI{0.0824}{m} for cyclic and \SI{0.0914}{m} for random. The paired information-minus-cyclic difference was \(-0.00356\pm0.01174\)~m across 20 seeds (13 wins), and a descriptive 95\% paired-bootstrap interval crossed zero. Against random, the difference was \(-0.01250\pm0.01677\)~m (17 wins), with interval \([-0.01953,-0.00517]\)~m. At 180 exchanges the gains over cyclic were small and variable; at 720 the policy errors largely converged. Geometry was not consistently better than cyclic. The fleet centroid remained near \SI{1.056}{m}, so absolute fleet RMSE changed much less than relative-shape error.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/phase2/p2c_budget_tradeoff.pdf}
+    \caption{P2C matched-budget link-policy means. The P2B all-link schedule is plotted at equal total exchanges for context; its per-tick timing differs.}
+\end{figure}
+
+The practical P2C decision is to retain cyclic as a strong low-complexity baseline and the information selector as a promising, budget-dependent comparator, without claiming a robust improvement over cyclic. P2D next tests packet loss, burst outages, and corrupted ranges on matched schedules before choosing a policy for less idealized conditions.
 
 After the infrastructure-free Phase-2 frontier is established, a separate P2G extension will test the value of a global reference. One of the existing four mobile nodes will first supply its true position throughout a matched run, followed by noisy and intermittent position reports. Comparisons will score the same three non-reference nodes and retain matched UWB budgets. This bounds how much a globally localized auxiliary can reduce common drift without changing the symmetric, unanchored main benchmark.

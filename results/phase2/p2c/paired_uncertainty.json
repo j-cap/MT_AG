@@ -1,0 +1,439 @@
+{
+  "method": "percentile paired-seed bootstrap of the mean difference",
+  "resamples": 30000,
+  "confidence_level": 0.95,
+  "results": [
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.0003577248109298464,
+      "interval_m": [
+        -0.002311244559761493,
+        0.0016884871186363685
+      ],
+      "paired_wins": 11
+    },
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.00793365352455011,
+      "interval_m": [
+        -0.020102890844156954,
+        0.0035610714435358073
+      ],
+      "paired_wins": 11
+    },
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.0028856713080799854,
+      "interval_m": [
+        -0.008856447619489316,
+        0.0034323769898122894
+      ],
+      "paired_wins": 11
+    },
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.00038242517830683884,
+      "interval_m": [
+        -0.0023408299127474714,
+        0.0016381557720367486
+      ],
+      "paired_wins": 8
+    },
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.014784846065066184,
+      "interval_m": [
+        -0.024263532360778453,
+        -0.00604524357471054
+      ],
+      "paired_wins": 14
+    },
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.010775600018066421,
+      "interval_m": [
+        -0.021291001403081385,
+        -0.000951325275536741
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.0001405028430638916,
+      "interval_m": [
+        -0.0019813146593977253,
+        0.0016696820846812746
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.010086497814994957,
+      "interval_m": [
+        -0.0193008440383617,
+        -0.0012213048665466453
+      ],
+      "paired_wins": 14
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.002756881632272927,
+      "interval_m": [
+        -0.009060933028901689,
+        0.0038827433146462753
+      ],
+      "paired_wins": 12
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "reference": "random",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.00016520321044088404,
+      "interval_m": [
+        -0.0023297350465441282,
+        0.002172280465360925
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "reference": "random",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.016937690355511032,
+      "interval_m": [
+        -0.026570899703246956,
+        -0.008016011328967643
+      ],
+      "paired_wins": 15
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "reference": "random",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.010646810342259365,
+      "interval_m": [
+        -0.02271407803100822,
+        0.00018914218071009383
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.000236683895739484,
+      "interval_m": [
+        -0.001944233018119873,
+        0.0014788060280170512
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": 4.7530368097067896e-05,
+      "interval_m": [
+        -0.007681718351368628,
+        0.007477004032321189
+      ],
+      "paired_wins": 9
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": 0.0028499411587059346,
+      "interval_m": [
+        -0.0030929049196223206,
+        0.009262047148264741
+      ],
+      "paired_wins": 9
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.0013488387123084284,
+      "interval_m": [
+        -0.0031302264518048776,
+        0.00042012650610957075
+      ],
+      "paired_wins": 12
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.010388712977105224,
+      "interval_m": [
+        -0.018560536693150546,
+        -0.002000010083533623
+      ],
+      "paired_wins": 14
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.006087329826813188,
+      "interval_m": [
+        -0.012855424951367246,
+        0.0007689351917347795
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.0006423896998641154,
+      "interval_m": [
+        -0.0021240972602120265,
+        0.0007660055316617734
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.0024079323301663623,
+      "interval_m": [
+        -0.00991787200066955,
+        0.005072581247269787
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.003561789317905332,
+      "interval_m": [
+        -0.008592169822154735,
+        0.0014351718503653737
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "reference": "random",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -0.0017545445164330598,
+      "interval_m": [
+        -0.0035183045534495313,
+        -6.678568032804214e-05
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "reference": "random",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.012844175675368654,
+      "interval_m": [
+        -0.019313330834912653,
+        -0.006532352064186805
+      ],
+      "paired_wins": 16
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "reference": "random",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.012499060303424455,
+      "interval_m": [
+        -0.019532234255177666,
+        -0.0051728492653295285
+      ],
+      "paired_wins": 17
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": 0.0004160716520349689,
+      "interval_m": [
+        -0.0015498465967456003,
+        0.0023888905095393125
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": 0.004589133129963785,
+      "interval_m": [
+        -0.0011794535087765868,
+        0.009983894930333474
+      ],
+      "paired_wins": 6
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "reference": "cyclic",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.0014737973187220934,
+      "interval_m": [
+        -0.006521778325265735,
+        0.0034334506456185367
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": 0.0004519691443727825,
+      "interval_m": [
+        -0.0007423402793543372,
+        0.0017023949120246102
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": 0.00485629736614297,
+      "interval_m": [
+        0.001302306522844533,
+        0.008539734131750989
+      ],
+      "paired_wins": 8
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "reference": "random",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.0024227578653155694,
+      "interval_m": [
+        -0.0055789887820418904,
+        0.0007050528739477783
+      ],
+      "paired_wins": 12
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -9.525692477254378e-05,
+      "interval_m": [
+        -0.0015446858248838995,
+        0.001369510318737755
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.0017473877113594132,
+      "interval_m": [
+        -0.0064608785168591126,
+        0.00316494954111659
+      ],
+      "paired_wins": 13
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "reference": "cyclic",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.0005748585608918104,
+      "interval_m": [
+        -0.006365450799979809,
+        0.005129334802675939
+      ],
+      "paired_wins": 9
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "reference": "random",
+      "metric": "fleet_rmse_m",
+      "mean_difference_m": -5.935943243473019e-05,
+      "interval_m": [
+        -0.0017100354028580897,
+        0.001577138356060028
+      ],
+      "paired_wins": 10
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "reference": "random",
+      "metric": "worst_node_rmse_m",
+      "mean_difference_m": -0.0014802234751802284,
+      "interval_m": [
+        -0.006313675085184293,
+        0.003000563863465254
+      ],
+      "paired_wins": 9
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "reference": "random",
+      "metric": "relative_shape_rmse_m",
+      "mean_difference_m": -0.0015238191074852861,
+      "interval_m": [
+        -0.00588333343562824,
+        0.002624718636427878
+      ],
+      "paired_wins": 10
+    }
+  ]
+}

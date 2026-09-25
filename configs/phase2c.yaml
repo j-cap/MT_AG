@@ -1,0 +1,9 @@
+# P2C freezes P2A sensor, trajectory, seed, and EKF settings.
+base_config: configs/phase2a.yaml
+budgets: [180, 360, 720]
+policies: [cyclic, random, geometry, information]
+geometry_memory_s: 2.0
+geometry_prior: 1.0
+profile_sample_rate_hz: 2.0
+profile_budgets: [180, 720]
+representative_budget: 360

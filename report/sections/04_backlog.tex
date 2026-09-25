@@ -187,7 +187,7 @@ The main thesis output is therefore an accuracy--communication Pareto frontier:
 \end{equation}
 
 \section{Phase-2 execution reference}
-The P2A--P2G sequence and the global-reference comparison protocol are placed in Section~\ref{sec:phase2_plan}, before the detailed P2A experiment. P2A and P2B establish the benchmark and its uniform-rate reference; P2C is the next milestone. P2A--P2F retain the symmetric, infrastructure-free benchmark; P2G is a later optional extension rather than a change to that benchmark.
+The P2A--P2G sequence and the global-reference comparison protocol are placed in Section~\ref{sec:phase2_plan}, before the detailed P2A experiment. P2A--P2C establish the benchmark, its uniform-rate reference, and a matched-budget link-selection comparison; P2D is the next milestone. P2A--P2F retain the symmetric, infrastructure-free benchmark; P2G is a later optional extension rather than a change to that benchmark.
 
 \section{Phase-3 adaptive communication}
 Only after the fixed-budget Phase-2 frontier is established should the project optimize communication dynamically. Candidate policies may use:
@@ -234,4 +234,4 @@ The four-node benchmark should use a small fixed visualization set throughout th
 Using the same benchmark and visual language across all scheduling policies is preferred over adding many unrelated scenarios.
 
 \section{Next concrete milestone}
-The immediate next step is \textbf{P2C: compare link-selection policies at matched UWB exchange counts}. Retain the P2A trajectories, 20 seeds, estimator, noise realizations, and P2B communication budgets. At each budget, compare the uniform all-pairs schedule against alternative ways to distribute the same number of exchanges among links and times; report fleet and worst-node RMSE together with the centroid/relative-shape decomposition.
+The immediate next step is \textbf{P2D: test reliability under packet loss, outages, and corrupted ranges}. Retain the P2A trajectories, 20 seeds, estimator, and selected P2B/P2C communication schedules, and vary UWB availability or measurement quality explicitly. Count attempted and successful exchanges separately, and report fleet, worst-node, and relative-shape errors so the value of a scheduling policy can be distinguished from the reliability of its measurements.

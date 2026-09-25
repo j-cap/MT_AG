@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Callable, Sequence
 
 import numpy as np
 
@@ -114,8 +115,12 @@ def run_joint_ekf(
     sigma_range_m: float,
     sigma_accel_process_mps2: float,
     sigma_gyro_process_rps: float,
+    range_selector: Callable[
+        [int, np.ndarray, np.ndarray, tuple[tuple[int, int], ...]],
+        Sequence[tuple[int, int]],
+    ] | None = None,
 ) -> JointEKFResult:
-    """Run a centralized joint EKF for symmetric mobile IMU+UWB nodes."""
+    """Run a joint EKF; an optional selector chooses eligible links before observing ranges."""
     imu_measurements = np.asarray(imu_measurements, dtype=float)
     pairwise_ranges = np.asarray(pairwise_ranges, dtype=float)
     range_mask = np.asarray(range_mask, dtype=bool)
@@ -187,17 +192,28 @@ def run_joint_ekf(
         current = predicted
 
         time_index = k + 1
-        for pair in all_pairs(n_nodes):
+        eligible = tuple(
+            pair for pair in all_pairs(n_nodes)
+            if range_mask[time_index, pair[0], pair[1]]
+        )
+        if range_selector is None:
+            selected = eligible
+        elif eligible:
+            selected = tuple(range_selector(time_index, current.copy(), covariance.copy(), eligible))
+            if len(selected) != len(set(selected)) or any(pair not in eligible for pair in selected):
+                raise ValueError("range_selector must return distinct eligible pairs")
+        else:
+            selected = ()
+        for pair in sorted(selected):
             i, j = pair
-            if range_mask[time_index, i, j]:
-                current, covariance = _range_update(
-                    current,
-                    covariance,
-                    pairwise_ranges[time_index, i, j],
-                    pair,
-                    sigma_range_m,
-                )
-                update_count += 1
+            current, covariance = _range_update(
+                current,
+                covariance,
+                pairwise_ranges[time_index, i, j],
+                pair,
+                sigma_range_m,
+            )
+            update_count += 1
 
         history[time_index] = current.reshape(n_nodes, 5)
         covariance_history[time_index] = covariance

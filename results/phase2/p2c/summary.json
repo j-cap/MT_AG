@@ -1,0 +1,962 @@
+{
+  "protocol": {
+    "base_config": "configs/phase2a.yaml",
+    "n_seeds": 20,
+    "budgets": [
+      180,
+      360,
+      720
+    ],
+    "policies": [
+      "cyclic",
+      "random",
+      "geometry",
+      "information"
+    ],
+    "max_opportunities": 600,
+    "pairwise_links": 6,
+    "geometry_memory_s": 2.0,
+    "geometry_prior": 1.0,
+    "per_tick_capacity_shared": true,
+    "same_seed_sensor_draws_as_p2a_p2b": true
+  },
+  "results": [
+    {
+      "budget": 180,
+      "policy": "cyclic",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0638580700886486,
+          "std": 0.4475790498143822,
+          "p95": 1.6448208618784526
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.098976340420699,
+          "std": 0.44765779770957953,
+          "p95": 1.675884678417178
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0565399024102804,
+          "std": 0.4514258624851624,
+          "p95": 1.6404678188935744
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.10952327602640755,
+          "std": 0.015784456135588234,
+          "p95": 0.13319343267696637
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05903930047464555,
+          "std": 0.016557517552779462,
+          "p95": 0.08753885606090878
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -2.4700367376992438e-05,
+          "std": 0.005504471080649334,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.006851192540516074,
+          "std": 0.0288391189311107,
+          "wins": 12
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.007889928709986435,
+          "std": 0.026522256656029152,
+          "wins": 12
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": -0.00033139155845111066,
+          "std": 0.005933680743480572,
+          "wins": 11
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0023286783952870065,
+          "std": 0.02423282568370552,
+          "wins": 10
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0042685139974236435,
+          "std": 0.015907494750672276,
+          "wins": 15
+        }
+      }
+    },
+    {
+      "budget": 180,
+      "policy": "random",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0638827704560259,
+          "std": 0.4468185196139625,
+          "p95": 1.6422639396346328
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.1058275329612148,
+          "std": 0.4408086655322594,
+          "p95": 1.6916630380212196
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0554199380414517,
+          "std": 0.4509807798600783,
+          "p95": 1.638502768633002
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.11741320473639397,
+          "std": 0.025118925445591533,
+          "p95": 0.15002990967103466
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05700263417686881,
+          "std": 0.01561934101933889,
+          "p95": 0.08037300346244111
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": 2.4700367376992438e-05,
+          "std": 0.005504471080649334,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 0.006851192540516074,
+          "std": 0.0288391189311107,
+          "wins": 8
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.007889928709986435,
+          "std": 0.026522256656029152,
+          "wins": 8
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0003066911910741182,
+          "std": 0.00562378648990833,
+          "wins": 8
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": 0.00917987093580308,
+          "std": 0.024206397137214408,
+          "wins": 7
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0036214147125627942,
+          "std": 0.024621523621266635,
+          "wins": 8
+        }
+      }
+    },
+    {
+      "budget": 180,
+      "policy": "geometry",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.063500345277719,
+          "std": 0.446195621247582,
+          "p95": 1.6382918971769074
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.091042686896149,
+          "std": 0.4410815103833422,
+          "p95": 1.6536344355879917
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0560292235437754,
+          "std": 0.4509676292140337,
+          "p95": 1.6346134583963594
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.10663760471832757,
+          "std": 0.020429030371036275,
+          "p95": 0.1416275522512676
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05339827112273628,
+          "std": 0.014164307673133623,
+          "p95": 0.07212075633019402
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": -0.0003577248109298464,
+          "std": 0.004692465061114732,
+          "wins": 11
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": -0.00793365352455011,
+          "std": 0.027613854292778413,
+          "wins": 11
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": -0.0028856713080799854,
+          "std": 0.01447757293731417,
+          "wins": 11
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -0.00038242517830683884,
+          "std": 0.004634793580970402,
+          "wins": 8
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.014784846065066184,
+          "std": 0.021407520927690653,
+          "wins": 14
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.010775600018066421,
+          "std": 0.02397761980830502,
+          "wins": 13
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0006891163693809571,
+          "std": 0.004197961553210336,
+          "wins": 9
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": -0.005604975129263104,
+          "std": 0.020071984344482197,
+          "wins": 13
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": -0.007154185305503627,
+          "std": 0.01387732700414286,
+          "wins": 13
+        }
+      }
+    },
+    {
+      "budget": 180,
+      "policy": "information",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0637175672455847,
+          "std": 0.4480146761282101,
+          "p95": 1.647465993872296
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0888898426057039,
+          "std": 0.45009145976717974,
+          "p95": 1.6931092261183054
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0565920212963027,
+          "std": 0.4519038369197427,
+          "p95": 1.643897944678527
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.10676639439413463,
+          "std": 0.02011464565252513,
+          "p95": 0.1537093177726037
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.054747485322316734,
+          "std": 0.01879891368161725,
+          "p95": 0.08179394776372775
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": -0.0001405028430638916,
+          "std": 0.004261549854736089,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": -0.010086497814994957,
+          "std": 0.02096294233351051,
+          "wins": 14
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": -0.002756881632272927,
+          "std": 0.015055472247247634,
+          "wins": 12
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -0.00016520321044088404,
+          "std": 0.005283609023132366,
+          "wins": 13
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.016937690355511032,
+          "std": 0.021727036012436512,
+          "wins": 15
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.010646810342259365,
+          "std": 0.026779461828603857,
+          "wins": 13
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0004718944015150023,
+          "std": 0.004970791847445474,
+          "wins": 11
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": -0.007757819419707951,
+          "std": 0.020230464034046974,
+          "wins": 14
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": -0.007025395629696571,
+          "std": 0.017661268818059635,
+          "wins": 14
+        }
+      }
+    },
+    {
+      "budget": 360,
+      "policy": "cyclic",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0609562976328353,
+          "std": 0.4483612532423079,
+          "p95": 1.6441670919498095
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0855352190959011,
+          "std": 0.4445615462595731,
+          "p95": 1.6596060684297436
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0566709523409386,
+          "std": 0.4507476014123262,
+          "p95": 1.6417819651551564
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.08244804726507339,
+          "std": 0.015853806993867087,
+          "p95": 0.10231019089352844
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.058055519854624225,
+          "std": 0.019409828719000904,
+          "p95": 0.08290041620179307
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -0.0011121548165689444,
+          "std": 0.004259271157309177,
+          "wins": 9
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.010436243345202292,
+          "std": 0.016450126408838063,
+          "wins": 14
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.008937270985519122,
+          "std": 0.016019876301774826,
+          "wins": 13
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": 1.550321142183564e-05,
+          "std": 0.0030859637740297337,
+          "wins": 9
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0004964166817859161,
+          "std": 0.01547644162339485,
+          "wins": 9
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0033742794872507497,
+          "std": 0.013968266236843772,
+          "wins": 12
+        }
+      }
+    },
+    {
+      "budget": 360,
+      "policy": "random",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0620684524494042,
+          "std": 0.4486410627275895,
+          "p95": 1.6418030178951808
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0959714624411037,
+          "std": 0.4502232476787263,
+          "p95": 1.6746993025746895
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0567009031249595,
+          "std": 0.4517809539691309,
+          "p95": 1.6391507314516116
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.09138531825059251,
+          "std": 0.018791285429356895,
+          "p95": 0.12255083440117258
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05821639035653654,
+          "std": 0.01509626405058614,
+          "p95": 0.07814307604845144
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": 0.0011121548165689444,
+          "std": 0.004259271157309177,
+          "wins": 11
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 0.010436243345202292,
+          "std": 0.016450126408838063,
+          "wins": 6
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.008937270985519122,
+          "std": 0.016019876301774826,
+          "wins": 7
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": 0.00112765802799078,
+          "std": 0.004070834193916982,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": 0.010932660026988209,
+          "std": 0.018820281732703274,
+          "wins": 6
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": 0.005562991498268373,
+          "std": 0.016135673879976806,
+          "wins": 6
+        }
+      }
+    },
+    {
+      "budget": 360,
+      "policy": "geometry",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0607196137370958,
+          "std": 0.4490438902150341,
+          "p95": 1.6395377741315025
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0855827494639985,
+          "std": 0.4473872807473269,
+          "p95": 1.6589807296711734
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0561720379012847,
+          "std": 0.4514885139307033,
+          "p95": 1.6371971253987725
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.08529798842377932,
+          "std": 0.016530315518027694,
+          "p95": 0.11686641540219954
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.054945952888124164,
+          "std": 0.012912015962188484,
+          "p95": 0.07674662250487777
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": -0.000236683895739484,
+          "std": 0.004079403278351376,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 4.7530368097067896e-05,
+          "std": 0.017860142863482444,
+          "wins": 9
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.0028499411587059346,
+          "std": 0.014385812497446061,
+          "wins": 9
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -0.0013488387123084284,
+          "std": 0.004179788784202835,
+          "wins": 12
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.010388712977105224,
+          "std": 0.019356673939101985,
+          "wins": 14
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.006087329826813188,
+          "std": 0.016141751913532353,
+          "wins": 13
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": -0.00022118068431764836,
+          "std": 0.0028792439749495712,
+          "wins": 12
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0005439470498829841,
+          "std": 0.014860030815091964,
+          "wins": 10
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0005243383285448145,
+          "std": 0.012147365413199109,
+          "wins": 11
+        }
+      }
+    },
+    {
+      "budget": 360,
+      "policy": "information",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.060313907932971,
+          "std": 0.4499020959128919,
+          "p95": 1.6426068690665503
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0831272867657349,
+          "std": 0.4484596878081031,
+          "p95": 1.668657437306878
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0565225723132021,
+          "std": 0.45178455732304346,
+          "p95": 1.6404433582576283
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.07888625794716805,
+          "std": 0.01414492817973292,
+          "p95": 0.1002482676589294
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.05473223913379503,
+          "std": 0.016340748364094625,
+          "p95": 0.07825533593626129
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": -0.0006423896998641154,
+          "std": 0.0033821736908872693,
+          "wins": 13
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": -0.0024079323301663623,
+          "std": 0.01758508232570238,
+          "wins": 10
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": -0.003561789317905332,
+          "std": 0.011738524379454947,
+          "wins": 13
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -0.0017545445164330598,
+          "std": 0.0040364014031457306,
+          "wins": 13
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.012844175675368654,
+          "std": 0.015005959778393441,
+          "wins": 16
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.012499060303424455,
+          "std": 0.0167675169182626,
+          "wins": 17
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0006268864884422798,
+          "std": 0.0031247304954344773,
+          "wins": 15
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": -0.0019115156483804463,
+          "std": 0.017101393620277485,
+          "wins": 13
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": -0.006936068805156082,
+          "std": 0.009159629617526551,
+          "wins": 15
+        }
+      }
+    },
+    {
+      "budget": 720,
+      "policy": "cyclic",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0593816448297162,
+          "std": 0.44963249835214664,
+          "p95": 1.6382878126431286
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.075509561525752,
+          "std": 0.4485595836537484,
+          "p95": 1.6492858580567586
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0566522039176331,
+          "std": 0.45063420779594676,
+          "p95": 1.6357324700145397
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.06873335671800587,
+          "std": 0.014312293353550007,
+          "p95": 0.09208267869685388
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.055927230088418975,
+          "std": 0.015580269655468739,
+          "p95": 0.07620468555372946
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": 3.589749233781358e-05,
+          "std": 0.004262170787658292,
+          "wins": 9
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": 0.00026716423617918484,
+          "std": 0.013262014112046123,
+          "wins": 9
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.0009489605465934758,
+          "std": 0.011979288825516412,
+          "wins": 10
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": 0.00016039144553126882,
+          "std": 0.0030706634876697045,
+          "wins": 11
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": -0.002182032943528117,
+          "std": 0.011513771227848323,
+          "wins": 11
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0017876139050616142,
+          "std": 0.012011654120142413,
+          "wins": 8
+        }
+      }
+    },
+    {
+      "budget": 720,
+      "policy": "random",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0593457473373784,
+          "std": 0.4507158640355523,
+          "p95": 1.640124988848762
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0752423972895726,
+          "std": 0.4538859848824742,
+          "p95": 1.6605132762265287
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0565659751094514,
+          "std": 0.4517912073344934,
+          "p95": 1.6382666010899554
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.06968231726459934,
+          "std": 0.010470390258952099,
+          "p95": 0.08370975913867011
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.055577537174751945,
+          "std": 0.019248747639391398,
+          "p95": 0.08277632797930519
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": -3.589749233781358e-05,
+          "std": 0.004262170787658292,
+          "wins": 11
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": -0.00026716423617918484,
+          "std": 0.013262014112046123,
+          "wins": 11
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": 0.0009489605465934758,
+          "std": 0.011979288825516412,
+          "wins": 10
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": 0.0,
+          "std": 0.0,
+          "wins": 0
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": 0.00012449395319345525,
+          "std": 0.0034219019408668083,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": -0.002449197179707302,
+          "std": 0.005063181904317605,
+          "wins": 16
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": 0.00273657445165509,
+          "std": 0.006719531096893991,
+          "wins": 7
+        }
+      }
+    },
+    {
+      "budget": 720,
+      "policy": "geometry",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0597977164817514,
+          "std": 0.4502808281709182,
+          "p95": 1.6395726642611463
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.0800986946557156,
+          "std": 0.4535486836270904,
+          "p95": 1.6775725969904711
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0571014105660907,
+          "std": 0.4515368509885125,
+          "p95": 1.6378730739362046
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.06725955939928378,
+          "std": 0.01065689326271536,
+          "p95": 0.08788386658280826
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.059790555023802594,
+          "std": 0.01859364005792713,
+          "p95": 0.09458257049606601
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": 0.0004160716520349689,
+          "std": 0.004620100457160546,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": 0.004589133129963785,
+          "std": 0.013276476500865619,
+          "wins": 6
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": -0.0014737973187220934,
+          "std": 0.011654731491442196,
+          "wins": 10
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": 0.0004519691443727825,
+          "std": 0.002867206846751883,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": 0.00485629736614297,
+          "std": 0.00844500817618765,
+          "wins": 8
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.0024227578653155694,
+          "std": 0.007404563415889802,
+          "wins": 12
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0005764630975662377,
+          "std": 0.003589719825319368,
+          "wins": 7
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": 0.002407100186435668,
+          "std": 0.0084187953583828,
+          "wins": 8
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0003138165863395208,
+          "std": 0.00922478057634778,
+          "wins": 10
+        }
+      }
+    },
+    {
+      "budget": 720,
+      "policy": "information",
+      "metrics": {
+        "fleet_rmse_m": {
+          "mean": 1.0592863879049437,
+          "std": 0.4503563015430266,
+          "p95": 1.6437942355333766
+        },
+        "worst_node_rmse_m": {
+          "mean": 1.073762173814392,
+          "std": 0.4499348620948396,
+          "p95": 1.673661948290628
+        },
+        "centroid_rmse_m": {
+          "mean": 1.0564410020364199,
+          "std": 0.4518290608597337,
+          "p95": 1.6422847506393718
+        },
+        "relative_shape_rmse_m": {
+          "mean": 0.06815849815711406,
+          "std": 0.010868261032286884,
+          "p95": 0.08726888884249634
+        },
+        "yaw_rmse_deg": {
+          "mean": 0.060876518465515964,
+          "std": 0.02044593474981536,
+          "p95": 0.09386741969102361
+        }
+      },
+      "paired_differences_m": {
+        "fleet_rmse_m_vs_cyclic": {
+          "mean": -9.525692477254378e-05,
+          "std": 0.003393473005258161,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_cyclic": {
+          "mean": -0.0017473877113594132,
+          "std": 0.011192305509867934,
+          "wins": 13
+        },
+        "relative_shape_rmse_m_vs_cyclic": {
+          "mean": -0.0005748585608918104,
+          "std": 0.01358640567567755,
+          "wins": 9
+        },
+        "fleet_rmse_m_vs_random": {
+          "mean": -5.935943243473019e-05,
+          "std": 0.003869433389518867,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_random": {
+          "mean": -0.0014802234751802284,
+          "std": 0.010990960714120082,
+          "wins": 9
+        },
+        "relative_shape_rmse_m_vs_random": {
+          "mean": -0.0015238191074852861,
+          "std": 0.009958226738767702,
+          "wins": 10
+        },
+        "fleet_rmse_m_vs_p2b_uniform": {
+          "mean": 6.513452075872506e-05,
+          "std": 0.0030450807048049786,
+          "wins": 10
+        },
+        "worst_node_rmse_m_vs_p2b_uniform": {
+          "mean": -0.003929420654887531,
+          "std": 0.010505923755183038,
+          "wins": 12
+        },
+        "relative_shape_rmse_m_vs_p2b_uniform": {
+          "mean": 0.0012127553441698038,
+          "std": 0.009190012555148305,
+          "wins": 10
+        }
+      }
+    }
+  ],
+  "campaign_runtime_s": 516.3487497240003
+}
