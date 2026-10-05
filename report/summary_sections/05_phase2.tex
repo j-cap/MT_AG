@@ -65,6 +65,22 @@ At 360 exchanges, the information policy obtained \SI{0.0789}{m} mean relative-s
     \caption{P2C matched-budget link-policy means. The P2B all-link schedule is plotted at equal total exchanges for context; its per-tick timing differs.}
 \end{figure}
 
-The practical P2C decision is to retain cyclic as a strong low-complexity baseline and the information selector as a promising, budget-dependent comparator, without claiming a robust improvement over cyclic. P2D next tests packet loss, burst outages, and corrupted ranges on matched schedules before choosing a policy for less idealized conditions.
+The practical P2C decision is to retain cyclic as a strong low-complexity baseline and the information selector as a promising, budget-dependent comparator, without claiming a robust improvement over cyclic. P2D below tests missing and corrupted ranges at equal attempts.
 
 After the infrastructure-free Phase-2 frontier is established, a separate P2G extension will test the value of a global reference. One of the existing four mobile nodes will first supply its true position throughout a matched run, followed by noisy and intermittent position reports. Comparisons will score the same three non-reference nodes and retain matched UWB budgets. This bounds how much a globally localized auxiliary can reduce common drift without changing the symmetric, unanchored main benchmark.
+
+\subsection{P2D reliability at 360 attempted exchanges}
+P2D ran 660 simulations: 20 matched seeds, cyclic and information schedules at identical times, and the differently timed P2B all-link 1 Hz reference. Seven separate reliability cases and a fixed NIS \(\leq9\) gate in four predefined cases were evaluated. Failures and rejected ranges consumed budget; attempted, received, and accepted counts remained distinct. Clean ordinary runs reproduced every P2B/P2C endpoint.
+
+Cyclic shape RMSE rose from 0.0824 m to 0.0919 m and 0.1100 m under 30\% and 50\% loss. A network outage from 20 to 30 s gave 0.0917 m, with late shape accuracy close to clean. Information's advantage under missing data was small and uncertain. Under node-1 outage, repeated choices of its unavailable links left information with only 305.1 received ranges versus cyclic's 330.
+
+Five percent positive outliers of 1--3 m raised ordinary cyclic shape RMSE to 0.2955 m. Gating reduced it to 0.0838 m, accepting 342.8 ranges and improving every seed; gated information gave 0.0826 m. Rejection mattered much more than specialized pair selection.
+
+Persistent +0.75 m bias on link 1--2 from 20 to 40 s exposed a scheduling interaction. Ordinary information improved on ordinary cyclic (0.1478 versus 0.1690 m), but gated information was worse than gated cyclic (0.1305 versus 0.0956 m). Their paired gated difference was +0.03484 m, descriptive bootstrap 95\% interval [0.01997, 0.04804] m. Gated information spent about 49.8\% of attempts during the bias interval on that link, versus cyclic's 16.7\%, and its error remained elevated after the bias ended.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/phase2/p2d_gating.pdf}
+\caption{P2D ordinary versus gated shape RMSE: mean and one sample standard deviation over 20 seeds. Gating strongly protects against isolated positive errors; persistent bias exposes an interaction with information scheduling.}
+\end{figure}
+
+Retain cyclic as the practical reference and proceed to P2E IMU sensitivity. Reliability-aware selection is a separate future comparison against gated cyclic at equal attempts. These results cover one budget, fixed paths, stylized stresses, and a fixed gate; they do not validate hardware energy or estimator consistency.

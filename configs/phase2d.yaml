@@ -1,0 +1,19 @@
+# Frozen before running P2D; no thresholds fitted to campaign outcomes.
+base_config: configs/phase2a.yaml
+budget: 360
+policies: [cyclic, information, p2b_uniform]
+cases: [clean, loss30, loss50, network_outage, node_outage, outliers, nlos]
+gated_cases: [clean, network_outage, outliers, nlos]
+innovation_gate_nis: 9.0
+outage_start_s: 20.0
+outage_end_s: 30.0
+outlier_probability: 0.05
+outlier_bias_min_m: 1.0
+outlier_bias_max_m: 3.0
+nlos_pair: [0, 1]
+nlos_start_s: 20.0
+nlos_end_s: 40.0
+nlos_bias_m: 0.75
+profile_sample_rate_hz: 2.0
+bootstrap_resamples: 30000
+bootstrap_seed: 20260419

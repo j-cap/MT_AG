@@ -14,6 +14,9 @@ class JointEKFResult:
     state: np.ndarray  # [time,node,5]
     covariance: np.ndarray  # [time,5N,5N]
     range_update_count: int
+    range_attempt_count: int = 0
+    range_received_count: int = 0
+    range_rejected_count: int = 0
 
 
 def _node_predict(
@@ -119,6 +122,8 @@ def run_joint_ekf(
         [int, np.ndarray, np.ndarray, tuple[tuple[int, int], ...]],
         Sequence[tuple[int, int]],
     ] | None = None,
+    reception_mask: np.ndarray | None = None,
+    innovation_gate_nis: float | None = None,
 ) -> JointEKFResult:
     """Run a joint EKF; an optional selector chooses eligible links before observing ranges."""
     imu_measurements = np.asarray(imu_measurements, dtype=float)
@@ -132,6 +137,15 @@ def run_joint_ekf(
     if range_mask.shape != pairwise_ranges.shape:
         raise ValueError("range_mask must match pairwise_ranges")
 
+    if reception_mask is None:
+        reception_mask = np.ones_like(range_mask)
+    else:
+        reception_mask = np.asarray(reception_mask, dtype=bool)
+        if reception_mask.shape != range_mask.shape:
+            raise ValueError("reception_mask must match pairwise_ranges")
+    if innovation_gate_nis is not None and (not np.isfinite(innovation_gate_nis) or innovation_gate_nis <= 0):
+        raise ValueError("innovation_gate_nis must be finite and positive")
+
     dim = 5 * n_nodes
     covariance = np.asarray(initial_covariance, dtype=float).copy()
     if covariance.shape != (dim, dim):
@@ -143,6 +157,7 @@ def run_joint_ekf(
     covariance_history[0] = covariance
     current = initial_state.reshape(-1).copy()
     update_count = 0
+    attempt_count = received_count = rejected_count = 0
 
     for k in range(n_steps):
         predicted = np.zeros_like(current)
@@ -206,6 +221,24 @@ def run_joint_ekf(
             selected = ()
         for pair in sorted(selected):
             i, j = pair
+            attempt_count += 1
+            if not reception_mask[time_index, i, j]:
+                continue
+            received_count += 1
+            measurement = pairwise_ranges[time_index, i, j]
+            delta = current[5 * i:5 * i + 2] - current[5 * j:5 * j + 2]
+            distance = float(np.linalg.norm(delta))
+            if distance < 1e-9 or not np.isfinite(measurement):
+                rejected_count += 1
+                continue
+            if innovation_gate_nis is not None:
+                h = np.zeros(dim)
+                h[5 * i:5 * i + 2] = delta / distance
+                h[5 * j:5 * j + 2] = -delta / distance
+                variance = float(h @ covariance @ h + sigma_range_m**2)
+                if (measurement - distance)**2 / variance > innovation_gate_nis:
+                    rejected_count += 1
+                    continue
             current, covariance = _range_update(
                 current,
                 covariance,
@@ -222,4 +255,7 @@ def run_joint_ekf(
         state=history,
         covariance=covariance_history,
         range_update_count=update_count,
+        range_attempt_count=attempt_count,
+        range_received_count=received_count,
+        range_rejected_count=rejected_count,
     )
