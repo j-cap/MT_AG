@@ -1,0 +1,49 @@
+# P2E IMU sensitivity
+
+| Condition | Q treatment | Exchanges | Shape RMSE [m], mean +/- SD | Fleet mean [m] | Centroid mean [m] |
+|---|---|---:|---:|---:|---:|
+| bias_half | frozen_q | 0 | 2.0250 +/- 0.5744 | 2.3210 | 1.0575 |
+| bias_half | frozen_q | 180 | 0.1088 +/- 0.0160 | 1.0648 | 1.0576 |
+| bias_half | frozen_q | 360 | 0.0816 +/- 0.0154 | 1.0620 | 1.0577 |
+| bias_half | frozen_q | 720 | 0.0681 +/- 0.0138 | 1.0604 | 1.0577 |
+| bias_half | frozen_q | 3600 | 0.0446 +/- 0.0087 | 1.0587 | 1.0574 |
+| bias_x10 | frozen_q | 0 | 2.1874 +/- 0.6654 | 2.4912 | 1.0931 |
+| bias_x10 | frozen_q | 180 | 0.1832 +/- 0.0360 | 1.1115 | 1.0902 |
+| bias_x10 | frozen_q | 360 | 0.1562 +/- 0.0446 | 1.1049 | 1.0898 |
+| bias_x10 | frozen_q | 720 | 0.1378 +/- 0.0380 | 1.1015 | 1.0898 |
+| bias_x10 | frozen_q | 3600 | 0.1119 +/- 0.0398 | 1.0975 | 1.0893 |
+| combined_poor | frozen_q | 0 | 2.5892 +/- 0.5717 | 2.9170 | 1.2242 |
+| combined_poor | frozen_q | 180 | 0.2382 +/- 0.0585 | 1.2548 | 1.2211 |
+| combined_poor | frozen_q | 360 | 0.2070 +/- 0.0682 | 1.2468 | 1.2203 |
+| combined_poor | frozen_q | 720 | 0.1850 +/- 0.0593 | 1.2409 | 1.2204 |
+| combined_poor | frozen_q | 3600 | 0.1527 +/- 0.0594 | 1.2369 | 1.2215 |
+| combined_poor | white_rescaled_q | 0 | 2.5892 +/- 0.5717 | 2.9170 | 1.2242 |
+| combined_poor | white_rescaled_q | 180 | 0.2083 +/- 0.0536 | 1.2522 | 1.2239 |
+| combined_poor | white_rescaled_q | 360 | 0.1817 +/- 0.0528 | 1.2456 | 1.2236 |
+| combined_poor | white_rescaled_q | 720 | 0.1598 +/- 0.0436 | 1.2409 | 1.2237 |
+| combined_poor | white_rescaled_q | 3600 | 0.1414 +/- 0.0486 | 1.2383 | 1.2237 |
+| noise_half | frozen_q | 0 | 1.9993 +/- 0.6070 | 2.2963 | 1.0547 |
+| noise_half | frozen_q | 180 | 0.1040 +/- 0.0157 | 1.0609 | 1.0546 |
+| noise_half | frozen_q | 360 | 0.0770 +/- 0.0152 | 1.0583 | 1.0547 |
+| noise_half | frozen_q | 720 | 0.0637 +/- 0.0142 | 1.0569 | 1.0546 |
+| noise_half | frozen_q | 3600 | 0.0404 +/- 0.0079 | 1.0552 | 1.0542 |
+| noise_half | white_rescaled_q | 0 | 1.9993 +/- 0.6070 | 2.2963 | 1.0547 |
+| noise_half | white_rescaled_q | 180 | 0.0989 +/- 0.0160 | 1.0600 | 1.0542 |
+| noise_half | white_rescaled_q | 360 | 0.0729 +/- 0.0162 | 1.0578 | 1.0545 |
+| noise_half | white_rescaled_q | 720 | 0.0610 +/- 0.0148 | 1.0563 | 1.0542 |
+| noise_half | white_rescaled_q | 3600 | 0.0380 +/- 0.0087 | 1.0543 | 1.0535 |
+| noise_x4 | frozen_q | 0 | 2.4313 +/- 0.4713 | 2.7399 | 1.1872 |
+| noise_x4 | frozen_q | 180 | 0.1868 +/- 0.0338 | 1.2061 | 1.1872 |
+| noise_x4 | frozen_q | 360 | 0.1569 +/- 0.0320 | 1.2005 | 1.1866 |
+| noise_x4 | frozen_q | 720 | 0.1381 +/- 0.0272 | 1.1968 | 1.1866 |
+| noise_x4 | frozen_q | 3600 | 0.1096 +/- 0.0257 | 1.1944 | 1.1876 |
+| noise_x4 | white_rescaled_q | 0 | 2.4313 +/- 0.4713 | 2.7399 | 1.1872 |
+| noise_x4 | white_rescaled_q | 180 | 0.1736 +/- 0.0352 | 1.2048 | 1.1874 |
+| noise_x4 | white_rescaled_q | 360 | 0.1483 +/- 0.0262 | 1.2000 | 1.1872 |
+| noise_x4 | white_rescaled_q | 720 | 0.1301 +/- 0.0244 | 1.1974 | 1.1873 |
+| noise_x4 | white_rescaled_q | 3600 | 0.1096 +/- 0.0277 | 1.1953 | 1.1872 |
+| reference | frozen_q | 0 | 2.0273 +/- 0.5806 | 2.3222 | 1.0566 |
+| reference | frozen_q | 180 | 0.1095 +/- 0.0158 | 1.0639 | 1.0565 |
+| reference | frozen_q | 360 | 0.0824 +/- 0.0159 | 1.0610 | 1.0567 |
+| reference | frozen_q | 720 | 0.0687 +/- 0.0143 | 1.0594 | 1.0567 |
+| reference | frozen_q | 3600 | 0.0456 +/- 0.0093 | 1.0576 | 1.0564 |

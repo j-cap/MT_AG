@@ -1,0 +1,18 @@
+# Frozen P2E protocol, prior to campaign execution.
+base_config: configs/phase2a.yaml
+budgets: [0, 180, 360, 720, 3600]
+policy: cyclic
+conditions:
+  - {name: reference, white_scale: 1.0, bias_scale: 1.0}
+  - {name: noise_half, white_scale: 0.5, bias_scale: 1.0}
+  - {name: noise_x4, white_scale: 4.0, bias_scale: 1.0}
+  - {name: bias_half, white_scale: 1.0, bias_scale: 0.5}
+  - {name: bias_x10, white_scale: 1.0, bias_scale: 10.0}
+  - {name: combined_poor, white_scale: 4.0, bias_scale: 10.0}
+# Main sweep freezes P2A Q. Companion scales both process standard deviations
+# with white-noise amplitude, preserving P2A's factor of 1.5; no bias model added.
+rescaled_q_conditions: [noise_half, noise_x4, combined_poor]
+profile_sample_rate_hz: 2.0
+shape_target_m: 0.10
+bootstrap_resamples: 30000
+bootstrap_seed: 20261005

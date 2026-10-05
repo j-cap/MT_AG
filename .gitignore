@@ -33,3 +33,6 @@ report/main.pdf
 !results/phase2/p2d/time_profile.csv
 !results/phase2/p2d/link_counts.csv
 results/phase2/p2d/_checkpoints/
+!results/phase2/p2e/seed_metrics.csv
+!results/phase2/p2e/time_profile.csv
+results/phase2/p2e/_checkpoints/

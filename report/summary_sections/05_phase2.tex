@@ -84,3 +84,20 @@ Persistent +0.75 m bias on link 1--2 from 20 to 40 s exposed a scheduling intera
 \end{figure}
 
 Retain cyclic as the practical reference and proceed to P2E IMU sensitivity. Reliability-aware selection is a separate future comparison against gated cyclic at equal attempts. These results cover one budget, fixed paths, stylized stresses, and a fixed gate; they do not validate hardware energy or estimator consistency.
+
+
+\subsection{P2E IMU sensitivity}
+P2E ran 900 simulations over the same 20 seeds and five cyclic budgets (0, 180, 360, 720, 3600). Six conditions varied white-noise and bias-drift amplitudes independently or together. The primary sweep froze process covariance; a companion rescaled its standard deviations with white noise for three conditions. All 100 reference endpoints reproduced earlier results. Sensors, initial-velocity errors, and Gaussian ranges used matched latent realizations. There was no gate or range failure.
+
+At 360 exchanges, mean shape RMSE rose from reference 0.0824 m to 0.1569 m with fourfold white noise, 0.1562 m with tenfold bias drift, and 0.2070 m with both. At full communication their errors remained 0.1096, 0.1119, and 0.1527 m, versus reference 0.0456 m. Thus more ranges did not fully compensate for the tested sensor degradation. Centroid error remained dominant and almost insensitive to positive budgets within each sensor condition.
+
+Halving white noise reduced fixed-process shape error by about 5.4 mm at 360 exchanges; halving the already small bias drift reduced it by only 0.9 mm. White-noise process rescaling helped some conditions, but did not remove the degraded-sensor floor. It did not model random-walk bias or establish estimator consistency.
+
+A predefined 0.10 m mean shape target was reached by reference at 360 exchanges. Lower noise plus process rescaling reached it at 180 (0.0989 m), but only 11/20 seeds passed and its empirical 95th percentile was 0.1234 m. This is a descriptive threshold crossing, not a reliable 50\% communication saving. None of the degraded conditions reached the mean target even at full communication.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/phase2/p2e_budget_curves.pdf}
+\caption{P2E fixed-process-covariance mean error versus positive cyclic exchange budgets (log scale). Relative geometry improves with ranging, while sensor-dependent centroid drift remains. The dotted shape line marks the descriptive 0.10 m target.}
+\end{figure}
+
+Proceed to P2F consolidation, keeping sensor quality, process-covariance treatment, and range reliability explicit. These fixed-path sensitivity conditions are not calibrated commercial-IMU grades, and the five-state EKF does not estimate bias. P2G remains the later optional global-reference comparison.
