@@ -101,3 +101,36 @@ A predefined 0.10 m mean shape target was reached by reference at 360 exchanges.
 \end{figure}
 
 Proceed to P2F consolidation, keeping sensor quality, process-covariance treatment, and range reliability explicit. These fixed-path sensitivity conditions are not calibrated commercial-IMU grades, and the five-state EKF does not estimate bias. P2G remains the later optional global-reference comparison.
+
+
+\subsection{P2F conditional accuracy--communication consolidation}
+P2F adds no simulations. It audits 1960 source records from P2A--P2E, verifies 200 repeated endpoints, and retains 1760 distinct seed records across 88 designs. Attempted exchanges remain the cost proxy; failures and gate rejections consume budget. This is not measured radio energy.
+
+Frontiers minimize attempted cost and error separately for each sensor, process-covariance, range-reliability, and update condition. Schedule and timing stay labelled: comparisons between uniform all-link rounds and P2C selection are whole-design comparisons, whereas cyclic versus information at matched P2C opportunities isolates pair choice. The empirical mean-shape frontier under clean reference settings chooses geometry at 180, information at 360, uniform at 720 and 1800, and full all-pairs at 3600; its ranking changes for worst-node error. Such empirical rankings do not establish robust policy superiority. Information's 360-attempt shape gain over cyclic is only 3.56 mm, with 13/20 improved seeds and a paired bootstrap interval including zero.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{lrr}
+\toprule
+Clean cyclic condition & Mean 10 cm target & Empirical p95 target\\
+\midrule
+Reference, frozen Q & 360 & 720\\
+Half noise or half bias, frozen Q & 360 & 360\\
+Half noise, rescaled Q & 180 & 360\\
+Degraded sensors, tested Q treatments & --- & ---\\
+\bottomrule
+\end{tabular}
+\caption{Smallest tested attempted budget meeting the shape criterion. Dashes indicate no crossing, including full communication. The 180-attempt crossing has only 11/20 passing seeds; it does not establish a reliable communication saving.}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/phase2/p2f_clean_frontiers.pdf}
+\caption{P2F clean-reference mean frontiers, with empirical nondominated designs ringed separately for each objective. Uniform rounds have different timing. Zero-UWB is retained numerically and omitted from the logarithmic plot; connecting lines do not imply tested intermediate budgets.}
+\end{figure}
+
+Cyclic at 360 attempts uses 10\% of full communication and meets the clean mean-shape target; 720 uses 20\% and meets the empirical p95 criterion. Pairwise ranging still leaves full-rate fleet RMSE near 1.058 m and centroid RMSE near 1.056 m. These results distinguish accurate relative geometry from globally accurate localization.
+
+Reliability evidence remains a 360-attempt slice. Gating outliers reduces cyclic shape RMSE from 0.2955 to 0.0838 m, a larger effect than clean pair selection. Under persistent bias, gated information worsens cyclic by 0.03484 m, descriptive paired 95\% interval [0.01997, 0.04804] m. No tested reliability case meets the p95 target at this budget; no minimum reliability budget can be inferred from a single point. Percentiles describe seed-level trajectory RMSE, and bootstrap intervals are unadjusted descriptive summaries of these fixed paths.
+
+P2A--P2F are complete. The next optional extension is P2G: one existing moving node supplies continuing global position information, with both conditions scored on the same three other nodes at matched UWB cost. Start with an ideal reference, then account for uncertainty and update costs in noisy or intermittent cases. Reliability-aware selection and bias-state estimation remain separate extensions.

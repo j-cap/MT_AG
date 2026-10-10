@@ -236,6 +236,6 @@ Using the same benchmark and visual language across all scheduling policies is p
 \section{Next concrete milestone}
 \begingroup
 \emergencystretch=2em
-The immediate next step is \textbf{P2F: consolidate accuracy and communication results}. Combine P2A--P2E while retaining distinct sensor quality, process-covariance treatment, range reliability, and scheduling assumptions. Report attempted exchange cost, relative-shape accuracy, worst-node error, and centroid/absolute limits. P2E found that more ranges do not fully compensate for the tested sensor degradation; white-noise rescaling helps selectively and is not a bias-matched estimator. Do not pool differently timed or differently stressed conditions into a single unlabeled curve. Include transaction energy when measured; P2G remains the later optional global-reference extension.
+P2A--P2F are complete. The next planned extension is \textbf{P2G: continuing global position reference}. Give one existing moving node its true position throughout the run, initially exactly, and evaluate the same three non-reference nodes in both conditions at matched UWB budgets. Keep trajectories, seeds, and sensor realizations matched. Later noisy and intermittent references must propagate their uncertainty and report their update costs separately. P2F established a clean cyclic mean-shape target at 360 attempts and an empirical p95 target at 720, but absolute error remains dominated by centroid drift. Reliability-aware scheduling and bias-state estimation remain separate follow-up experiments.
 \par
 \endgroup

@@ -1,0 +1,9 @@
+# Consolidation only: no new simulation or filter tuning.
+source_commit: 39b9ceb7bb0804c361d08e5c9be53446c06e316b
+n_seeds: 20
+full_attempt_count: 3600
+shape_target_m: 0.10
+bootstrap_resamples: 30000
+bootstrap_seed: 20261010
+pareto_numeric_tolerance: 1.0e-12
+sources: [p2a, p2b, p2c, p2d, p2e]
