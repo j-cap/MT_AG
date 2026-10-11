@@ -39,3 +39,7 @@ results/phase2/p2e/_checkpoints/
 
 # Reproducible P2F consolidation inputs and decisions
 !results/phase2/p2f/*.csv
+
+# Compact P2G evidence and resumable seed checkpoints
+!results/phase2/p2g/*.csv
+results/phase2/p2g/_checkpoints/

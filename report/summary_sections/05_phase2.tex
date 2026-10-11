@@ -134,3 +134,24 @@ Cyclic at 360 attempts uses 10\% of full communication and meets the clean mean-
 Reliability evidence remains a 360-attempt slice. Gating outliers reduces cyclic shape RMSE from 0.2955 to 0.0838 m, a larger effect than clean pair selection. Under persistent bias, gated information worsens cyclic by 0.03484 m, descriptive paired 95\% interval [0.01997, 0.04804] m. No tested reliability case meets the p95 target at this budget; no minimum reliability budget can be inferred from a single point. Percentiles describe seed-level trajectory RMSE, and bootstrap intervals are unadjusted descriptive summaries of these fixed paths.
 
 P2A--P2F are complete. The next optional extension is P2G: one existing moving node supplies continuing global position information, with both conditions scored on the same three other nodes at matched UWB cost. Start with an ideal reference, then account for uncertainty and update costs in noisy or intermittent cases. Reliability-aware selection and bias-state estimation remain separate extensions.
+
+\subsection{P2G continuing global position reference}
+P2G ran 400 matched simulations: four reference cases, five cyclic UWB budgets, and 20 seeds. Node 1 remains moving and supplies position only: exact at 100 Hz (6000 updates), Gaussian 0.10 m per axis at 1 Hz (60 reports), or identical noisy reports with a $[20,30)$ s outage (50 reports). The control has no continuing reference. Initial poses, paths, sensors, and all six UWB links remain matched. Velocity and yaw are estimated. Position reports condition the full joint covariance before UWB. Ideal versus noisy changes both report rate and noise; it does not isolate either factor.
+
+Every headline error scores \textbf{the same three non-reference nodes, 2--4}, including the control, with no alignment. All 100 four-node control endpoints reproduce P2E; zero-UWB leaves the three other nodes byte-identical across reference conditions. Conditioning, covariance transfer, exact constraints, and count/mask checks pass. Reference information reaches the scored nodes through ranging.
+
+At 360 UWB attempts, absolute fleet RMSE is $1.0613\pm0.4488$ m unanchored, $0.1183\pm0.0243$ m exact, $0.1313\pm0.0261$ m noisy, and $0.1319\pm0.0259$ m with outage. Exact-minus-control mean is $-0.9430$ m, descriptive paired bootstrap 95\% interval $[-1.1409,-0.7614]$ m. Every reference case improves every seed at every positive tested budget. Centroid reduction explains the absolute gain: exact reference changes mean shape from 0.0766 to 0.0763 m at 360, with a paired interval including zero.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.93\textwidth]{figures/phase2/p2g_budget_curves.pdf}
+\caption{P2G conditional mean errors on nodes 2--4 at matched UWB budgets. Reference updates are separately counted; equal UWB is not equal total communication. Zero-UWB is omitted from the log axis and gives identical scored histories. Lines connect tested budgets only.}
+\end{figure}
+
+For a 0.10 m \emph{absolute three-node fleet} target, ideal reference first reaches the mean at 720 attempts (0.0984 m), but only 10/20 seeds pass and empirical p95 is 0.1269 m. Its p95 criterion needs 3600 (0.0713 m, all seeds pass). Noisy reports reach the mean at 3600 (0.0851 m; 17/20 pass), but p95 is 0.1048 m. Outage gives 0.0868 m, 16/20 pass, and p95 0.1096 m. The control never reaches this absolute target. These are smallest tested crossings; no budget within the 720--3600 gap is inferred. This criterion differs from P2F's four-node shape target.
+
+The short outage adds only 0.00059 m whole-run fleet RMSE at 360, paired 95\% interval $[-0.00130,0.00257]$ m. Over the sampled outage window, average instantaneous reference error rises from 0.0539 to 0.0797 m, while the fleet changes from 0.1306 to 0.1319 m. Reports resume at 30 s. This does not establish robustness to other outages. Statistics describe these fixed paths; empirical p95 concerns seed trajectory RMSE and bootstrap intervals are unadjusted.
+
+\begin{samepage}
+P2G shows that continuing global information changes absolute localization substantially, while UWB already constrains relative geometry. Cost is a vector of attempted UWB and reference updates; the external source/delivery and radio energy are not modeled. The ideal case is an information benchmark, not a guaranteed error bound. One position reference does not prove general observability or remove all yaw/geometry uncertainty. P2A--P2G are complete; the next decision is whether the application needs infrastructure-free relative geometry or globally referenced absolute accuracy, followed by a realistic reference/cost model or a separate scheduling extension.
+\end{samepage}

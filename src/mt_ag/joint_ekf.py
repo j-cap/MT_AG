@@ -17,6 +17,7 @@ class JointEKFResult:
     range_attempt_count: int = 0
     range_received_count: int = 0
     range_rejected_count: int = 0
+    position_reference_update_count: int = 0
 
 
 def _node_predict(
@@ -108,6 +109,28 @@ def _range_update(
     return updated, updated_covariance
 
 
+def _position_reference_update(state_flat, covariance, measurement, node, sigma):
+    """Condition the full joint Gaussian on a node's two position coordinates.
+
+    Zero sigma is an exact position constraint; velocity and yaw are never
+    replaced with truth. Cross-node covariance carries reference information.
+    """
+    indices = np.array([5 * node, 5 * node + 1])
+    h = np.eye(len(state_flat))[indices]
+    variance = covariance[np.ix_(indices, indices)] + sigma**2 * np.eye(2)
+    gain = np.linalg.solve(variance, covariance[:, indices].T).T
+    updated = state_flat + gain @ (measurement - state_flat[indices])
+    residual = np.eye(len(state_flat)) - gain @ h
+    p = residual @ covariance @ residual.T + sigma**2 * (gain @ gain.T)
+    p = (p + p.T) / 2
+    updated[4::5] = wrap_angle(updated[4::5])
+    if sigma == 0:
+        updated[indices] = measurement
+        p[indices, :] = 0
+        p[:, indices] = 0
+    return updated, p
+
+
 def run_joint_ekf(
     imu_measurements: np.ndarray,
     pairwise_ranges: np.ndarray,
@@ -124,6 +147,10 @@ def run_joint_ekf(
     ] | None = None,
     reception_mask: np.ndarray | None = None,
     innovation_gate_nis: float | None = None,
+    position_reference: np.ndarray | None = None,
+    position_reference_mask: np.ndarray | None = None,
+    position_reference_node: int = 0,
+    sigma_position_reference_m: float = 0.0,
 ) -> JointEKFResult:
     """Run a joint EKF; an optional selector chooses eligible links before observing ranges."""
     imu_measurements = np.asarray(imu_measurements, dtype=float)
@@ -132,6 +159,21 @@ def run_joint_ekf(
     initial_state = np.asarray(initial_state, dtype=float)
 
     n_steps, n_nodes, _ = imu_measurements.shape
+    if position_reference is not None:
+        position_reference = np.asarray(position_reference, dtype=float)
+        position_reference_mask = np.asarray(position_reference_mask, dtype=bool)
+        if position_reference.shape != (n_steps + 1, 2):
+            raise ValueError("position_reference must have shape [time,2]")
+        if position_reference_mask.shape != (n_steps + 1,) or position_reference_mask[0]:
+            raise ValueError("Reference mask must match time and exclude known initialization")
+        if not 0 <= position_reference_node < n_nodes:
+            raise ValueError("Invalid position reference node")
+        if not np.isfinite(sigma_position_reference_m) or sigma_position_reference_m < 0:
+            raise ValueError("Reference sigma must be finite and nonnegative")
+        if not np.all(np.isfinite(position_reference[position_reference_mask])):
+            raise ValueError("Available reference measurements must be finite")
+    elif position_reference_mask is not None:
+        raise ValueError("Reference mask requires reference measurements")
     if pairwise_ranges.shape != (n_steps + 1, n_nodes, n_nodes):
         raise ValueError("pairwise_ranges must have shape [time,node,node]")
     if range_mask.shape != pairwise_ranges.shape:
@@ -158,6 +200,7 @@ def run_joint_ekf(
     current = initial_state.reshape(-1).copy()
     update_count = 0
     attempt_count = received_count = rejected_count = 0
+    reference_count = 0
 
     for k in range(n_steps):
         predicted = np.zeros_like(current)
@@ -207,6 +250,13 @@ def run_joint_ekf(
         current = predicted
 
         time_index = k + 1
+        # The external position report conditions the joint state before UWB.
+        if position_reference is not None and position_reference_mask[time_index]:
+            current, covariance = _position_reference_update(
+                current, covariance, position_reference[time_index],
+                position_reference_node, sigma_position_reference_m,
+            )
+            reference_count += 1
         eligible = tuple(
             pair for pair in all_pairs(n_nodes)
             if range_mask[time_index, pair[0], pair[1]]
@@ -258,4 +308,5 @@ def run_joint_ekf(
         range_attempt_count=attempt_count,
         range_received_count=received_count,
         range_rejected_count=rejected_count,
+        position_reference_update_count=reference_count,
     )

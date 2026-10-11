@@ -1,0 +1,14 @@
+# P2G continuing external position reference; matched four-node benchmark
+base_config: configs/phase2a.yaml
+source_commit: 2efc917fc126ab938b670faa4f90f3f577b56a29
+budgets: [0, 180, 360, 720, 3600]
+reference_node_zero_based: 0
+scored_nodes_zero_based: [1, 2, 3]
+reference_noise_sigma_m: 0.10
+reference_rate_hz: 1.0
+reference_outage_s: [20.0, 30.0] # [start,end), reports at 30 s resume
+cases: [unanchored, exact_100hz, noisy_1hz, noisy_1hz_outage]
+profile_sample_rate_hz: 10.0
+bootstrap_seed: 20261011
+bootstrap_resamples: 30000
+absolute_target_m: 0.10
